@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, ChevronDown, Search } from "lucide-react"
+import { Bell, Search } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { UserAvatar } from "@/components/user-avatar"
 
@@ -34,21 +34,8 @@ export function TopBar() {
           <Search className="h-5 w-5" />
         </button>
 
-        {/* Notification Icon */}
-        <div className="relative">
-          <Bell className="h-6 w-6 text-blue-400 cursor-pointer hover:text-blue-300 transition-colors" />
-          <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></div>
-        </div>
-
-        {/* User Profile */}
-        <div className="flex items-center space-x-3 cursor-pointer hover:bg-[#3a3f4b] px-2 py-1 rounded-lg transition-colors">
-          <UserAvatar name="Mikel New" role="Admin" />
-          <div className="text-white hidden sm:block">
-            <div className="text-sm font-medium">Mikel New</div>
-            <div className="text-xs text-gray-400">Admin</div>
-          </div>
-          <ChevronDown className="h-4 w-4 text-gray-400 hidden sm:block" />
-        </div>
+        {/* User Profile - Now using the enhanced UserAvatar component */}
+        <UserAvatar name="Moni Roy" role="Admin" />
       </div>
     </div>
   )

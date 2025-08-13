@@ -4,7 +4,6 @@ import {
   BarChart3, 
   FileText, 
   Home, 
-  LogOut, 
   Settings, 
   Upload 
 } from "lucide-react"
@@ -32,7 +31,6 @@ const mainNav = [
 
 const utilityNav = [
   { title: "Settings", href: "/settings", icon: Settings },
-  { title: "Logout", href: "/", icon: LogOut },
 ]
 
 export function AppSidebar() {
