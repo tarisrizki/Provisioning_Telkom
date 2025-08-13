@@ -1,36 +1,53 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ProvisioningTSEL - Sidebar
 
-## Getting Started
+Sidebar sederhana untuk sistem ProvisioningTSEL berdasarkan desain yang diberikan.
 
-First, run the development server:
+## Fitur
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Sesuai Desain**: Menggunakan warna dan layout yang tepat sesuai gambar
+- **Responsive**: Bekerja di desktop dan mobile
+- **Active State**: Otomatis highlight halaman aktif
+- **Clean**: Kode sederhana dan mudah dipahami
+
+## Struktur
+
+```
+src/
+├── components/
+│   ├── ui/
+│   │   └── sidebar.tsx          # Komponen sidebar dari shadcn/ui
+│   └── app-sidebar.tsx          # Implementasi sidebar utama
+└── app/
+    ├── layout.tsx               # Layout dengan sidebar
+    ├── page.tsx                 # Halaman Dashboard
+    ├── upload/page.tsx          # Halaman Upload
+    ├── laporan/page.tsx         # Halaman Laporan
+    ├── monitoring/page.tsx      # Halaman Monitoring
+    └── settings/page.tsx        # Halaman Settings
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Warna
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Background**: `#282c34` (Dark charcoal gray)
+- **Text**: `#ffffff` (White)
+- **Brand**: `#60a5fa` (Blue-400 untuk "Provisioning")
+- **Active**: `#3b82f6` (Blue-500)
+- **Border**: `#404552` (Medium gray)
+- **Hover**: `#3a3f4b` (Slightly lighter gray)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Penggunaan
 
-## Learn More
+Sidebar sudah terintegrasi di layout utama. Untuk menambah halaman baru:
 
-To learn more about Next.js, take a look at the following resources:
+1. Buat file di `src/app/nama-halaman/page.tsx`
+2. Tambahkan item navigasi di `src/components/app-sidebar.tsx`
+3. Sidebar akan otomatis highlight halaman aktif
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Menjalankan
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm install
+npm run dev
+```
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Buka [http://localhost:3000](http://localhost:3000) untuk melihat aplikasi.
