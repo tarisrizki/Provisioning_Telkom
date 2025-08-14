@@ -1,9 +1,10 @@
 "use client"
 
-import { Filter, Calendar, Upload, AlertCircle, Loader2 } from "lucide-react"
+export const dynamic = 'force-dynamic'
+
+import { Filter, Calendar, Upload, AlertCircle, Loader2, Database } from "lucide-react"
 import { useLaporan } from "@/hooks/use-laporan"
 import { FilterDropdown, DataTable } from "@/components/laporan"
-import { createColumnMapping, mapCSVToLaporan } from "@/lib/utils"
 
 export default function LaporanPage() {
   const {
@@ -13,6 +14,7 @@ export default function LaporanPage() {
     visibleRows,
     isLoading,
     error,
+    totalCount,
     dateFilter,
     aoFilter,
     channelFilter,
@@ -55,7 +57,7 @@ export default function LaporanPage() {
             Loading Data...
           </h3>
           <p className="text-gray-400">
-            Please wait while we load your CSV data.
+            Please wait while we load your data from database.
           </p>
         </div>
       </div>
@@ -93,7 +95,7 @@ export default function LaporanPage() {
   }
 
   // Show no data state
-  if (!csvData) {
+  if (!csvData || csvData.rows.length === 0) {
     return (
       <div className="space-y-6">
         <div>
@@ -104,12 +106,12 @@ export default function LaporanPage() {
         </div>
         
         <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-12 text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <Database className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-xl font-semibold text-white mb-2">
             No Data Available
           </h3>
           <p className="text-gray-400 mb-6">
-            Please upload a CSV file first to view reports.
+            No data found in database. Please upload a CSV file first to view reports.
           </p>
           <a 
             href="/upload" 
@@ -133,6 +135,7 @@ export default function LaporanPage() {
         </p>
         <div className="mt-2 text-sm text-green-400">
           📊 Data loaded: {csvData.rows.length.toLocaleString()} rows • {csvData.headers.length} columns
+          {totalCount > csvData.rows.length && ` • Total in database: ${totalCount.toLocaleString()}`}
         </div>
       </div>
 
@@ -143,10 +146,10 @@ export default function LaporanPage() {
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
               <span className="text-sm text-gray-400">Data Status:</span>
-              <span className="text-sm text-green-400 font-medium">Connected</span>
+              <span className="text-sm text-green-400 font-medium">Connected to Database</span>
             </div>
             <div className="text-sm text-gray-400">
-              Source: {csvData.rows.length > 1000 ? 'IndexedDB' : 'localStorage'}
+              Source: Supabase Database
             </div>
           </div>
           <button
@@ -178,7 +181,7 @@ export default function LaporanPage() {
               }}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-white font-medium">February 2019</h3>
+                <h3 className="text-white font-medium">Select Date</h3>
                 <div className="flex space-x-2">
                   <button className="p-1 hover:bg-[#334155] rounded">
                     <Calendar className="h-4 w-4 text-gray-400 rotate-90" />
@@ -346,6 +349,7 @@ export default function LaporanPage() {
           </h2>
           <p className="text-sm text-gray-400">
             Showing {Math.min(visibleRows, currentData.rows.length)} of {currentData.rows.length} rows
+            {totalCount > currentData.rows.length && ` (${totalCount.toLocaleString()} total in database)`}
           </p>
         </div>
         

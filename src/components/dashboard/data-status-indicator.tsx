@@ -1,7 +1,12 @@
 import { FileText, CheckCircle, AlertCircle, RefreshCw } from "lucide-react"
 
+interface CSVData {
+  headers: string[]
+  rows: string[][]
+}
+
 interface DataStatusIndicatorProps {
-  csvData: any
+  csvData: CSVData | null
   lastUpdate: Date
   onRefresh: () => void
 }
