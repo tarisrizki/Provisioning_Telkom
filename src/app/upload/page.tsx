@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = 'force-dynamic'
+
 import { FileUploadArea } from "@/components/upload/file-upload-area"
 import { DataPreview } from "@/components/upload/data-preview"
 import { useUpload } from "@/hooks/use-upload"

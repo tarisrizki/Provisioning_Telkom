@@ -23,7 +23,7 @@ export function MonthlyTrendChart({ data, months }: MonthlyTrendChartProps) {
   const totalValue = data.reduce((sum, item) => sum + item.value, 0)
   const avgValue = totalValue / data.length
   const currentMonthValue = data[data.length - 1]?.value || 0
-  const trendPercentage = avgValue > 0 ? ((currentMonthValue - avgValue) / avgValue * 100).toFixed(1) : "0.0"
+  const trendPercentage = avgValue > 0 ? ((currentMonthValue - avgValue) / avgValue * 100) : 0
 
   return (
     <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
@@ -33,7 +33,7 @@ export function MonthlyTrendChart({ data, months }: MonthlyTrendChartProps) {
           <p className="text-sm text-gray-400">Showing work orders distribution across months</p>
           <div className="flex items-center text-sm text-green-400 mt-1">
             <TrendingUp className="h-4 w-4 mr-1" />
-            {trendPercentage > 0 ? "Trending up" : "Trending down"} by {Math.abs(Number(trendPercentage))}% this month
+            {trendPercentage > 0 ? "Trending up" : "Trending down"} by {Math.abs(trendPercentage).toFixed(1)}% this month
           </div>
           <p className="text-xs text-gray-500 mt-1">January - December 2024</p>
         </div>

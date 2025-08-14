@@ -526,18 +526,33 @@ export function useUpload() {
 
     setUploading(true)
     setUploadStatus("idle")
+    setErrorMessage("")
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Dynamic import to avoid build-time issues
+      const { DatabaseService } = await import("@/lib/database")
       
-      setUploadStatus("success")
-      setShowPreview(false)
-      setCsvData(null)
-      setFileName("")
-    } catch {
+      // Process CSV data and upload to Supabase
+      const result = await DatabaseService.processCSVData(csvData, fileName)
+      
+      if (result.success) {
+        setUploadStatus("success")
+        setShowPreview(false)
+        setCsvData(null)
+        setFileName("")
+        
+        // Dispatch custom event to notify dashboard of data update
+        window.dispatchEvent(new CustomEvent('csvDataUpdated'))
+        
+        console.log(`Successfully uploaded ${result.insertedCount} work orders to database`)
+      } else {
+        setUploadStatus("error")
+        setErrorMessage(result.error || "Failed to upload data to database")
+      }
+    } catch (error) {
+      console.error("Upload error:", error)
       setUploadStatus("error")
-      setErrorMessage("Failed to upload data")
+      setErrorMessage(error instanceof Error ? error.message : "Failed to upload data")
     } finally {
       setUploading(false)
     }
