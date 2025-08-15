@@ -40,7 +40,7 @@ export default function LaporanPage() {
 
   const currentData = filteredData || { headers: [], rows: [] }
 
-  // Show loading state
+  // MASIH ERORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
   if (isLoading) {
     return (
       <div className="space-y-6">
