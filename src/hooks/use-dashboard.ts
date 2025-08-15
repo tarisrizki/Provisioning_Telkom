@@ -20,10 +20,12 @@ interface DashboardMetrics {
 }
 
 export function useDashboard() {
-  const [selectedMonth, setSelectedMonth] = useState("October")
+  const [selectedMonth, setSelectedMonth] = useState("All")
   const [csvData, setCsvData] = useState<CSVData | null>(null)
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date())
   const [isLoading, setIsLoading] = useState(false)
+  const [dbTotalWorkOrders, setDbTotalWorkOrders] = useState(0)
+  const [dbTotalColumns, setDbTotalColumns] = useState(0)
   
   // Use ref to track last known data without causing re-renders
   const lastKnownDataRef = useRef<string | null>(null)
@@ -54,35 +56,11 @@ export function useDashboard() {
       setIsLoading(true)
       console.log("Dashboard: Loading data from Supabase database...")
       
-      // First, try to get data from localStorage if available
-      try {
-        const storedData = localStorage.getItem('dashboardData')
-        if (storedData) {
-          const parsedData = JSON.parse(storedData)
-          if (parsedData && parsedData.headers && parsedData.rows && parsedData.rows.length > 0) {
-            console.log("Dashboard: Found stored data in localStorage:", {
-              headers: parsedData.headers.length,
-              rows: parsedData.rows.length
-            })
-            setCsvData(parsedData)
-            setLastUpdate(new Date())
-            lastKnownDataRef.current = JSON.stringify(parsedData)
-            setIsLoading(false)
-            return
-          }
-        }
-      } catch (localStorageError) {
-        console.warn("Dashboard: Failed to load from localStorage:", localStorageError)
-      }
+      // Always get fresh data from Supabase first (primary source)
+      console.log("Dashboard: Fetching fresh data from work_orders table (Supabase)...")
       
-      // Always try to get fresh data from Supabase first
-      console.log("Dashboard: Fetching fresh data from work_orders table...")
-      
-      // Get all work orders from database (same logic as laporan)
-      const result = await DatabaseService.getWorkOrders({
-        limit: 10000, // Load up to 10,000 records
-        offset: 0
-      })
+      // Get all work orders from database (no limit)
+      const result = await DatabaseService.getWorkOrders()
       
       console.log("Dashboard: Raw result from DatabaseService:", {
         success: result.success,
@@ -93,33 +71,19 @@ export function useDashboard() {
       })
       
       if (result.success && result.data && result.data.length > 0) {
-        // Define the specific columns we want to display (same as laporan)
+        // Use only the required columns for dashboard
         const headers = [
-          "AO", 
-          "CHANNEL", 
-          "DATE_CREATED", 
-          "WORKORDER", 
-          "HSA", 
-          "BRANCH", 
-          "UPDATE_LAPANGAN", 
-          "SYMPTOM", 
-          "TINJUT_HD_OPLANG", 
-          "KATEGORI_MANJA", 
+          "AO",
+          "DATE_CREATED",
+          "UPDATE_LAPANGAN",
           "STATUS_BIMA"
         ]
         
-        // Convert work orders to table format (same as laporan)
+        // Convert work orders to table format (4 columns only)
         const rows = result.data.map(wo => [
           wo.ao || "",
-          wo.channel || "",
           wo.date_created || "",
-          wo.workorder || "",
-          wo.hsa || "",
-          wo.branch || "",
           wo.update_lapangan || "",
-          wo.symptom || "",
-          wo.tinjut_hd_oplang || "",
-          wo.kategori_manja || "",
           wo.status_bima || ""
         ])
         
@@ -138,6 +102,8 @@ export function useDashboard() {
         console.log("Dashboard: First few work orders from Supabase:", result.data.slice(0, 3))
         
         setCsvData(supabaseCSVData)
+        setDbTotalWorkOrders(result.count || result.data.length)
+        setDbTotalColumns(result.data[0] ? Object.keys(result.data[0]).length : headers.length)
         setLastUpdate(new Date())
         lastKnownDataRef.current = JSON.stringify(supabaseCSVData)
         
@@ -159,6 +125,27 @@ export function useDashboard() {
           count: result.count
         })
         
+        // Try to load cached data from localStorage as fallback
+        try {
+          const storedData = localStorage.getItem('dashboardData')
+          if (storedData) {
+            const parsedData = JSON.parse(storedData)
+            if (parsedData && parsedData.headers && parsedData.rows && parsedData.rows.length > 0) {
+              console.log("Dashboard: Using cached data from localStorage as fallback:", {
+                headers: parsedData.headers.length,
+                rows: parsedData.rows.length
+              })
+              setCsvData(parsedData)
+              setLastUpdate(new Date())
+              lastKnownDataRef.current = JSON.stringify(parsedData)
+              setIsLoading(false)
+              return
+            }
+          }
+        } catch (localStorageError) {
+          console.warn("Dashboard: Failed to load fallback data from localStorage:", localStorageError)
+        }
+        
         // Try to get data directly from laporan hook to see if it works there
         console.log("Dashboard: Attempting to get data directly...")
         try {
@@ -167,23 +154,17 @@ export function useDashboard() {
           
           if (directResult.success && directResult.count && directResult.count > 0) {
             console.log("Dashboard: Found data count, trying to fetch actual data...")
-            const actualDataResult = await DatabaseService.getWorkOrders({
-              limit: directResult.count,
-              offset: 0
-            })
+            const actualDataResult = await DatabaseService.getWorkOrders()
             
             if (actualDataResult.success && actualDataResult.data && actualDataResult.data.length > 0) {
               console.log("Dashboard: Successfully fetched data on second attempt!")
               
               const headers = [
-                "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-                "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+                "AO", "DATE_CREATED", "UPDATE_LAPANGAN", "STATUS_BIMA"
               ]
               
               const rows = actualDataResult.data.map(wo => [
-                wo.ao || "", wo.channel || "", wo.date_created || "", wo.workorder || "", wo.hsa || "",
-                wo.branch || "", wo.update_lapangan || "", wo.symptom || "", wo.tinjut_hd_oplang || "",
-                wo.kategori_manja || "", wo.status_bima || ""
+                wo.ao || "", wo.date_created || "", wo.update_lapangan || "", wo.status_bima || ""
               ])
               
               const retryData = { headers, rows }
@@ -194,6 +175,8 @@ export function useDashboard() {
               })
               
               setCsvData(retryData)
+              setDbTotalWorkOrders(actualDataResult.count || actualDataResult.data.length)
+              setDbTotalColumns(actualDataResult.data[0] ? Object.keys(actualDataResult.data[0]).length : headers.length)
               setLastUpdate(new Date())
               lastKnownDataRef.current = JSON.stringify(retryData)
               
@@ -215,21 +198,13 @@ export function useDashboard() {
         // If still no data from Supabase, create sample data for testing
         console.log("Dashboard: Creating sample data for testing...")
         const sampleHeaders = [
-          "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-          "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+          "AO", "DATE_CREATED", "UPDATE_LAPANGAN", "STATUS_BIMA"
         ]
         
         const sampleRows = Array.from({ length: 30 }, (_, index) => [
           `AO_${String(index + 1).padStart(3, '0')}`,
-          `CHANNEL_${String.fromCharCode(65 + (index % 5))}`,
           new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          `WO_${String(index + 1).padStart(4, '0')}`,
-          `HSA_${String(index + 1).padStart(3, '0')}`,
-          `BRANCH_${String.fromCharCode(65 + (index % 8))}`,
           ["Kendala Pelanggan", "Kendala Teknik (UNSC)", "Salah Segmen", "Force Majuere"][index % 4],
-          `Symptom_${index + 1}`,
-          `Tinjut_${(index % 5) + 1}`,
-          ["lewat manja", "dalam manja", "normal"][index % 3],
           ["COMPLETE", "WORKFAIL", "CANCLWORK", "PROGRESS"][index % 4]
         ])
         
@@ -240,6 +215,8 @@ export function useDashboard() {
         })
         
         setCsvData(sampleData)
+        setDbTotalWorkOrders(sampleRows.length)
+        setDbTotalColumns(sampleHeaders.length)
         setLastUpdate(new Date())
         lastKnownDataRef.current = JSON.stringify(sampleData)
         
@@ -261,21 +238,13 @@ export function useDashboard() {
       // If Supabase fails, create sample data so dashboard isn't empty
       console.log("Dashboard: Creating emergency sample data...")
       const emergencyHeaders = [
-        "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-        "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+        "AO", "DATE_CREATED", "UPDATE_LAPANGAN", "STATUS_BIMA"
       ]
       
       const emergencyRows = Array.from({ length: 30 }, (_, index) => [
         `AO_${String(index + 1).padStart(3, '0')}`,
-        `CHANNEL_${String.fromCharCode(65 + (index % 5))}`,
         new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        `WO_${String(index + 1).padStart(4, '0')}`,
-        `HSA_${String(index + 1).padStart(3, '0')}`,
-        `BRANCH_${String.fromCharCode(65 + (index % 8))}`,
         ["Kendala Pelanggan", "Kendala Teknik (UNSC)", "Salah Segmen", "Force Majuere"][index % 4],
-        `Symptom_${index + 1}`,
-        `Tinjut_${(index % 5) + 1}`,
-        ["lewat manja", "dalam manja", "normal"][index % 3],
         ["COMPLETE", "WORKFAIL", "CANCLWORK", "PROGRESS"][index % 4]
       ])
       
@@ -286,6 +255,8 @@ export function useDashboard() {
       })
       
       setCsvData(emergencyData)
+      setDbTotalWorkOrders(emergencyRows.length)
+      setDbTotalColumns(emergencyHeaders.length)
       setLastUpdate(new Date())
       lastKnownDataRef.current = JSON.stringify(emergencyData)
       
@@ -382,49 +353,40 @@ export function useDashboard() {
     
     console.log("Dashboard: Column mapping from utils", columnMapping)
 
+    // Helper: parse date string in flexible formats (e.g., "05/08/2025 12:58", "02/07/2025 15.00", "DD/MM/YYYY")
+    const parseFlexibleDate = (value: string): Date | null => {
+      if (!value) return null
+      const v = value.trim()
+      // Match DD/MM/YYYY with optional time HH:MM or HH.MM
+      const m = v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2})[:.](\d{1,2})(?::(\d{1,2}))?)?$/)
+      if (m) {
+        const day = parseInt(m[1], 10)
+        const month = parseInt(m[2], 10) - 1 // JS month 0-11
+        const year = parseInt(m[3], 10)
+        const hh = m[4] ? parseInt(m[4], 10) : 0
+        const mm = m[5] ? parseInt(m[5], 10) : 0
+        const ss = m[6] ? parseInt(m[6], 10) : 0
+        const d = new Date(year, month, day, hh, mm, ss)
+        return isNaN(d.getTime()) ? null : d
+      }
+      // Fallback to native Date parsing
+      const d = new Date(v)
+      return isNaN(d.getTime()) ? null : d
+    }
+
     // Filter data based on selected month
     const filteredRows = rows.filter((row, index) => {
       if (columnMapping.dateIndex >= 0) {
         const dateValue = row[columnMapping.dateIndex]?.trim() || ''
         if (dateValue) {
-          try {
-            // Try to parse the date and check if it matches selected month
-            const date = new Date(dateValue)
-            if (!isNaN(date.getTime())) {
-              const monthNames = [
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-              ]
-              const rowMonth = monthNames[date.getMonth()]
-              return rowMonth === selectedMonth
-            }
-          } catch (error) {
-            // If date parsing fails, try to extract month from string
+          const date = parseFlexibleDate(dateValue)
+          if (date) {
             const monthNames = [
-              "january", "february", "march", "april", "may", "june",
-              "july", "august", "september", "october", "november", "december"
+              "January", "February", "March", "April", "May", "June",
+              "July", "August", "September", "October", "November", "December"
             ]
-            const monthAbbr = [
-              "jan", "feb", "mar", "apr", "may", "jun",
-              "jul", "aug", "sep", "oct", "nov", "dec"
-            ]
-            
-            const dateLower = dateValue.toLowerCase()
-            const monthIndex = monthNames.findIndex(month => dateLower.includes(month))
-            if (monthIndex !== -1) {
-              const rowMonth = monthNames[monthIndex]
-              return rowMonth === selectedMonth.toLowerCase()
-            }
-            
-            const abbrIndex = monthAbbr.findIndex(abbr => dateLower.includes(abbr))
-            if (abbrIndex !== -1) {
-              const monthNames = [
-                "January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-              ]
-              const rowMonth = monthNames[abbrIndex]
-              return rowMonth === selectedMonth
-            }
+            const rowMonth = monthNames[date.getMonth()]
+            return rowMonth === selectedMonth
           }
         }
       }
@@ -564,41 +526,23 @@ export function useDashboard() {
              // Count orders for each month based on DATE_CREATED
        workingRows.forEach((row, index) => {
          const dateValue = row[columnMapping.dateIndex]?.trim() || ''
-         
-         // Log first few rows for debugging
          if (index < 5) {
            console.log(`Row ${index + 1} DATE_CREATED: "${dateValue}"`)
          }
-         
          if (dateValue) {
-           try {
-             const date = new Date(dateValue)
-             if (!isNaN(date.getTime())) {
-               const month = date.getMonth() + 1 // getMonth() returns 0-11, so add 1
-               const currentCount = monthCounts.get(month) || 0
-               monthCounts.set(month, currentCount + 1)
-               
-               // Log successful date parsing for first few rows
-               if (index < 5) {
-                 console.log(`Row ${index + 1}: Date "${dateValue}" parsed to month ${month} (${date.toLocaleDateString()})`)
-               }
-             } else {
-               // Log invalid dates
-               if (index < 5) {
-                 console.warn(`Row ${index + 1}: Invalid date "${dateValue}"`)
-               }
-             }
-           } catch (error) {
-             // Handle date parsing errors
+           const date = parseFlexibleDate(dateValue)
+           if (date) {
+             const month = date.getMonth() + 1
+             const currentCount = monthCounts.get(month) || 0
+             monthCounts.set(month, currentCount + 1)
              if (index < 5) {
-               console.warn(`Row ${index + 1}: Failed to parse date "${dateValue}":`, error)
+               console.log(`Row ${index + 1}: Parsed to month ${month} (${date.toISOString()})`)
              }
+           } else if (index < 5) {
+             console.warn(`Row ${index + 1}: Invalid date "${dateValue}"`)
            }
-         } else {
-           // Log empty date values
-           if (index < 5) {
-             console.warn(`Row ${index + 1}: Empty DATE_CREATED value`)
-           }
+         } else if (index < 5) {
+           console.warn(`Row ${index + 1}: Empty DATE_CREATED value`)
          }
        })
       
@@ -666,30 +610,19 @@ export function useDashboard() {
        // Count orders for each day in the selected month based on DATE_CREATED
        workingRows.forEach((row) => {
          const dateValue = row[columnMapping.dateIndex]?.trim() || ''
-         if (dateValue) {
-           try {
-             const date = new Date(dateValue)
-             if (!isNaN(date.getTime())) {
-               const monthNames = [
-                 "January", "February", "March", "April", "May", "June",
-                 "July", "August", "September", "October", "November", "December"
-               ]
-               const rowMonth = monthNames[date.getMonth()]
-               
-               // Check if the date belongs to the selected month
-               if (rowMonth === selectedMonth) {
-                 const day = date.getDate()
-                 // Map day to 1-30 range (handle months with different number of days)
-                 const normalizedDay = Math.min(day, daysInMonth)
-                 const currentCount = dailyCounts.get(normalizedDay) || 0
-                 dailyCounts.set(normalizedDay, currentCount + 1)
-               }
-             }
-           } catch (error) {
-             // Handle date parsing errors
-             console.warn("Failed to parse date:", dateValue)
-           }
-         }
+         if (!dateValue) return
+         const date = parseFlexibleDate(dateValue)
+         if (!date) return
+         const monthNames = [
+           "January", "February", "March", "April", "May", "June",
+           "July", "August", "September", "October", "November", "December"
+         ]
+         const rowMonth = monthNames[date.getMonth()]
+         if (rowMonth !== selectedMonth) return
+         const day = date.getDate()
+         const normalizedDay = Math.min(day, daysInMonth)
+         const currentCount = dailyCounts.get(normalizedDay) || 0
+         dailyCounts.set(normalizedDay, currentCount + 1)
        })
        
        // Convert to array format for chart (always 30 days)
@@ -843,7 +776,7 @@ export function useDashboard() {
     })
 
     return {
-      totalWorkOrders: workingTotalWorkOrders,
+      totalWorkOrders: dbTotalWorkOrders || workingTotalWorkOrders,
       avgProvisioningTime,
       successRate,
       failureRate,
@@ -866,6 +799,8 @@ export function useDashboard() {
     dashboardMetrics,
     lastUpdate,
     refreshData,
-    isLoading
+    isLoading,
+    dbTotalColumns,
+    dbTotalWorkOrders
   }
 } 

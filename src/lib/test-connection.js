@@ -29,7 +29,7 @@ export async function testSupabaseConnection() {
     // Test 3: Database query sederhana
     console.log('\n3️⃣ Testing Database Connection:')
     const { count, error } = await supabase
-      .from('work_orders')
+      .from('test')
       .select('*', { count: 'exact', head: true })
     
     if (error) {

@@ -29,13 +29,8 @@ export function MonthlyTrendChart({ data, months }: MonthlyTrendChartProps) {
     <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">Tren Order Bulanan</h3>
-          <p className="text-sm text-gray-400">Showing work orders distribution across months</p>
-          <div className="flex items-center text-sm text-green-400 mt-1">
-            <TrendingUp className="h-4 w-4 mr-1" />
-            {trendPercentage > 0 ? "Trending up" : "Trending down"} by {Math.abs(trendPercentage).toFixed(1)}% this month
-          </div>
-          <p className="text-xs text-gray-500 mt-1">January - December 2024</p>
+          <h1 className="text-lg font-bold text-white">Tren Order Bulanan</h1>
+          
         </div>
         
         <div className="relative">

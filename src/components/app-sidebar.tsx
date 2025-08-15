@@ -5,7 +5,7 @@ import {
   FileText, 
   Home, 
   Settings, 
-  Upload 
+  LogOut 
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -24,12 +24,13 @@ import {
 
 const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: Home },
-  { title: "Upload Data", href: "/upload", icon: Upload },
-  { title: "Laporan", href: "/laporan", icon: FileText },
   { title: "Monitoring", href: "/monitoring", icon: BarChart3 },
+  { title: "Format Order", href: "/laporan", icon: FileText },
+  { title: "Report", href: "/laporan", icon: FileText },
 ]
 
 const utilityNav = [
+  { title: "User login", href: "/", icon: Settings },
   { title: "Settings", href: "/settings", icon: Settings },
 ]
 
@@ -104,6 +105,14 @@ export function AppSidebar() {
                   </SidebarMenuItem>
                 )
               })}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className="w-full flex items-center space-x-3 px-3 py-2 rounded-md text-white hover:bg-[#3a3f4b]">
+                  <Link href="#">
+                    <LogOut className="h-4 w-4" />
+                    <span>Log out</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

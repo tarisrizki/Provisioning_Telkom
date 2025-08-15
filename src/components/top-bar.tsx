@@ -10,6 +10,10 @@ export function TopBar() {
       {/* Brand/Logo Section */}
       <div className="flex items-center space-x-4">
         <SidebarTrigger className="text-white hover:text-blue-400" />
+        <div className="text-lg font-bold select-none">
+          <span className="text-blue-400">Provisioning</span>
+          <span className="text-white">TSEL</span>
+        </div>
       </div>
 
       {/* Search Bar - Left Aligned */}
@@ -27,7 +31,7 @@ export function TopBar() {
       {/* Spacer to push right content to the far right */}
       <div className="flex-1"></div>
 
-      {/* Right Section - Notification & User Profile */}
+      {/* Right Section - User Profile */}
       <div className="flex items-center space-x-6">
         {/* Mobile Search Button */}
         <button className="md:hidden p-2 text-gray-400 hover:text-white transition-colors">
