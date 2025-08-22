@@ -68,13 +68,13 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.15 0 0);
+  --sidebar: #282c34;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.22 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0);
+  --sidebar-border: #404552;
   --sidebar-ring: oklch(0.556 0 0);
 }
 
@@ -102,13 +102,13 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.15 0 0);
+  --sidebar: #282c34;
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.22 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.25 0 0);
+  --sidebar-border: #404552;
   --sidebar-ring: oklch(0.556 0 0);
 }
 
@@ -118,7 +118,55 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-x: hidden;
   }
+  html {
+    overflow-x: hidden;
+  }
+}
+
+/* Custom sidebar styling to ensure #282c34 background */
+[data-slot="sidebar"],
+[data-slot="sidebar-inner"],
+[data-sidebar="sidebar"] {
+  background-color: #282c34 !important;
+}
+
+[data-slot="sidebar-header"],
+[data-sidebar="header"] {
+  background-color: #282c34 !important;
+}
+
+[data-slot="sidebar-content"],
+[data-sidebar="content"] {
+  background-color: #282c34 !important;
+}
+
+/* Custom styling for active sidebar menu items */
+[data-slot="sidebar-menu-button"][data-active="true"],
+[data-sidebar="menu-button"][data-active="true"] {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+[data-slot="sidebar-menu-button"][data-active="true"]:hover,
+[data-sidebar="menu-button"][data-active="true"]:hover {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Override sidebar accent color for active states */
+[data-slot="sidebar-menu-button"][data-active="true"],
+[data-sidebar="menu-button"][data-active="true"] {
+  background-color: #3b82f6 !important;
+  color: white !important;
+}
+
+/* Ensure hover states work correctly */
+[data-slot="sidebar-menu-button"]:hover:not([data-active="true"]),
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+  background-color: #404552 !important;
+  color: white !important;
 }
 
 /* Custom scrollbar styles */

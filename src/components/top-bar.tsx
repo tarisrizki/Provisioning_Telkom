@@ -1,19 +1,14 @@
 "use client"
 
 import { Bell, Search } from "lucide-react"
-import { SidebarTrigger } from "@/components/ui/sidebar"
 import { UserAvatar } from "@/components/user-avatar"
 
 export function TopBar() {
   return (
-    <div className="h-16 bg-[#282c34] border-b border-[#404552] px-6 flex items-center w-screen">
+    <div className="h-16 bg-[#282c34] border-b border-[#404552] px-6 flex items-center w-full">
       {/* Brand/Logo Section */}
       <div className="flex items-center space-x-4">
-        <SidebarTrigger className="text-white hover:text-blue-400" />
-        <div className="text-lg font-bold select-none">
-          <span className="text-blue-400">Provisioning</span>
-          <span className="text-white">TSEL</span>
-        </div>
+        {/* Removed SidebarTrigger */}
       </div>
 
       {/* Search Bar - Left Aligned */}
