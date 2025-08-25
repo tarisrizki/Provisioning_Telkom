@@ -1,131 +1,225 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { DatabaseService } from '@/lib/database'
+import { useState, useEffect } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+
+interface TestData {
+  id: string
+  name: string
+  status: string
+  timestamp: string
+}
 
 export default function TestDataPage() {
-  const [rawData, setRawData] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [testData, setTestData] = useState<TestData[]>([])
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const loadRawData = async () => {
-    setIsLoading(true)
-    try {
-      const result = await DatabaseService.getWorkOrders({
-        limit: 20,
-        offset: 0
-      })
-      
-      if (result.success && result.data) {
-        setRawData(result.data)
-        console.log('Raw data loaded:', result.data)
-      } else {
-        setError(result.error || 'Failed to load data')
+  useEffect(() => {
+    // Simulate API call
+    const fetchTestData = async () => {
+      try {
+        setLoading(true)
+        // Simulate delay
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        
+        // Mock data
+        const mockData: TestData[] = [
+          {
+            id: "1",
+            name: "Test Connection 1",
+            status: "success",
+            timestamp: new Date().toISOString()
+          },
+          {
+            id: "2", 
+            name: "Test Connection 2",
+            status: "failed",
+            timestamp: new Date().toISOString()
+          },
+          {
+            id: "3",
+            name: "Test Connection 3", 
+            status: "pending",
+            timestamp: new Date().toISOString()
+          }
+        ]
+        
+        setTestData(mockData)
+        setError(null)
+      } catch {
+        setError("Failed to fetch test data")
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      setError(error instanceof Error ? error.message : 'Unknown error')
-    } finally {
-      setIsLoading(false)
+    }
+
+    fetchTestData()
+  }, [])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "success":
+        return "bg-green-600 text-white"
+      case "failed":
+        return "bg-red-600 text-white"
+      case "pending":
+        return "bg-yellow-600 text-black"
+      default:
+        return "bg-gray-600 text-white"
     }
   }
 
-  useEffect(() => {
-    loadRawData()
-  }, [])
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case "success":
+        return "Success"
+      case "failed":
+        return "Failed"
+      case "pending":
+        return "Pending"
+      default:
+        return "Unknown"
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white">Loading test data...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-red-500">Error: {error}</div>
+      </div>
+    )
+  }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <h1 className="text-2xl font-bold mb-6">Raw Database Data Test</h1>
-      
-      <div className="mb-4">
-        <button
-          onClick={loadRawData}
-          disabled={isLoading}
-          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 text-white px-4 py-2 rounded"
-        >
-          {isLoading ? 'Loading...' : 'Refresh Data'}
-        </button>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-white">Test Data</h1>
+        <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+          Refresh Data
+        </Button>
       </div>
 
-      {error && (
-        <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded mb-4">
-          Error: {error}
-        </div>
-      )}
-
-      {rawData.length > 0 && (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-4 border-b">
-            <h2 className="text-lg font-semibold">
-              Raw Data from Database ({rawData.length} records)
-            </h2>
-            <p className="text-sm text-gray-600">
-              Showing first 20 records to verify data integrity
-            </p>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">AO</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Channel</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Work Order</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">HSA</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Branch</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Update Lapangan</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Symptom</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Tinjut HD Oplang</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Kategori Manja</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status Bima</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rawData.map((record, index) => (
-                  <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="px-4 py-2 text-sm font-mono">{record.ao}</td>
-                    <td className="px-4 py-2 text-sm">{record.channel}</td>
-                    <td className="px-4 py-2 text-sm">{record.date_created}</td>
-                    <td className="px-4 py-2 text-sm">{record.workorder}</td>
-                    <td className="px-4 py-2 text-sm">{record.hsa}</td>
-                    <td className="px-4 py-2 text-sm">{record.branch}</td>
-                    <td className="px-4 py-2 text-sm max-w-xs truncate">{record.update_lapangan}</td>
-                    <td className="px-4 py-2 text-sm max-w-xs truncate">{record.symptom}</td>
-                    <td className="px-4 py-2 text-sm max-w-xs truncate">{record.tinjut_hd_oplang}</td>
-                    <td className="px-4 py-2 text-sm font-semibold bg-yellow-50 px-2 py-1 rounded">
-                      {record.kategori_manja}
-                    </td>
-                    <td className="px-4 py-2 text-sm">{record.status_bima}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold mb-2">Data Verification:</h3>
-        <ul className="text-sm space-y-1">
-          <li>• <strong>Kategori Manja</strong> should show original text like "LEWAT MANJA"</li>
-          <li>• Check if there are any data transformations happening</li>
-          <li>• Verify that CSV data is preserved exactly as uploaded</li>
-        </ul>
-      </div>
-
-      {rawData.length > 0 && (
-        <div className="mt-6 p-4 bg-green-50 rounded-lg">
-          <h3 className="font-semibold mb-2">Sample Kategori Manja Values:</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            {Array.from(new Set(rawData.map(r => r.kategori_manja))).slice(0, 8).map((kategori, index) => (
-              <div key={index} className="bg-white p-2 rounded border text-sm">
-                <span className="font-mono">{kategori}</span>
+      <Card className="bg-[#1e293b] border-[#334155]">
+        <CardHeader>
+          <CardTitle className="text-white">Connection Test Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {testData.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center justify-between p-4 bg-[#334155] rounded-lg"
+              >
+                <div className="flex items-center space-x-4">
+                  <div>
+                    <h3 className="text-white font-medium">{item.name}</h3>
+                    <p className="text-gray-400 text-sm">
+                      Tested at: {new Date(item.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Badge className={getStatusColor(item.status)}>
+                    {getStatusText(item.status)}
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    View Details
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        </CardContent>
+      </Card>
+
+      <Card className="bg-[#1e293b] border-[#334155]">
+        <CardHeader>
+          <CardTitle className="text-white">Test Configuration</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Database URL
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-[#334155] border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  placeholder="Enter database URL"
+                  defaultValue="postgresql://localhost:5432/testdb"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Connection Timeout
+                </label>
+                <input
+                  type="number"
+                  className="w-full bg-[#334155] border border-gray-600 rounded-lg px-3 py-2 text-white"
+                  placeholder="30"
+                  defaultValue="30"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Test Query
+              </label>
+              <textarea
+                className="w-full bg-[#334155] border border-gray-600 rounded-lg px-3 py-2 text-white h-24"
+                placeholder="SELECT 1;"
+                defaultValue="SELECT 1;"
+              />
+            </div>
+            <div className="flex space-x-2">
+              <Button className="bg-green-600 hover:bg-green-700 text-white">
+                Run Test
+              </Button>
+              <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-700">
+                Save Configuration
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-[#1e293b] border-[#334155]">
+        <CardHeader>
+          <CardTitle className="text-white">Test History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm text-gray-400">
+              <span>Last 24 hours: 15 tests</span>
+              <span>Success rate: 87%</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-gray-400">
+              <span>Last 7 days: 89 tests</span>
+              <span>Success rate: 92%</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-gray-400">
+              <span>Last 30 days: 342 tests</span>
+              <span>Success rate: 89%</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

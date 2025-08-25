@@ -1,15 +1,32 @@
 "use client"
 
 import { useState } from "react"
-import { X, Download, ArrowRight } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { X, Download, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 interface DetailModalProps {
   isOpen: boolean
   onClose: () => void
-  orderData: any
+  orderData: {
+    orderId?: string
+    channel?: string
+    dateCreated?: string
+    workOrder?: string
+    soOrderNo?: string
+    serviceArea?: string
+    branch?: string
+    cluster?: string
+    mitra?: string
+    laborTeknis?: string
+    updateLapaorgan?: string
+    symptom?: string
+    hasilQeqrisis?: string
+    statusRma?: string
+    kategoriManja?: string
+    umurManja?: string
+    [key: string]: unknown
+  } | null
 }
 
 export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
@@ -21,19 +38,19 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
     { id: "detail-customer", label: "Detail Customer" },
     { id: "service-area", label: "Service Area" },
     { id: "mitra", label: "Mitra" },
-    { id: "update-lapangan", label: "Update lapangan" }
+    { id: "update-lapangan", label: "Update Lapangan" },
+    { id: "manja", label: "MANJA" }
   ]
 
   // Generate dynamic data based on orderData
   const generateDynamicData = () => {
-    const baseId = orderData?.orderId || "AO-00250626041731268866500"
     const timestamp = new Date().toLocaleString('id-ID')
     
     return {
       detailCustomer: {
         noService: `FG${Math.floor(Math.random() * 99999999)}`,
-        description: `V${Math.floor(Math.random() * 999999)}_SMOOK`,
-        address: `JL ${['Sastro Aceh', 'Merdeka', 'Sudirman', 'Thamrin', 'Gatot Subroto'][Math.floor(Math.random() * 5)]}`,
+        description: `V${Math.floor(Math.random() * 999999)}_SMOOGA`,
+        address: `JL Sastro Aceh ${Math.floor(Math.random() * 9999)}`,
         customerName: ['SAIFUL JAMI', 'BUDI SANTOSO', 'SARI DEWI', 'AHMAD HIDAYAT', 'NURUL AINI'][Math.floor(Math.random() * 5)],
         workZone: Math.floor(Math.random() * 200) + 1,
         routingDate: timestamp,
@@ -44,8 +61,8 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
       serviceArea: {
         serviceArea: ['LAMUGA', 'LAPVISA', 'MELLABOCU', 'SERVICELATER', 'MAIL'][Math.floor(Math.random() * 5)],
         branch: ['BALAI', 'AC241', '29/12/21', '09/12/21'][Math.floor(Math.random() * 4)],
-        area: ['LUNDEA', 'BARRETA', 'PINK WESTERN', 'BAHANA ACEH', 'MELLABORU'][Math.floor(Math.random() * 5)],
-        symptom: ['AHM', 'RMA', 'ODP FAIL', 'COMPLETE', 'ASSIGNED'][Math.floor(Math.random() * 5)],
+        area: ['LANGSA', 'BARRETA', 'PINK WESTERN', 'BAHANA ACEH', 'MELLABORU'][Math.floor(Math.random() * 5)],
+        symptom: ['ATM', 'RMA', 'ODP FAIL', 'COMPLETE', 'ASSIGNED'][Math.floor(Math.random() * 5)],
         subTipeMitra: `${['FAUZAN', 'BINAI', 'ISAL', 'BUDIAH'][Math.floor(Math.random() * 4)]}/${Math.floor(Math.random() * 999999999)}`,
         keterangan: `>${Math.floor(Math.random() * 20) + 1} HARI`,
         statusLapangan: ['CLOSED', 'OPEN', 'IN PROGRESS', 'PENDING'][Math.floor(Math.random() * 4)],
@@ -63,7 +80,7 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
       updateLapangan: {
         hasilHD: `FU ${Math.floor(Math.random() * 1000)}`,
         keteranganHD: (Math.random() * 10).toFixed(8),
-        subTipeMitra: `${['odpimbe-try', 'mitra-tech', 'field-support'][Math.floor(Math.random() * 3)]}/${Math.floor(Math.random() * 99)}`,
+        subTipeMitra: `${['odp-imbe-try', 'mitra-tech', 'field-support'][Math.floor(Math.random() * 3)]}/${Math.floor(Math.random() * 99)}`,
         pic: ['ISAL', 'BUDI', 'SARI', 'AHMAD', 'NURUL'][Math.floor(Math.random() * 5)],
         statusUC: ['Done Cancel', 'In Progress', 'Completed', 'Failed'][Math.floor(Math.random() * 4)],
         keteranganUC: ['-', 'Pending Review', 'Under Investigation'][Math.floor(Math.random() * 3)],
@@ -72,6 +89,12 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
         statusWPRO: ['-', 'IN PROGRESS', 'COMPLETED', 'FAILED'][Math.floor(Math.random() * 4)],
         statusMALUA: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
         umur: `> ${Math.floor(Math.random() * 10) + 1} hari`,
+        keteranganMALUA: ['Lewat MALUA', 'Dalam MALUA', 'Pending MALUA'][Math.floor(Math.random() * 3)],
+        statusMMG: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
+        tanggalPS: timestamp
+      },
+      manja: {
+        subTipeMitra: 'Umum - 3 hari',
         keteranganMALUA: ['Lewat MALUA', 'Dalam MALUA', 'Pending MALUA'][Math.floor(Math.random() * 3)],
         statusMMG: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
         tanggalPS: timestamp
@@ -85,45 +108,63 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
     switch (activeTab) {
       case "detail-customer":
         return (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">NO Service:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.noService}</span>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">No Service:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.noService}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Description:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.description}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Description:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.description}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Address:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.address}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Address:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.address}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Customer Name:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.customerName}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Customer Name:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.customerName}</span>
+                </div>
+              </div>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Work Zone:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.workZone}</span>
+                </div>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Work Zone:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.workZone}</span>
+            <div className="space-y-4">
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Routing Date:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.routingDate}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Routing Date:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.routingDate}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Status Data:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.statusData}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Status Data:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.statusData}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Contract ID:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.contractId}</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">Contract ID:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.contractId}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-300 text-sm">DOP:</span>
-                <span className="text-white font-medium">{dynamicData.detailCustomer.dop}</span>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">DOP:</span>
+                  <span className="text-white font-semibold">{dynamicData.detailCustomer.dop}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -131,50 +172,70 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
       case "service-area":
         return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Service Area:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.serviceArea}</span>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Service Area:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.serviceArea}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Branch:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.branch}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Branch:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.branch}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Area:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.area}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Area:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.area}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Symptom:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.symptom}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Symptom:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.symptom}</span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Sub/Tipe Mitra:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.subTipeMitra}</span>
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.subTipeMitra}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Keterangan:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.keterangan}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Keterangan:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.keterangan}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status Lapangan:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.statusLapangan}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status Lapangan:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.statusLapangan}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Symptom:</span>
-                  <span className="text-white font-medium">{dynamicData.serviceArea.symptom2}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Symptom 2:</span>
+                    <span className="text-white font-semibold">{dynamicData.serviceArea.symptom2}</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="flex justify-between items-center p-3 bg-gray-700 rounded-lg">
-              <span className="text-gray-300 text-sm">Engineering MMG:</span>
-              <div className="flex items-center space-x-2">
-                <span className="text-white font-medium">{dynamicData.serviceArea.engineeringMMG}</span>
-                <ArrowRight className="h-4 w-4 text-blue-400" />
+            <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="flex justify-between items-center">
+                <span className="text-gray-300 text-sm font-medium">Engineering MMG:</span>
+                <div className="flex items-center space-x-3">
+                  <span className="text-white font-semibold">{dynamicData.serviceArea.engineeringMMG}</span>
+                  <Button size="sm" className="h-8 w-8 p-0 bg-white text-gray-800 hover:bg-gray-100">
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -182,34 +243,46 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
       case "mitra":
         return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Mitra Name:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.mitraName}</span>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Mitra Name:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.mitraName}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Mitra ID:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.mitraId}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Mitra ID:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.mitraId}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Type:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.type}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Type:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.type}</span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.status}</span>
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.status}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Area Coverage:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.areaCoverage}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Area Coverage:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.areaCoverage}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Performance:</span>
-                  <span className="text-white font-medium">{dynamicData.mitra.performance}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Performance:</span>
+                    <span className="text-white font-semibold">{dynamicData.mitra.performance}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -218,75 +291,130 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
       case "update-lapangan":
         return (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Hasil HD (DP/MG):</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.hasilHD}</span>
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Hasil HD:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.hasilHD}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Keterangan HD (DP/MG):</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.keteranganHD}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Keterangan HD:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganHD}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Sub/Tipe Mitra:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.subTipeMitra}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.subTipeMitra}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">PIC:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.pic}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">PIC:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.pic}</span>
+                  </div>
+                </div>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status UC:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusUC}</span>
+                  </div>
+                </div>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Keterangan UC:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganUC}</span>
+                  </div>
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status UC:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.statusUC}</span>
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status Blok:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusBlok}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Keterangan UC:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.keteranganUC}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status DC:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusDC}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status Blok:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.statusBlok}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status WPRO:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusWPRO}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status D&C:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.statusDC}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Status MALUA:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusMALUA}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300 text-sm">Status WPRO:</span>
-                  <span className="text-white font-medium">{dynamicData.updateLapangan.statusWPRO}</span>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Umur:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.umur}</span>
+                  </div>
+                </div>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300 text-sm font-medium">Keterangan MALUA:</span>
+                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganMALUA}</span>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="border-t border-gray-600 pt-4">
-              <h4 className="text-white font-medium mb-3">Manajemen Janji</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-300 text-sm">Status MALUA:</span>
-                    <span className="text-white font-medium">{dynamicData.updateLapangan.statusMALUA}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300 text-sm">Umur:</span>
-                    <span className="text-white font-medium">{dynamicData.updateLapangan.umur}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300 text-sm">Keterangan MALUA:</span>
-                    <span className="text-white font-medium">{dynamicData.updateLapangan.keteranganMALUA}</span>
-                  </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Status MMG:</span>
+                  <span className="text-white font-semibold">{dynamicData.updateLapangan.statusMMG}</span>
                 </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-300 text-sm">Status MMG:</span>
-                    <span className="text-white font-medium">{dynamicData.updateLapangan.statusMMG}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-300 text-sm">Tanggal PS:</span>
-                    <span className="text-white font-medium">{dynamicData.updateLapangan.tanggalPS}</span>
-                  </div>
+              </div>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Tanggal PS:</span>
+                  <span className="text-white font-semibold">{dynamicData.updateLapangan.tanggalPS}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case "manja":
+        return (
+          <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
+                  <span className="text-white font-semibold">{dynamicData.manja.subTipeMitra}</span>
+                </div>
+              </div>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Keterangan MALUA:</span>
+                  <span className="text-white font-semibold">{dynamicData.manja.keteranganMALUA}</span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Status MMG:</span>
+                  <span className="text-white font-semibold">{dynamicData.manja.statusMMG}</span>
+                </div>
+              </div>
+              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300 text-sm font-medium">Tanggal PS:</span>
+                  <span className="text-white font-semibold">{dynamicData.manja.tanggalPS}</span>
                 </div>
               </div>
             </div>
@@ -300,24 +428,24 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[#1e293b] rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+      <div className="bg-[#1e293b] rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden shadow-2xl border border-[#475569]">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-600">
+        <div className="flex items-center justify-between p-6 border-b border-[#475569] bg-[#0f172a]">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold text-white">
-              {orderData?.orderId || "AO-00250626041731268866500"}
+              {orderData?.orderId || "AD-60250828041731268865d0"}
             </h2>
-            <Badge className="bg-green-600 text-white">COMPLETE</Badge>
+            <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-medium">COMPLETE</Badge>
           </div>
           <div className="flex items-center space-x-3">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569]">
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
             <Button
               onClick={onClose}
               variant="ghost"
-              className="text-gray-400 hover:text-white"
+              className="text-gray-400 hover:text-white hover:bg-[#334155]"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -327,19 +455,19 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
         {/* Content */}
         <div className="flex h-[calc(90vh-120px)]">
           {/* Left Panel */}
-          <div className="w-80 bg-[#334155] p-6 border-r border-gray-600">
-            <div className="space-y-4">
+          <div className="w-80 bg-[#334155] p-6 border-r border-[#475569]">
+            <div className="space-y-6">
               <div className="text-center">
                 <h3 className="text-white font-semibold text-lg">DIGIPOS</h3>
               </div>
-              <div className="space-y-3">
-                <div>
-                  <span className="text-gray-300 text-sm">Order Created:</span>
-                  <p className="text-white font-medium">{new Date().toLocaleString('id-ID')}</p>
+              <div className="space-y-4">
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <span className="text-gray-300 text-sm font-medium">Order Created:</span>
+                  <p className="text-white font-semibold mt-1">{new Date().toLocaleString('id-ID')}</p>
                 </div>
-                <div>
-                  <span className="text-gray-300 text-sm">Work Order:</span>
-                  <p className="text-white font-medium">WO-{Math.floor(Math.random() * 999999999)}</p>
+                <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+                  <span className="text-gray-300 text-sm font-medium">Work Order:</span>
+                  <p className="text-white font-semibold mt-1">WO-{Math.floor(Math.random() * 999999999)}</p>
                 </div>
               </div>
             </div>
@@ -348,14 +476,14 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
           {/* Right Panel */}
           <div className="flex-1 flex flex-col">
             {/* Tabs */}
-            <div className="flex border-b border-gray-600">
+            <div className="flex border-b border-[#475569] bg-[#0f172a]">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-3 text-sm font-medium transition-colors ${
+                  className={`px-6 py-3 text-sm font-medium transition-all duration-200 ${
                     activeTab === tab.id
-                      ? "text-blue-400 border-b-2 border-blue-400 bg-[#334155]"
+                      ? "text-white bg-blue-600 border-b-2 border-blue-600"
                       : "text-gray-400 hover:text-white hover:bg-[#334155]"
                   }`}
                 >
@@ -365,7 +493,7 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
             </div>
 
             {/* Tab Content */}
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-6 overflow-y-auto bg-[#1e293b]">
               {renderDetailContent()}
             </div>
           </div>

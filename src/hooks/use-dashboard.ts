@@ -375,7 +375,6 @@ export function useDashboard() {
     })
 
     const rows = csvData.rows
-    const totalWorkOrders = rows.length
 
     // Use the same column mapping logic as laporan
     const columnMapping = createColumnMapping(csvData.headers)
@@ -452,13 +451,8 @@ export function useDashboard() {
       // Create a map to count occurrences of each unique status value
       const statusCounts = new Map<string, number>()
       
-      workingRows.forEach((row, index) => {
+      workingRows.forEach((row) => {
         const status = row[columnMapping.statusIndex]?.trim() || ''
-        
-        // Log first few rows for debugging
-        if (index < 5) {
-          console.log(`Row ${index + 1} STATUS_BIMA: "${status}"`)
-        }
         
         if (status) {
           // Count each unique status value
@@ -513,16 +507,16 @@ export function useDashboard() {
       })
     } else {
       console.warn("Dashboard: STATUS_BIMA column not found, using fallback calculation")
-      // If no status column, distribute based on row index for variety
-      workingRows.forEach((row, index) => {
-        if (index % 3 === 0) {
-          completeCount++
-        } else if (index % 3 === 1) {
-          workFailCount++
-        } else {
-          canclWorkCount++
-        }
-      })
+             // If no status column, distribute based on row index for variety
+       workingRows.forEach((_, index) => {
+         if (index % 3 === 0) {
+           completeCount++
+         } else if (index % 3 === 1) {
+           workFailCount++
+         } else {
+           canclWorkCount++
+         }
+       })
     }
 
     // Ensure we have some variety in the data
@@ -588,11 +582,8 @@ export function useDashboard() {
                  console.warn(`Row ${index + 1}: Invalid date "${dateValue}"`)
                }
              }
-           } catch (error) {
-             // Handle date parsing errors
-             if (index < 5) {
-               console.warn(`Row ${index + 1}: Failed to parse date "${dateValue}":`, error)
-             }
+           } catch {
+             // Handle date parsing errors silently
            }
          } else {
            // Log empty date values
@@ -622,7 +613,7 @@ export function useDashboard() {
                if (!isNaN(date.getTime())) {
                  return `${dateValue} -> Month ${date.getMonth() + 1}`
                }
-             } catch (error) {
+             } catch {
                return `${dateValue} -> Parse Error`
              }
            }
@@ -685,9 +676,8 @@ export function useDashboard() {
                  dailyCounts.set(normalizedDay, currentCount + 1)
                }
              }
-           } catch (error) {
-             // Handle date parsing errors
-             console.warn("Failed to parse date:", dateValue)
+           } catch {
+             // Handle date parsing errors silently
            }
          }
        })

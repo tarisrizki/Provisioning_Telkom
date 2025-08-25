@@ -1,6 +1,6 @@
 "use client"
 
-import { Bell, Search } from "lucide-react"
+import { Search } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { UserAvatar } from "@/components/user-avatar"
 

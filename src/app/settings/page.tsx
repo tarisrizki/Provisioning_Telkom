@@ -32,10 +32,11 @@ export default function SettingsPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-4 mb-6">
+        <UserAvatar />
         <div>
-          <h1 className="text-3xl font-bold text-white">Manage Account</h1>
-          <p className="text-gray-400 mt-2">Update your profile information and settings</p>
+          <h2 className="text-xl font-semibold text-white">Manage Account</h2>
+          <p className="text-gray-400">Update your profile information</p>
         </div>
       </div>
 
@@ -48,10 +49,7 @@ export default function SettingsPage() {
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
-                <UserAvatar 
-                  className="w-32 h-32"
-                  fallback="TR"
-                />
+                <UserAvatar />
               </div>
             </div>
             <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
