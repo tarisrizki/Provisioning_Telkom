@@ -1,14 +1,13 @@
 "use client"
 
 import { 
-  BarChart3, 
-  FileText, 
   Home, 
+  BarChart3, 
+  Users, 
   Settings, 
-  Upload,
-  User,
-  LogOut,
-  FileSpreadsheet
+  FileText, 
+  Database,
+  Upload as UploadIcon
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -28,17 +27,17 @@ import {
 const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: Home },
   { title: "Monitoring", href: "/monitoring", icon: BarChart3 },
-  { title: "Format Order", href: "/upload", icon: FileSpreadsheet },
+  { title: "Format Order", href: "/upload", icon: UploadIcon },
   { title: "Report", href: "/laporan", icon: FileText },
 ]
 
 const userNav = [
-  { title: "User login", href: "/login", icon: User },
+  { title: "User login", href: "/login", icon: Users },
 ]
 
 const utilityNav = [
   { title: "Settings", href: "/settings", icon: Settings },
-  { title: "Log out", href: "/logout", icon: LogOut },
+  { title: "Log out", href: "/logout", icon: Database },
 ]
 
 export function AppSidebar() {

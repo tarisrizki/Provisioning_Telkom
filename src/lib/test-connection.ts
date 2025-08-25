@@ -22,7 +22,7 @@ export async function testSupabaseConnection() {
     console.log('✓ Supabase client created successfully')
     
     // Test connection by making a simple query
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('work_orders')
       .select('count', { count: 'exact', head: true })
     

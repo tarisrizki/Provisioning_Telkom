@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown, User, Key, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 
 interface UserAvatarProps {
   name?: string
@@ -56,9 +57,11 @@ export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: Use
         {/* Avatar Image */}
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-400 to-purple-500 flex items-center justify-center text-white font-semibold text-lg">
           {avatarUrl ? (
-            <img 
+            <Image 
               src={avatarUrl} 
               alt={name} 
+              width={40}
+              height={40}
               className="w-full h-full rounded-full object-cover"
             />
           ) : (

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { testSupabaseConnection } from '@/lib/test-connection'
 import { DatabaseService } from '@/lib/database'
 
@@ -8,6 +8,7 @@ interface TestResult {
   success: boolean
   message?: string
   error?: string
+  timestamp?: string
 }
 
 interface DataStats {
@@ -38,28 +39,30 @@ export default function TestConnectionPage() {
   const [dataStats, setDataStats] = useState<DataStats | null>(null)
   const [integrityReport, setIntegrityReport] = useState<IntegrityReport | null>(null)
   const [uploadHistory, setUploadHistory] = useState<UploadRecord[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  const runTest = async () => {
+  const runTest = useCallback(async () => {
     setIsLoading(true)
+    setError(null)
+    
     try {
       const result = await testSupabaseConnection()
-      setTestResult(result)
       
-      // Get additional data if connection is successful
       if (result.success) {
-        await getDataStats()
-        await getIntegrityReport()
-        await getUploadHistory()
+        setTestResult({
+          success: true,
+          message: result.message || 'Connection test successful',
+          timestamp: new Date().toISOString()
+        })
+      } else {
+        setError(result.error || 'Connection test failed')
       }
-    } catch (error) {
-      setTestResult({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      })
+    } catch (err) {
+      setError('An unexpected error occurred')
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   const getDataStats = async () => {
     try {
@@ -103,9 +106,8 @@ export default function TestConnectionPage() {
   }
 
   useEffect(() => {
-    // Auto-run test on page load
     runTest()
-  }, [])
+  }, [runTest])
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">

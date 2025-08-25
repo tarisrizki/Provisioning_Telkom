@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { DatabaseService } from "@/lib/database"
 
 interface WorkOrderData {
@@ -138,12 +138,6 @@ export function useLaporan() {
     }
   }, [])
 
-  // Apply filters with memoization
-  const applyFilters = useCallback(() => {
-    if (!csvData) return
-    applyFiltersWithData(csvData)
-  }, [csvData])
-
   // Apply filters with specific data
   const applyFiltersWithData = useCallback((data: FilteredData) => {
     console.log("Laporan: Applying filters to data", {
@@ -192,6 +186,12 @@ export function useLaporan() {
     setVisibleRows(50)
   }, [aoFilter, channelFilter, dateFilter, branchFilter])
 
+  // Apply filters with memoization
+  const applyFilters = useCallback(() => {
+    if (!csvData) return
+    applyFiltersWithData(csvData)
+  }, [csvData, applyFiltersWithData])
+
   // Reset filters
   const resetFilters = useCallback(() => {
     setDateFilter("")
@@ -201,7 +201,7 @@ export function useLaporan() {
     if (csvData) {
       applyFiltersWithData(csvData)
     }
-  }, [csvData, applyFiltersWithData])
+  }, [applyFiltersWithData])
 
   // Handle infinite scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
