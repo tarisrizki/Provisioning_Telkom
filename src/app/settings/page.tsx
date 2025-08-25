@@ -1,75 +1,166 @@
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { UserAvatar } from "@/components/user-avatar"
+
 export default function SettingsPage() {
+  const [profileData, setProfileData] = useState({
+    firstName: "Taris",
+    lastName: "Rizki",
+    email: "bo.mraz@yahoo.com",
+    phoneNumber: "+62 8134 1945 1708",
+    dateOfBirth: "11-03-1994",
+    gender: "Male"
+  })
+
+  const handleInputChange = (field: string, value: string) => {
+    setProfileData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const handleSave = () => {
+    // Handle save logic here
+    console.log("Profile data saved:", profileData)
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-gray-400">
-          Configure your provisioning system preferences and account settings.
-        </p>
+    <div className="flex-1 space-y-6 p-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-white">Manage Account</h1>
+          <p className="text-gray-400 mt-2">Update your profile information and settings</p>
+        </div>
       </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">Account Settings</h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">Display Name</label>
-              <input 
-                type="text" 
-                className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white placeholder-gray-500"
-                placeholder="Enter your display name"
+
+      <Card className="bg-[#334155] border-0">
+        <CardHeader className="text-center pb-8">
+          <CardTitle className="text-white text-2xl font-semibold">User Profile</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          {/* Profile Picture Section */}
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative">
+              <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-600 flex items-center justify-center">
+                <UserAvatar 
+                  className="w-32 h-32"
+                  fallback="TR"
+                />
+              </div>
+            </div>
+            <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
+              Edit Photo
+            </button>
+          </div>
+
+          {/* Form Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* First Name */}
+            <div className="space-y-2">
+              <Label htmlFor="firstName" className="text-gray-300 text-sm font-medium">
+                First Name
+              </Label>
+              <Input
+                id="firstName"
+                value={profileData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Enter your first name"
               />
             </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Email</label>
-              <input 
-                type="email" 
-                className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded-lg text-white placeholder-gray-500"
+
+            {/* Last Name */}
+            <div className="space-y-2">
+              <Label htmlFor="lastName" className="text-gray-300 text-sm font-medium">
+                Last Name
+              </Label>
+              <Input
+                id="lastName"
+                value={profileData.lastName}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Enter your last name"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-gray-300 text-sm font-medium">
+                Your email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={profileData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
                 placeholder="Enter your email"
               />
             </div>
-            <button className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-              Save Changes
-            </button>
+
+            {/* Phone Number */}
+            <div className="space-y-2">
+              <Label htmlFor="phoneNumber" className="text-gray-300 text-sm font-medium">
+                Phone Number
+              </Label>
+              <Input
+                id="phoneNumber"
+                value={profileData.phoneNumber}
+                onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+                placeholder="Enter your phone number"
+              />
+            </div>
+
+            {/* Date of Birth */}
+            <div className="space-y-2">
+              <Label htmlFor="dateOfBirth" className="text-gray-300 text-sm font-medium">
+                Date of Birth
+              </Label>
+              <Input
+                id="dateOfBirth"
+                type="date"
+                value={profileData.dateOfBirth}
+                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Gender */}
+            <div className="space-y-2">
+              <Label htmlFor="gender" className="text-gray-300 text-sm font-medium">
+                Gender
+              </Label>
+              <Select value={profileData.gender} onValueChange={(value) => handleInputChange("gender", value)}>
+                <SelectTrigger className="bg-gray-700 border-gray-600 text-white focus:border-blue-500 focus:ring-blue-500">
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-700 border-gray-600">
+                  <SelectItem value="Male" className="text-white hover:bg-gray-600">Male</SelectItem>
+                  <SelectItem value="Female" className="text-white hover:bg-gray-600">Female</SelectItem>
+                  <SelectItem value="Other" className="text-white hover:bg-gray-600">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
-        
-        <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-white mb-4">System Preferences</h3>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-300">Dark Theme</span>
-              <div className="w-12 h-6 bg-blue-500 rounded-full relative">
-                <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-300">Notifications</span>
-              <div className="w-12 h-6 bg-gray-600 rounded-full relative">
-                <div className="w-5 h-5 bg-white rounded-full absolute left-0.5 top-0.5"></div>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-gray-300">Auto-save</span>
-              <div className="w-12 h-6 bg-blue-500 rounded-full relative">
-                <div className="w-5 h-5 bg-white rounded-full absolute right-0.5 top-0.5"></div>
-              </div>
-            </div>
+
+          {/* Save Button */}
+          <div className="flex justify-center pt-6">
+            <Button
+              onClick={handleSave}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+            >
+              Save
+            </Button>
           </div>
-        </div>
-      </div>
-      
-      <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white mb-4">Security</h3>
-        <div className="space-y-4">
-          <button className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
-            Change Password
-          </button>
-          <button className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors ml-3">
-            Enable 2FA
-          </button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

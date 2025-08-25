@@ -5,7 +5,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts"
-import { chartConfig } from "@/config/dashboard-data"
 
 interface BIMAStatusData {
   name: string
@@ -28,54 +27,51 @@ export function BIMAStatusChart({ data }: BIMAStatusChartProps) {
   }))
 
   return (
-    <div className="bg-[#1e293b] border border-[#334155] rounded-lg p-6">
-      <h3 className="text-lg font-semibold text-white mb-6">Distribusi Status BIMA</h3>
-      <div className="flex items-center justify-center">
-        <div className="w-48 h-48">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={40}
-                outerRadius={80}
-                paddingAngle={2}
-                dataKey="value"
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip 
-                contentStyle={chartConfig.tooltipStyle}
-                formatter={(value: number, name: string) => [
-                  `${value} work orders (${Math.round((value / total) * 100)}%)`,
-                  name
-                ]}
-              />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="ml-8 space-y-3">
-          {formattedData.map((item, index) => (
-            <div key={index} className="flex items-center space-x-3">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: item.color }}
-              ></div>
-              <span className="text-white text-sm">{item.name}</span>
-              <span className="text-gray-400 text-sm">
-                {item.value} ({item.percentage}%)
-              </span>
-            </div>
-          ))}
-          <div className="pt-2 border-t border-gray-600">
-            <span className="text-white text-sm font-medium">
-              Total: {total} work orders
+    <div className="flex items-center justify-center">
+      <div className="w-48 h-48">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={90}
+              paddingAngle={3}
+              dataKey="value"
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: '#1f2937',
+                border: '1px solid #374151',
+                borderRadius: '8px',
+                color: '#fff'
+              }}
+              formatter={(value: number, name: string) => [
+                `${value} orders (${Math.round((value / total) * 100)}%)`,
+                name
+              ]}
+            />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="ml-8 space-y-3">
+        {formattedData.map((item, index) => (
+          <div key={index} className="flex items-center space-x-3">
+            <div 
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: item.color }}
+            ></div>
+            <span className="text-white text-sm">{item.name}</span>
+            <span className="text-gray-400 text-sm">
+              {item.percentage}%
             </span>
           </div>
-        </div>
+        ))}
       </div>
     </div>
   )
