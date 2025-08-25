@@ -5,7 +5,7 @@ import { UserAvatar } from "@/components/user-avatar"
 
 export function TopBar() {
   return (
-    <div className="h-16 bg-[#282c34] border-b border-[#404552] px-6 flex items-center w-full">
+    <div className="h-16 bg-[#282c34]  px-6 flex items-center w-full">
       {/* Brand/Logo Section */}
       <div className="flex items-center space-x-4">
         {/* Removed SidebarTrigger */}

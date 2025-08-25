@@ -56,28 +56,35 @@ export default function DashboardPage() {
     <div className="space-y-6">     
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
-          title="Total Work Order"
+          title="Total Order"
           value={`${dashboardMetrics.totalWorkOrders.toLocaleString()}`}
           trend={`Dibaca dari database`}
           trendType="up"
           color="green"
         />
         <KPICard
-          title="Avg Provisioning Time"
+          title="Order Complete"
           value={dashboardMetrics.avgProvisioningTime}
           trend={"Up from past week"}
           trendType="up"
           color="green"
         />
         <KPICard
-          title="Success Rate"
+          title="Target Static"
           value={`${dashboardMetrics.successRate}%`}
           trend={"Up from past week"}
           trendType="up"
           color="green"
         />
         <KPICard
-          title="Failure Rate"
+          title="PS/RE"
+          value={`${dashboardMetrics.failureRate}%`}
+          trend={"Down from yesterday"}
+          trendType="down"
+          color="red"
+        />
+         <KPICard
+          title="Target This Month"
           value={`${dashboardMetrics.failureRate}%`}
           trend={"Down from yesterday"}
           trendType="down"

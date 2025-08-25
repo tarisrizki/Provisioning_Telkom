@@ -40,12 +40,12 @@ export function AppSidebar() {
 
   return (
     <div 
-      className="w-64 bg-[#282c34] text-white border-r border-[#404552] flex flex-col"
+      className="w-64 bg-[#282c34] text-white flex flex-col"
       style={{ backgroundColor: '#282c34' }}
     >
       {/* Header */}
       <div 
-        className="border-b border-[#404552] p-6"
+        className=" p-6"
         style={{ backgroundColor: '#282c34' }}
       >
         <div className="text-xl font-bold">
