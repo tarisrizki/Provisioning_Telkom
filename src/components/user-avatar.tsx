@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react"
 import { ChevronDown, User, Key, LogOut } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface UserAvatarProps {
   name?: string
@@ -12,6 +13,7 @@ interface UserAvatarProps {
 export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: UserAvatarProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const router = useRouter()
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -33,8 +35,8 @@ export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: Use
   }
 
   const handleManageAccount = () => {
-    // Add manage account logic here
-    console.log('Opening manage account...')
+    // Navigate to settings/profile page
+    router.push('/settings')
     setIsDropdownOpen(false)
   }
 
