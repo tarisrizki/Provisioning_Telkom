@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Progress } from "@/components/ui/progress"
-import { ChevronDown, Download, FileText, Users, Settings, Activity, BarChart3, RefreshCw } from "lucide-react"
+import { ChevronDown, Download, FileText, Users, Settings, Activity, BarChart3, RefreshCw, Database, Upload, CheckCircle } from "lucide-react"
 import { DetailModal } from "@/components/upload/detail-modal"
 
 interface WorkOrderData {
@@ -754,71 +754,112 @@ export default function FormatOrderPage() {
         )}
 
         {selectedTab === "Update lapaorgan" && (
-          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
+          <Card className="bg-gradient-to-br from-[#1e293b] via-[#2d3748] to-[#334155] border-[#475569] shadow-2xl hover:shadow-purple-500/10 transition-all duration-300">
             <CardHeader className="pb-4">
               <CardTitle className="text-white flex items-center space-x-3">
-                <div className="p-2 bg-red-500/20 rounded-lg">
-                  <Activity className="h-5 w-5 text-red-400" />
+                <div className="p-3 bg-gradient-to-br from-purple-500/20 to-purple-600/20 rounded-xl border border-purple-500/20">
+                  <BarChart3 className="h-6 w-6 text-purple-400" />
                 </div>
-                <span className="text-xl font-semibold">Analisis</span>
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-purple-300 bg-clip-text text-transparent">Analisis</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Total AO */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-300 text-sm font-medium">Total AO</span>
-                  <span className="text-white font-semibold text-lg">10,089</span>
-                </div>
-              </div>
-
-              {/* Status BIMA */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Status BIMA</span>
-                  <span className="text-white font-semibold text-lg">10,089</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="bg-green-600 px-3 py-1 rounded text-white text-xs font-medium shadow-md">COMPLETE</div>
-                    <span className="text-white font-semibold text-lg">80</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="bg-red-600 px-3 py-1 rounded text-white text-xs font-medium shadow-md">WORK FAIL</div>
-                    <span className="text-white font-semibold text-lg">57</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="bg-green-600 px-3 py-1 rounded text-white text-xs font-medium shadow-md">COMPLETE</div>
-                    <span className="text-white font-semibold text-lg">109</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Update Lapangan */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Update Lapangan</span>
-                  <span className="text-white font-semibold text-lg">10,089</span>
-                </div>
-                <div className="space-y-3">
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-500 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+            <CardContent className="space-y-8">
+              {/* Grid Layout for Analysis Cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Left Column - Total AO and Update Lapangan */}
+                <div className="space-y-6">
+                  {/* Total AO */}
+                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/20">
+                        <Database className="h-6 w-6 text-blue-400" />
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
-                        ORBIT
+                      <span className="text-xl font-bold bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">Total AO</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-300 text-base font-medium">Total AO</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                        <span className="text-white font-bold text-2xl">10,089</span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+
+                  {/* Update Lapangan */}
+                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-3 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl border border-green-500/20">
+                        <Upload className="h-6 w-6 text-green-400" />
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
-                        DIGISHOP
+                      <span className="text-xl font-bold bg-gradient-to-r from-green-400 to-green-300 bg-clip-text text-transparent">Update Lapangan</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-6">
+                      <span className="text-gray-300 text-base font-medium">Progress Update</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span className="text-white font-bold text-2xl">10,089</span>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="relative group">
+                        <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                          <div className="bg-gradient-to-r from-green-500 to-green-400 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-green-400 hover:to-green-300 shadow-lg" style={{width: '26%'}}>
+                            <span className="text-white text-sm font-bold">26</span>
+                          </div>
+                          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
+                            ORBIT
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative group">
+                        <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                          <div className="bg-gradient-to-r from-green-400 to-green-300 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-green-300 hover:to-green-200 shadow-lg" style={{width: '26%'}}>
+                            <span className="text-white text-sm font-bold">26</span>
+                          </div>
+                          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
+                            DIGISHOP
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column - Status BIMA */}
+                <div>
+                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner h-full">
+                    <div className="flex items-center space-x-3 mb-4">
+                      <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 rounded-xl border border-yellow-500/20">
+                        <CheckCircle className="h-6 w-6 text-yellow-400" />
+                      </div>
+                      <span className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-yellow-300 bg-clip-text text-transparent">Status BIMA</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-6">
+                      <span className="text-gray-300 text-base font-medium">Status Overview</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                        <span className="text-white font-bold text-2xl">10,089</span>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#1a2332] to-[#2d3748] rounded-lg border border-[#475569] hover:border-green-500/30 transition-all duration-300">
+                        <div className="bg-gradient-to-r from-green-600 to-green-500 px-4 py-2 rounded-lg text-white text-sm font-bold shadow-lg hover:shadow-green-500/25 transition-all duration-300">
+                          COMPLETE
+                        </div>
+                        <span className="text-white font-bold text-xl">80</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#1a2332] to-[#2d3748] rounded-lg border border-[#475569] hover:border-red-500/30 transition-all duration-300">
+                        <div className="bg-gradient-to-r from-red-600 to-red-500 px-4 py-2 rounded-lg text-white text-sm font-bold shadow-lg hover:shadow-red-500/25 transition-all duration-300">
+                          WORK FAIL
+                        </div>
+                        <span className="text-white font-bold text-xl">57</span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gradient-to-r from-[#1a2332] to-[#2d3748] rounded-lg border border-[#475569] hover:border-green-500/30 transition-all duration-300">
+                        <div className="bg-gradient-to-r from-green-600 to-green-500 px-4 py-2 rounded-lg text-white text-sm font-bold shadow-lg hover:shadow-green-500/25 transition-all duration-300">
+                          COMPLETE
+                        </div>
+                        <span className="text-white font-bold text-xl">109</span>
                       </div>
                     </div>
                   </div>
@@ -826,40 +867,48 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Symptom */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Symptom</span>
-                  <span className="text-white font-semibold text-lg">10,089</span>
+              <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Activity className="h-5 w-5 text-blue-400" />
+                    </div>
+                    <span className="text-gray-300 text-lg font-semibold">Symptom</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-white font-bold text-xl">10,089</span>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-500 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-400 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-blue-400 hover:to-blue-300 shadow-lg" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-bold">26</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <span className="text-white text-sm font-medium">RO</span>
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
+                        <span className="text-white text-sm font-bold">RO</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-blue-400 to-blue-300 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-blue-300 hover:to-blue-200 shadow-lg" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-bold">26</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
                         MRO
                       </div>
                     </div>
                   </div>
 
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-300 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '85%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-blue-300 to-blue-200 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-blue-200 hover:to-blue-100 shadow-lg" style={{width: '85%'}}>
+                        <span className="text-slate-800 text-sm font-bold">85</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
                         LPS
                       </div>
                     </div>
@@ -868,40 +917,48 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Tindak Lanjut HD OPLANG */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Tindak Lanjut HD OPLANG</span>
-                  <span className="text-white font-semibold text-lg">10,089</span>
+              <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-indigo-500/20 rounded-lg">
+                      <FileText className="h-5 w-5 text-indigo-400" />
+                    </div>
+                    <span className="text-gray-300 text-lg font-semibold">Tindak Lanjut HD OPLANG</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></div>
+                    <span className="text-white font-bold text-xl">10,089</span>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-500 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                <div className="space-y-4">
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-indigo-500 to-indigo-400 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-indigo-400 hover:to-indigo-300 shadow-lg" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-bold">26</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
                         RO
                       </div>
                     </div>
                   </div>
                   
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '55%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-indigo-400 to-indigo-300 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-indigo-300 hover:to-indigo-200 shadow-lg" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-bold">26</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
                         MRO
                       </div>
                     </div>
                   </div>
 
-                  <div className="relative">
-                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '85%'}}>
-                        <span className="text-white text-sm font-medium">26</span>
+                  <div className="relative group">
+                    <div className="w-full bg-gradient-to-r from-[#1e293b] to-[#2d3748] rounded-xl h-10 relative overflow-hidden border border-[#475569] shadow-inner">
+                      <div className="bg-gradient-to-r from-indigo-300 to-indigo-200 h-10 rounded-xl absolute left-0 top-0 flex items-center justify-start pl-4 transition-all duration-500 hover:from-indigo-200 hover:to-indigo-100 shadow-lg" style={{width: '85%'}}>
+                        <span className="text-slate-800 text-sm font-bold">85</span>
                       </div>
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                      <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-semibold">
                         LPS
                       </div>
                     </div>
@@ -1002,17 +1059,6 @@ export default function FormatOrderPage() {
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Update Button */}
-              <div className="flex justify-center">
-                <Button 
-                  onClick={updateManjaData}
-                  className="bg-gradient-to-r from-purple-600 to-purple-700 text-white hover:from-purple-700 hover:to-purple-800 transition-all duration-200 shadow-lg"
-                >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Update Data
-                </Button>
               </div>
             </CardContent>
           </Card>
