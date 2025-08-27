@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Download, FileText, Users, Activity, BarChart3, RefreshCw, Database, Upload, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
-import { DetailModal } from "@/components/upload/detail-modal"
+import { DetailModal } from "@/components/format-order/detail-modal"
 import { useTabData } from "@/hooks/use-format-order"
 import { useAnalysisData } from "@/hooks/use-analysis-data"
 

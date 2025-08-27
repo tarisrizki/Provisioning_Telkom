@@ -114,7 +114,7 @@ export default function LaporanPage() {
             No data found in database. Please upload a CSV file first to view reports.
           </p>
           <a 
-            href="/upload" 
+            href="/format-order" 
             className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Upload className="h-5 w-5 mr-2" />

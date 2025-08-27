@@ -5,10 +5,30 @@ A comprehensive application for managing Telkom provisioning work orders with CS
 ## Features
 
 - **CSV Data Upload**: Upload and process large CSV files with comprehensive data mapping
-- **Dashboard Analytics**: Real-time monitoring of work order statistics and performance metrics
+- **Dashboard Analytics**: Real-time monitoring of work order statistics and performance metrics with live Supabase data
 - **Data Management**: Complete CRUD operations for work orders and upload history
 - **Performance Optimization**: Streaming CSV parsing and batch database operations
 - **Responsive Design**: Modern UI with mobile-friendly interface
+- **Real-time BIMA Status**: Live distribution charts from Supabase database
+
+## Environment Setup
+
+Create a `.env.local` file in the root directory with your Supabase credentials:
+
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+### Supabase Integration
+
+The application now connects directly to Supabase for real-time data:
+
+- **BIMA Status Distribution**: Automatically fetches and displays status distribution from `format_order` table
+- **Real-time Updates**: Charts update automatically when data changes
+- **Error Handling**: Comprehensive error states and loading indicators
+- **Performance**: Optimized queries for large datasets (>10,000 records)
 
 ## Database Structure
 

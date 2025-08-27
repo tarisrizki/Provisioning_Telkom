@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { createColumnMapping } from "@/lib/utils"
-import { DatabaseService } from "@/lib/database"
+import { supabase } from "@/lib/supabase"
 
 interface CSVData {
   headers: string[]
@@ -78,56 +78,53 @@ export function useDashboard() {
       // Always try to get fresh data from Supabase first
       console.log("Dashboard: Fetching fresh data from work_orders table...")
       
-      // Get all work orders from database (same logic as laporan)
-      const result = await DatabaseService.getWorkOrders({
-        limit: 10000, // Load up to 10,000 records
-        offset: 0
+      // Get all format orders from database
+      const { data: formatOrders, error, count } = await supabase
+        .from('format_order')
+        .select('*', { count: 'exact' })
+        .limit(10000)
+      
+      console.log("Dashboard: Raw result from Supabase:", {
+        hasData: !!formatOrders,
+        dataLength: formatOrders?.length || 0,
+        count: count,
+        error: error
       })
       
-      console.log("Dashboard: Raw result from DatabaseService:", {
-        success: result.success,
-        hasData: !!result.data,
-        dataLength: result.data?.length || 0,
-        count: result.count,
-        error: result.error
-      })
-      
-      if (result.success && result.data && result.data.length > 0) {
-        // Define the specific columns we want to display (same as laporan)
+      if (!error && formatOrders && formatOrders.length > 0) {
+        // Define the specific columns we want to display
         const headers = [
-          "AO", 
+          "ORDER_ID", 
           "CHANNEL", 
           "DATE_CREATED", 
           "WORKORDER", 
-          "HSA", 
+          "SERVICE_AREA", 
           "BRANCH", 
           "UPDATE_LAPANGAN", 
           "SYMPTOM", 
           "TINJUT_HD_OPLANG", 
-          "KATEGORI_MANJA", 
           "STATUS_BIMA"
         ]
         
-        // Convert work orders to table format (same as laporan)
-        const rows = result.data.map(wo => [
-          wo.ao || "",
-          wo.channel || "",
-          wo.date_created || "",
-          wo.workorder || "",
-          wo.hsa || "",
-          wo.branch || "",
-          wo.update_lapangan || "",
-          wo.symptom || "",
-          wo.tinjut_hd_oplang || "",
-          wo.kategori_manja || "",
-          wo.status_bima || ""
+        // Convert format orders to table format
+        const rows = formatOrders.map(fo => [
+          fo.order_id || "",
+          fo.channel || "",
+          fo.date_created || "",
+          fo.workorder || "",
+          fo.service_area || "",
+          fo.branch || "",
+          fo.update_lapangan || "",
+          fo.symptom || "",
+          fo.tinjut_hd_oplang || "",
+          fo.status_bima || ""
         ])
         
         const supabaseCSVData = { headers, rows }
         
-        console.log("Dashboard: Data loaded from Supabase (same as laporan)", {
-          totalWorkOrders: result.count || 0,
-          actualRows: result.data.length,
+        console.log("Dashboard: Data loaded from Supabase", {
+          totalWorkOrders: count || 0,
+          actualRows: formatOrders.length,
           headers: headers.length,
           sampleData: {
             firstRow: rows[0],
@@ -135,7 +132,7 @@ export function useDashboard() {
           }
         })
         
-        console.log("Dashboard: First few work orders from Supabase:", result.data.slice(0, 3))
+        console.log("Dashboard: First few format orders from Supabase:", formatOrders.slice(0, 3))
         
         setCsvData(supabaseCSVData)
         setLastUpdate(new Date())
@@ -153,43 +150,46 @@ export function useDashboard() {
       } else {
         console.log("Dashboard: No data found in Supabase database")
         console.log("Dashboard: Result details:", {
-          success: result.success,
-          data: result.data,
-          error: result.error,
-          count: result.count
+          hasData: !!formatOrders,
+          dataLength: formatOrders?.length || 0,
+          error: error,
+          count: count
         })
         
-        // Try to get data directly from laporan hook to see if it works there
-        console.log("Dashboard: Attempting to get data directly...")
+        // Try to get count separately
+        console.log("Dashboard: Attempting to get count separately...")
         try {
-          const directResult = await DatabaseService.getWorkOrdersCount()
-          console.log("Dashboard: Direct count result:", directResult)
+          const { count: totalCount } = await supabase
+            .from('format_order')
+            .select('*', { count: 'exact', head: true })
           
-          if (directResult.success && directResult.count && directResult.count > 0) {
+          console.log("Dashboard: Total count result:", totalCount)
+          
+          if (totalCount && totalCount > 0) {
             console.log("Dashboard: Found data count, trying to fetch actual data...")
-            const actualDataResult = await DatabaseService.getWorkOrders({
-              limit: directResult.count,
-              offset: 0
-            })
+            const { data: actualData, error: actualError } = await supabase
+              .from('format_order')
+              .select('*')
+              .limit(Math.min(totalCount, 10000))
             
-            if (actualDataResult.success && actualDataResult.data && actualDataResult.data.length > 0) {
+            if (!actualError && actualData && actualData.length > 0) {
               console.log("Dashboard: Successfully fetched data on second attempt!")
               
               const headers = [
-                "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-                "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+                "ORDER_ID", "CHANNEL", "DATE_CREATED", "WORKORDER", "SERVICE_AREA", "BRANCH", 
+                "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "STATUS_BIMA"
               ]
               
-              const rows = actualDataResult.data.map(wo => [
-                wo.ao || "", wo.channel || "", wo.date_created || "", wo.workorder || "", wo.hsa || "",
-                wo.branch || "", wo.update_lapangan || "", wo.symptom || "", wo.tinjut_hd_oplang || "",
-                wo.kategori_manja || "", wo.status_bima || ""
+              const rows = actualData.map(fo => [
+                fo.order_id || "", fo.channel || "", fo.date_created || "", fo.workorder || "", fo.service_area || "",
+                fo.branch || "", fo.update_lapangan || "", fo.symptom || "", fo.tinjut_hd_oplang || "",
+                fo.status_bima || ""
               ])
               
               const retryData = { headers, rows }
               console.log("Dashboard: Data loaded on retry:", {
-                totalWorkOrders: actualDataResult.count || 0,
-                actualRows: actualDataResult.data.length,
+                totalWorkOrders: totalCount || 0,
+                actualRows: actualData.length,
                 headers: headers.length
               })
               
@@ -212,44 +212,10 @@ export function useDashboard() {
           console.error("Dashboard: Direct count failed:", directError)
         }
         
-        // If still no data from Supabase, create sample data for testing
-        console.log("Dashboard: Creating sample data for testing...")
-        const sampleHeaders = [
-          "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-          "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
-        ]
-        
-        const sampleRows = Array.from({ length: 30 }, (_, index) => [
-          `AO_${String(index + 1).padStart(3, '0')}`,
-          `CHANNEL_${String.fromCharCode(65 + (index % 5))}`,
-          new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          `WO_${String(index + 1).padStart(4, '0')}`,
-          `HSA_${String(index + 1).padStart(3, '0')}`,
-          `BRANCH_${String.fromCharCode(65 + (index % 8))}`,
-          ["Kendala Pelanggan", "Kendala Teknik (UNSC)", "Salah Segmen", "Force Majuere"][index % 4],
-          `Symptom_${index + 1}`,
-          `Tinjut_${(index % 5) + 1}`,
-          ["lewat manja", "dalam manja", "normal"][index % 3],
-          ["COMPLETE", "WORKFAIL", "CANCLWORK", "PROGRESS"][index % 4]
-        ])
-        
-        const sampleData = { headers: sampleHeaders, rows: sampleRows }
-        console.log("Dashboard: Sample data created:", {
-          headers: sampleData.headers.length,
-          rows: sampleData.rows.length
-        })
-        
-        setCsvData(sampleData)
+        // No data available from Supabase
+        console.log("Dashboard: No data available from Supabase")
+        setCsvData({ headers: [], rows: [] })
         setLastUpdate(new Date())
-        lastKnownDataRef.current = JSON.stringify(sampleData)
-        
-        // Store sample data in localStorage
-        try {
-          localStorage.setItem('dashboardData', JSON.stringify(sampleData))
-          console.log("Dashboard: Sample data saved to localStorage")
-        } catch (storageError) {
-          console.warn("Dashboard: Failed to save sample data to localStorage:", storageError)
-        }
       }
     } catch (error) {
       console.error("Dashboard: Failed to load data from Supabase:", error)
@@ -261,21 +227,20 @@ export function useDashboard() {
       // If Supabase fails, create sample data so dashboard isn't empty
       console.log("Dashboard: Creating emergency sample data...")
       const emergencyHeaders = [
-        "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-        "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+        "ORDER_ID", "CHANNEL", "DATE_CREATED", "WORKORDER", "SERVICE_AREA", "BRANCH", 
+        "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "STATUS_BIMA"
       ]
       
       const emergencyRows = Array.from({ length: 30 }, (_, index) => [
-        `AO_${String(index + 1).padStart(3, '0')}`,
+        `ORDER_${String(index + 1).padStart(3, '0')}`,
         `CHANNEL_${String.fromCharCode(65 + (index % 5))}`,
         new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         `WO_${String(index + 1).padStart(4, '0')}`,
-        `HSA_${String(index + 1).padStart(3, '0')}`,
+        `SERVICE_${String.fromCharCode(65 + (index % 8))}`,
         `BRANCH_${String.fromCharCode(65 + (index % 8))}`,
         ["Kendala Pelanggan", "Kendala Teknik (UNSC)", "Salah Segmen", "Force Majuere"][index % 4],
         `Symptom_${index + 1}`,
         `Tinjut_${(index % 5) + 1}`,
-        ["lewat manja", "dalam manja", "normal"][index % 3],
         ["COMPLETE", "WORKFAIL", "CANCLWORK", "PROGRESS"][index % 4]
       ])
       
@@ -382,7 +347,7 @@ export function useDashboard() {
     console.log("Dashboard: Column mapping from utils", columnMapping)
 
     // Filter data based on selected month
-    const filteredRows = rows.filter((row, index) => {
+    const filteredRows = rows.filter((row) => {
       if (columnMapping.dateIndex >= 0) {
         const dateValue = row[columnMapping.dateIndex]?.trim() || ''
         if (dateValue) {
@@ -397,7 +362,7 @@ export function useDashboard() {
               const rowMonth = monthNames[date.getMonth()]
               return rowMonth === selectedMonth
             }
-          } catch (error) {
+          } catch {
             // If date parsing fails, try to extract month from string
             const monthNames = [
               "january", "february", "march", "april", "may", "june",
