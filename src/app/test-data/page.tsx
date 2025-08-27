@@ -25,27 +25,8 @@ export default function TestDataPage() {
         // Simulate delay
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        // Mock data
-        const mockData: TestData[] = [
-          {
-            id: "1",
-            name: "Test Connection 1",
-            status: "success",
-            timestamp: new Date().toISOString()
-          },
-          {
-            id: "2", 
-            name: "Test Connection 2",
-            status: "failed",
-            timestamp: new Date().toISOString()
-          },
-          {
-            id: "3",
-            name: "Test Connection 3", 
-            status: "pending",
-            timestamp: new Date().toISOString()
-          }
-        ]
+        // Data will be fetched from Supabase - no mock data
+        const mockData: TestData[] = []
         
         setTestData(mockData)
         setError(null)
@@ -206,16 +187,16 @@ export default function TestDataPage() {
         <CardContent>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm text-gray-400">
-              <span>Last 24 hours: 15 tests</span>
-              <span>Success rate: 87%</span>
+              <span>Last 24 hours: 0 tests</span>
+              <span>Success rate: 0%</span>
             </div>
             <div className="flex items-center justify-between text-sm text-gray-400">
-              <span>Last 7 days: 89 tests</span>
-              <span>Success rate: 92%</span>
+              <span>Last 7 days: 0 tests</span>
+              <span>Success rate: 0%</span>
             </div>
             <div className="flex items-center justify-between text-sm text-gray-400">
-              <span>Last 30 days: 342 tests</span>
-              <span>Success rate: 89%</span>
+              <span>Last 30 days: 0 tests</span>
+              <span>Success rate: 0%</span>
             </div>
           </div>
         </CardContent>

@@ -7,16 +7,15 @@ export function cn(...inputs: ClassValue[]) {
 
 // CSV Column Validation Utilities
 export interface ColumnMapping {
-  aoIndex: number
+  orderIdIndex: number
   channelIndex: number
   dateIndex: number
   workOrderIndex: number
-  hsaIndex: number
+  serviceAreaIndex: number
   branchIndex: number
   updateLapanganIndex: number
   symptomIndex: number
   tinjutIndex: number
-  kategoriIndex: number
   statusIndex: number
 }
 
@@ -27,8 +26,8 @@ export function validateCSVStructure(headers: string[]): {
   columnMapping: ColumnMapping
 } {
   const expectedColumns = [
-    "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-    "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+    "ORDER_ID", "CHANNEL", "DATE_CREATED", "WORKORDER", "SERVICE_AREA", "BRANCH", 
+    "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "STATUS_BIMA"
   ]
   
   const availableColumns = headers.map(h => h.trim())
@@ -64,50 +63,37 @@ export function createColumnMapping(headers: string[]): ColumnMapping {
   }
 
   // Map headers with multiple possible variations
-  const aoIndex = findColumnIndex(["AO", "ao", "Ao"])
+  const orderIdIndex = findColumnIndex(["ORDER_ID", "order_id", "Order ID", "AO", "ao", "Ao"])
   const channelIndex = findColumnIndex(["CHANNEL", "channel", "Channel"])
   const dateIndex = findColumnIndex(["DATE_CREATED", "date_created", "DATE", "date", "Date Created"])
   const workOrderIndex = findColumnIndex(["WORKORDER", "workorder", "WORK_ORDER", "work_order", "WO", "wo"])
-  const hsaIndex = findColumnIndex(["HSA", "hsa", "Hsa"])
+  const serviceAreaIndex = findColumnIndex(["SERVICE_AREA", "service_area", "SERVICE AREA", "service area", "HSA", "hsa", "Hsa"])
   const branchIndex = findColumnIndex(["BRANCH", "branch", "Branch"])
   const updateLapanganIndex = findColumnIndex(["UPDATE_LAPANGAN", "update_lapangan", "UPDATE LAPANGAN", "update lapangan"])
   const symptomIndex = findColumnIndex(["SYMPTOM", "symptom", "Symptom"])
   const tinjutIndex = findColumnIndex(["TINJUT_HD_OPLANG", "tinjut_hd_oplang", "TINJUT HD OPLANG", "tinjut hd oplang"])
-  let kategoriIndex = findColumnIndex(["KATEGORI_MANJA", "kategori_manja", "KATEGORI MANJA", "kategori manja"])
   let statusIndex = findColumnIndex(["STATUS_BIMA", "status_bima", "STATUS BIMA", "status bima"])
 
   // Log the mapping for debugging
   console.log("Column Mapping:", {
-    aoIndex,
+    orderIdIndex,
     channelIndex,
     dateIndex,
     workOrderIndex,
-    hsaIndex,
+    serviceAreaIndex,
     branchIndex,
     updateLapanganIndex,
     symptomIndex,
     tinjutIndex,
-    kategoriIndex,
     statusIndex,
     headers: headers
   })
 
   // Fallback: If any critical columns are not found, try sequential mapping
-  if (kategoriIndex === -1 || statusIndex === -1) {
+  if (statusIndex === -1) {
     console.warn("⚠️ Critical columns not found, using sequential fallback")
     
     // Try to find columns by position or partial matches
-    if (kategoriIndex === -1) {
-      // Look for any column containing "kategori" or "manja"
-      const fallbackKategori = headers.findIndex(h => 
-        h.toLowerCase().includes('kategori') || h.toLowerCase().includes('manja')
-      )
-      if (fallbackKategori !== -1) {
-        console.log("Found KATEGORI_MANJA at fallback index:", fallbackKategori)
-        kategoriIndex = fallbackKategori
-      }
-    }
-    
     if (statusIndex === -1) {
       // Look for any column containing "status" or "bima"
       const fallbackStatus = headers.findIndex(h => 
@@ -121,8 +107,8 @@ export function createColumnMapping(headers: string[]): ColumnMapping {
   }
   
   return {
-    aoIndex, channelIndex, dateIndex, workOrderIndex, hsaIndex, branchIndex,
-    updateLapanganIndex, symptomIndex, tinjutIndex, kategoriIndex, statusIndex
+    orderIdIndex, channelIndex, dateIndex, workOrderIndex, serviceAreaIndex, branchIndex,
+    updateLapanganIndex, symptomIndex, tinjutIndex, statusIndex
   }
 }
 
@@ -133,23 +119,22 @@ export function mapCSVToLaporan(csvData: { headers: string[], rows: string[][] }
   const columnMapping = createColumnMapping(csvData.headers)
   
   const laporanHeaders = [
-    "AO", "CHANNEL", "DATE_CREATED", "WORKORDER", "HSA", "BRANCH", 
-    "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "KATEGORI_MANJA", "STATUS_BIMA"
+    "ORDER_ID", "CHANNEL", "DATE_CREATED", "WORKORDER", "SERVICE_AREA", "BRANCH", 
+    "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "STATUS_BIMA"
   ]
   
   // Simple mapping without excessive logging
   const laporanRows = csvData.rows.map((row, rowIndex) => {
     const mappedRow = [
-      columnMapping.aoIndex >= 0 ? (row[columnMapping.aoIndex] || "") : "",
+      columnMapping.orderIdIndex >= 0 ? (row[columnMapping.orderIdIndex] || "") : "",
       columnMapping.channelIndex >= 0 ? (row[columnMapping.channelIndex] || "") : "",
       columnMapping.dateIndex >= 0 ? (row[columnMapping.dateIndex] || "") : "",
       columnMapping.workOrderIndex >= 0 ? (row[columnMapping.workOrderIndex] || "") : "",
-      columnMapping.hsaIndex >= 0 ? (row[columnMapping.hsaIndex] || "") : "",
+      columnMapping.serviceAreaIndex >= 0 ? (row[columnMapping.serviceAreaIndex] || "") : "",
       columnMapping.branchIndex >= 0 ? (row[columnMapping.branchIndex] || "") : "",
       columnMapping.updateLapanganIndex >= 0 ? (row[columnMapping.updateLapanganIndex] || "") : "",
       columnMapping.symptomIndex >= 0 ? (row[columnMapping.symptomIndex] || "") : "",
       columnMapping.tinjutIndex >= 0 ? (row[columnMapping.tinjutIndex] || "") : "",
-      columnMapping.kategoriIndex >= 0 ? (row[columnMapping.kategoriIndex] || "") : "",
       columnMapping.statusIndex >= 0 ? (row[columnMapping.statusIndex] || "") : ""
     ]
     

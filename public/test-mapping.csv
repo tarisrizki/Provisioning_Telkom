@@ -1,4 +1,0 @@
-AO,CHANNEL,DATE_CREATED,WORKORDER,HSA,BRANCH,UPDATE_LAPANGAN,SYMPTOM,TINJUT_HD_OPLANG,KATEGORI_MANJA,STATUS_BIMA
-AO001,Online,2024-01-15,WO-001,HSA001,Jakarta,Completed,Network Issue,HD-001,Technical,Active
-AO002,Offline,2024-01-16,WO-002,HSA002,Bandung,Pending,Hardware Problem,HD-002,Hardware,In Progress
-AO003,Call Center,2024-01-17,WO-003,HSA003,Surabaya,Failed,Software Bug,HD-003,Software,Failed

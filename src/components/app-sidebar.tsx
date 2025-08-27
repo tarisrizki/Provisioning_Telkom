@@ -27,7 +27,7 @@ import {
 const mainNav = [
   { title: "Dashboard", href: "/dashboard", icon: Home },
   { title: "Monitoring", href: "/monitoring", icon: BarChart3 },
-  { title: "Format Order", href: "/upload", icon: UploadIcon },
+  { title: "Format Order", href: "/format-order", icon: UploadIcon },
   { title: "Report", href: "/laporan", icon: FileText },
 ]
 
