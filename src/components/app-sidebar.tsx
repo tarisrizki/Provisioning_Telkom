@@ -44,8 +44,8 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar className="w-64 bg-[#282c34] text-white border-r border-[#404552]">
-      <SidebarHeader className="border-b border-[#404552] p-4">
+    <Sidebar className="w-64 bg-[#282c34] text-white">
+      <SidebarHeader className="p-4">
         <div className="text-xl font-bold">
           <span className="text-blue-400">Provisioning</span>
           <span className="text-white">TSEL</span>
@@ -120,7 +120,7 @@ export function AppSidebar() {
         </div>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-[#404552] p-4">
+      <SidebarFooter className="p-4">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

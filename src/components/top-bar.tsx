@@ -6,18 +6,13 @@ import { UserAvatar } from "@/components/user-avatar"
 
 export function TopBar() {
   return (
-    <header className="w-full h-16 bg-[#282c34] border-b border-[#404552] flex items-center justify-between px-4 md:px-6 transition-all duration-300 ease-in-out shrink-0">
+    <header className="w-full h-16 bg-sidebar flex items-center justify-between px-4 md:px-6 transition-all duration-300 ease-in-out shrink-0">
       {/* Left Section - Sidebar Trigger */}
       <div className="flex items-center space-x-4">
         <SidebarTrigger className="text-white hover:text-blue-400 transition-colors" />
         
         {/* Brand/Logo - Hidden on mobile when sidebar is open */}
-        <div className="hidden sm:block">
-          <h1 className="text-lg font-semibold text-white">
-            <span className="text-blue-400">Provisioning</span>
-            <span className="text-white">TSEL</span>
-          </h1>
-        </div>
+     
       </div>
 
       {/* Center Section - Search Bar (Desktop) */}

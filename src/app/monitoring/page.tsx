@@ -10,6 +10,10 @@ import { TrendingUp, RefreshCw, BarChart3, PieChart as PieChartIcon } from "luci
 import { MonitoringChart, HSAWorkOrderChart } from "@/components/dashboard"
 import { useMonitoring, useHSAWorkOrder } from "@/hooks"
 
+
+
+import { TrendingDown} from "lucide-react"
+
 // Interfaces will be used when data is fetched from Supabase
 
 // All data will be fetched from Supabase
@@ -55,6 +59,64 @@ export default function MonitoringPage() {
           <p className="text-gray-400 text-lg">
             Real-time monitoring of work orders and system performance metrics.
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Data Work Order</h3>
+                <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
+              </div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0</div>
+              <div className="flex items-center text-gray-400 text-sm font-medium">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                <span>Data akan dimuat dari Supabase</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Avg Provisioning Time</h3>
+                <div className="h-3 w-3 rounded-full bg-blue-500/20 border-2 border-white/20"></div>
+              </div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0 hr</div>
+              <div className="flex items-center text-gray-400 text-sm font-medium">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                <span>Data akan dimuat dari Supabase</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Success Rate</h3>
+                <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
+              </div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
+              <div className="flex items-center text-gray-400 text-sm font-medium">
+                <TrendingUp className="h-4 w-4 mr-2" />
+                <span>Data akan dimuat dari Supabase</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Failure Rate</h3>
+                <div className="h-3 w-3 rounded-full bg-red-500/20 border-2 border-white/20"></div>
+              </div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
+              <div className="flex items-center text-gray-400 text-sm font-medium">
+                <TrendingDown className="h-4 w-4 mr-2" />
+                <span>Data akan dimuat dari Supabase</span>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* KPI Cards */}

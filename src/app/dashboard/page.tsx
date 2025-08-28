@@ -70,6 +70,7 @@ export default function DashboardPage() {
         </div>
 
         {/* KPI Cards Section */}
+        {/* Olah ini untuk memanggil fungsi di databa */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
