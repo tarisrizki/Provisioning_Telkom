@@ -32,7 +32,7 @@ export function DataPreview({ csvData }: DataPreviewProps) {
       </div>
       
       {/* Data Integrity Summary */}
-      <div className="bg-[#0f172a] border border-[#334155] rounded-lg p-4 mb-6">
+      <div className="bg-[#1B2431] border border-[#334155] rounded-lg p-4 mb-6">
         <h4 className="text-white font-medium mb-3">Data Integrity Summary</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>
@@ -75,7 +75,7 @@ export function DataPreview({ csvData }: DataPreviewProps) {
         <h4 className="text-white font-medium mb-3">Raw CSV Data Preview (First 10 Rows)</h4>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[#0f172a]">
+            <thead className="bg-[#1B2431]">
               <tr>
                 {csvData.headers.map((header, index) => (
                   <th
@@ -116,7 +116,7 @@ export function DataPreview({ csvData }: DataPreviewProps) {
       </div>
 
       {/* Data Statistics */}
-      <div className="bg-[#0f172a] border border-[#334155] rounded-lg p-4">
+      <div className="bg-[#1B2431] border border-[#334155] rounded-lg p-4">
         <h4 className="text-white font-medium mb-3">Data Statistics</h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           <div>

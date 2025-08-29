@@ -97,7 +97,7 @@ export function HSAWorkOrderChart({ data, loading, error }: HSAWorkOrderChartPro
               </Pie>
               <Tooltip 
                 contentStyle={{
-                  backgroundColor: '#0f172a',
+                  backgroundColor: '#1B2431',
                   border: '1px solid #374151',
                   borderRadius: '12px',
                   color: '#ffffff',
@@ -134,7 +134,7 @@ export function HSAWorkOrderChart({ data, loading, error }: HSAWorkOrderChartPro
         {formattedData.map((item, index) => (
           <div 
             key={index} 
-            className="group flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-[#0f172a] to-[#1e293b] border border-[#475569]/20 hover:border-[#475569]/40 transition-all duration-300 hover:shadow-xl hover:shadow-gray-900/20 hover:-translate-y-0.5"
+            className="group flex items-center space-x-3 p-4 rounded-xl bg-gradient-to-r from-[#1B2431] to-[#1e293b] border border-[#475569]/20 hover:border-[#475569]/40 transition-all duration-300 hover:shadow-xl hover:shadow-gray-900/20 hover:-translate-y-0.5"
           >
             <div 
               className="w-5 h-5 rounded-full flex-shrink-0 shadow-lg transition-all duration-300 group-hover:scale-110"

@@ -51,7 +51,7 @@ export default function MonitoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] p-6">
+    <div className="min-h-screen bg-[#1B2431] p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
@@ -144,7 +144,7 @@ export default function MonitoringPage() {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-4">
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger className="w-[160px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[160px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -157,7 +157,7 @@ export default function MonitoringPage() {
                 </Select>
 
                 <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-                  <SelectTrigger className="w-[140px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -170,7 +170,7 @@ export default function MonitoringPage() {
                 </Select>
 
                 <Select value={selectedWOK} onValueChange={setSelectedWOK}>
-                  <SelectTrigger className="w-[120px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[120px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -186,7 +186,7 @@ export default function MonitoringPage() {
               <Button 
                 onClick={handleResetFilter}
                 variant="outline" 
-                className="bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
+                className="bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Reset Filter

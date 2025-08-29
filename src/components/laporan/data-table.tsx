@@ -12,7 +12,7 @@ export function DataTable({ headers, rows, visibleRows }: DataTableProps) {
     <div className="bg-[#1e293b] border border-[#334155] rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-[#0f172a] border-b border-[#334155]">
+          <thead className="bg-[#1B2431] border-b border-[#334155]">
             <tr>
               {headers.map((header, index) => (
                 <th

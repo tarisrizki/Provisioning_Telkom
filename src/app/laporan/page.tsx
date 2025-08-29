@@ -237,7 +237,7 @@ export default function LaporanPage() {
                   placeholder="Search AO..."
                   value={aoFilter}
                   onChange={(e) => setAoFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded text-white placeholder-gray-400"
+                  className="w-full px-3 py-2 bg-[#1B2431] border border-[#334155] rounded text-white placeholder-gray-400"
                 />
                 <div className="max-h-40 overflow-y-auto">
                   {/* Sample AO options */}
@@ -273,7 +273,7 @@ export default function LaporanPage() {
                   placeholder="Search Channel..."
                   value={channelFilter}
                   onChange={(e) => setChannelFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded text-white placeholder-gray-400"
+                  className="w-full px-3 py-2 bg-[#1B2431] border border-[#334155] rounded text-white placeholder-gray-400"
                 />
                 <div className="max-h-40 overflow-y-auto">
                   {/* Sample channel options */}
@@ -309,7 +309,7 @@ export default function LaporanPage() {
                   placeholder="Search Branch..."
                   value={branchFilter}
                   onChange={(e) => setBranchFilter(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#0f172a] border border-[#334155] rounded text-white placeholder-gray-400"
+                  className="w-full px-3 py-2 bg-[#1B2431] border border-[#334155] rounded text-white placeholder-gray-400"
                 />
                 <div className="max-h-40 overflow-y-auto">
                   {/* Sample branch options */}

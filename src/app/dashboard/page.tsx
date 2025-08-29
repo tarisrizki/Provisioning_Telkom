@@ -11,7 +11,6 @@ import {
   FieldUpdates
 } from "@/components/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
 import { Upload, TrendingUp, TrendingDown, BarChart3, PieChart, Activity } from "lucide-react"
 
 export default function DashboardPage() {
@@ -24,7 +23,7 @@ export default function DashboardPage() {
   // Show message if no data available
   if (!csvData) {
     return (
-      <div className="min-h-screen bg-[#0f172a] p-6">
+      <div className="min-h-screen bg-[#1B2431] p-6">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard</h1>
@@ -59,23 +58,23 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] p-6">
+    <div className="min-h-screen bg-[#1B2431] p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Overview</h1>
           <p className="text-gray-400 text-lg">
             Real-time insights and analytics for your provisioning system.
           </p>
-        </div>
+        </div> */}
 
         {/* KPI Cards Section */}
-        {/* Olah ini untuk memanggil fungsi di databa */}
+        {/* Olah ini untuk memanggil fungsi di database */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardContent className="p-6">
+            <CardContent className="py-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Data Work Order</h3>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">PS</h3>
                 <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
               </div>
               <div className="text-4xl font-bold text-white mb-3 tracking-tight">0</div>
@@ -84,12 +83,12 @@ export default function DashboardPage() {
                 <span>Data akan dimuat dari Supabase</span>
               </div>
             </CardContent>
-          </Card>
+          </Card> 
 
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Avg Provisioning Time</h3>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">RE</h3>
                 <div className="h-3 w-3 rounded-full bg-blue-500/20 border-2 border-white/20"></div>
               </div>
               <div className="text-4xl font-bold text-white mb-3 tracking-tight">0 hr</div>
@@ -103,7 +102,7 @@ export default function DashboardPage() {
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Success Rate</h3>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">PS/RE</h3>
                 <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
               </div>
               <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
@@ -117,13 +116,13 @@ export default function DashboardPage() {
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Failure Rate</h3>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Target Static</h3>
                 <div className="h-3 w-3 rounded-full bg-red-500/20 border-2 border-white/20"></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">75,12%</div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
-                <TrendingDown className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                {/* <TrendingDown className="h-4 w-4 mr-2" /> */}
+                <span>Per bulan</span>
               </div>
             </CardContent>
           </Card>

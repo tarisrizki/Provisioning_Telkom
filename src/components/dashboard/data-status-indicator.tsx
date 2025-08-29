@@ -41,7 +41,7 @@ export function DataStatusIndicator({ csvData, lastUpdate, onRefresh }: DataStat
   }
 
   return (
-    <div className="bg-[#0f172a] border border-[#334155] rounded-lg p-4">
+    <div className="bg-[#1B2431] border border-[#334155] rounded-lg p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
           <div className={`${getStatusColor()} flex items-center space-x-2`}>

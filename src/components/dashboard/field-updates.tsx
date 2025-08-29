@@ -71,7 +71,7 @@ export function FieldUpdates({ data, loading, error }: FieldUpdatesProps) {
                 {item.value.toLocaleString()} ({percentage.toFixed(1)}%)
               </span>
             </div>
-            <div className="w-full bg-[#0f172a] rounded-full h-2">
+            <div className="w-full bg-[#1B2431] rounded-full h-2">
               <div 
                 className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${percentage}%` }}

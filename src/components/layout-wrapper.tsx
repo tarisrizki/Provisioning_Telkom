@@ -17,7 +17,7 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   
   if (isPublicRoute) {
     // Return children directly for public routes (like login)
-    return <div className="h-full w-full bg-[#0f172a]">{children}</div>
+    return <div className="h-full w-full bg-[#1B2431]">{children}</div>
   }
   
   // Wrap with MainLayout for authenticated routes
