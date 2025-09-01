@@ -1,19 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { DatabaseService } from "@/lib/database"
-
-interface WorkOrderData {
-  ao: string
-  channel: string
-  date_created: string
-  workorder: string
-  hsa: string
-  branch: string
-  update_lapangan: string
-  symptom: string
-  tinjut_hd_oplang: string
-  kategori_manja: string
-  status_bima: string
-}
+import { supabase, FormatOrder } from "@/lib/supabase"
 
 interface FilteredData {
   headers: string[]
@@ -56,88 +42,6 @@ export function useLaporan() {
     }
   }, [])
 
-  // Load data from Supabase database
-  const loadCSVData = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      console.log("Laporan: Loading data from Supabase database...")
-      
-      // Get all work orders from database
-      const result = await DatabaseService.getWorkOrders({
-        limit: 10000, // Load up to 10,000 records
-        offset: 0
-      })
-      
-      if (result.success && result.data && result.data.length > 0) {
-        // Define the specific columns we want to display
-        const headers = [
-          "AO", 
-          "CHANNEL", 
-          "DATE_CREATED", 
-          "WORKORDER", 
-          "HSA", 
-          "BRANCH", 
-          "UPDATE_LAPANGAN", 
-          "SYMPTOM", 
-          "TINJUT_HD_OPLANG", 
-          "KATEGORI_MANJA", 
-          "STATUS_BIMA"
-        ]
-        
-        // Convert work orders to table format
-        const rows = result.data.map(wo => [
-          wo.ao || "",
-          wo.channel || "",
-          wo.date_created || "",
-          wo.workorder || "",
-          wo.hsa || "",
-          wo.branch || "",
-          wo.update_lapangan || "",
-          wo.symptom || "",
-          wo.tinjut_hd_oplang || "",
-          wo.kategori_manja || "",
-          wo.status_bima || ""
-        ])
-        
-        const data = { headers, rows }
-        
-        console.log("Laporan: Data loaded successfully from Supabase", {
-          headers: data.headers.length,
-          rows: data.rows.length,
-          totalCount: result.count || 0
-        })
-        
-        setCsvData(data)
-        setTotalCount(result.count || 0)
-        
-        // Apply initial filters
-        if (data.rows.length > 0) {
-          applyFiltersWithData(data)
-        }
-      } else {
-        console.log("Laporan: No data found in Supabase database")
-        setCsvData(null)
-        setFilteredData(null)
-        setTotalCount(0)
-        if (result.error) {
-          setError(`Failed to load data: ${result.error}`)
-        } else {
-          setError("No data available. Please upload CSV data first.")
-        }
-      }
-    } catch (error) {
-      console.error("Laporan: Failed to load data from Supabase:", error)
-      setError("Failed to load data from database. Please try again.")
-      setCsvData(null)
-      setFilteredData(null)
-      setTotalCount(0)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
   // Apply filters with specific data
   const applyFiltersWithData = useCallback((data: FilteredData) => {
     console.log("Laporan: Applying filters to data", {
@@ -147,7 +51,7 @@ export function useLaporan() {
 
     let filtered = data.rows
 
-    // Apply AO filter
+    // Apply ORDER_ID filter
     if (aoFilter) {
       filtered = filtered.filter(row => 
         row[0]?.toLowerCase().includes(aoFilter.toLowerCase())
@@ -186,6 +90,88 @@ export function useLaporan() {
     setVisibleRows(50)
   }, [aoFilter, channelFilter, dateFilter, branchFilter])
 
+  // Load data from Supabase database
+  const loadCSVData = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      console.log("Laporan: Loading data from Supabase database...")
+      
+      // Get all format orders from database
+      const { data: formatOrders, error: supabaseError, count } = await supabase
+        .from('format_order')
+        .select('*', { count: 'exact' })
+        .limit(10000)
+      
+      if (supabaseError) {
+        throw new Error(supabaseError.message)
+      }
+      
+      if (formatOrders && formatOrders.length > 0) {
+        // Define the specific columns we want to display
+        const headers = [
+          "ORDER_ID", 
+          "CHANNEL", 
+          "DATE_CREATED", 
+          "WORKORDER", 
+          "SERVICE_AREA", 
+          "BRANCH", 
+          "UPDATE_LAPANGAN", 
+          "SYMPTOM", 
+          "TINJUT_HD_OPLANG", 
+          "KATEGORI_MANJA", 
+          "STATUS_BIMA"
+        ]
+        
+        // Convert format orders to table format
+        const rows = formatOrders.map((fo: FormatOrder) => [
+          fo.order_id || "",
+          fo.channel || "",
+          fo.date_created || "",
+          fo.workorder || "",
+          fo.service_area || "",
+          fo.branch || "",
+          fo.update_lapangan || "",
+          fo.symptom || "",
+          fo.tinjut_hd_oplang || "",
+          "Normal", // Placeholder for kategori_manja
+          fo.status_bima || ""
+        ])
+        
+        const data = { headers, rows }
+        
+        console.log("Laporan: Data loaded successfully from Supabase", {
+          headers: data.headers.length,
+          rows: data.rows.length,
+          totalCount: count || 0
+        })
+        
+        setCsvData(data)
+        setTotalCount(count || 0)
+        
+        // Apply initial filters
+        if (data.rows.length > 0) {
+          applyFiltersWithData(data)
+        }
+      } else {
+        console.log("Laporan: No data found in Supabase database")
+        setCsvData(null)
+        setFilteredData(null)
+        setTotalCount(0)
+        setError("No data available. Please upload CSV data first.")
+      }
+    } catch (error) {
+      console.error("Laporan: Failed to load data from Supabase:", error)
+      setError("Failed to load data from database. Please try again.")
+      setCsvData(null)
+      setFilteredData(null)
+      setTotalCount(0)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [applyFiltersWithData])
+
   // Apply filters with memoization
   const applyFilters = useCallback(() => {
     if (!csvData) return
@@ -201,7 +187,7 @@ export function useLaporan() {
     if (csvData) {
       applyFiltersWithData(csvData)
     }
-  }, [applyFiltersWithData])
+  }, [csvData, applyFiltersWithData])
 
   // Handle infinite scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {

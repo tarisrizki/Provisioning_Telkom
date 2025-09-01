@@ -130,7 +130,7 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
   // Fetch data when component mounts or filters change
   useEffect(() => {
     fetchData(1)
-  }, [filters])
+  }, [filters, fetchData])
 
   return {
     data,
@@ -181,14 +181,14 @@ export function useTabData(tab: string, options: UseFormatOrderOptions = {}) {
         // Calculate kategori and umur manja from existing data
         const getKategoriManja = (item: FormatOrder) => {
           // This would need business logic to determine MANJA category
-          // For now, return a placeholder
-          return 'Normal'
+          // For now, return a placeholder based on order_id existence
+          return item.order_id ? 'Normal' : 'Unknown'
         }
         
         const getUmurManja = (item: FormatOrder) => {
           // This would need business logic to calculate MANJA age
-          // For now, return a placeholder
-          return '0 hari'
+          // For now, return a placeholder based on order_id existence
+          return item.order_id ? '0 hari' : 'N/A'
         }
         
         return data.map(item => [

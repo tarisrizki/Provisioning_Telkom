@@ -142,11 +142,9 @@ export function mapCSVToLaporan(csvData: { headers: string[], rows: string[][] }
     if (rowIndex === 0) {
       console.log("First Row Mapping:", {
         original: {
-          kategori: row[columnMapping.kategoriIndex] || "NOT_FOUND",
           status: row[columnMapping.statusIndex] || "NOT_FOUND"
         },
         mapped: {
-          kategori: mappedRow[9],
           status: mappedRow[10]
         }
       })

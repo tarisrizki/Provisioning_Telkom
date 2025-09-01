@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { MainLayout } from "@/components/main-layout"
+import { SearchProvider } from "@/contexts/search-context"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -20,6 +21,10 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <div className="h-full w-full bg-[#1B2431]">{children}</div>
   }
   
-  // Wrap with MainLayout for authenticated routes
-  return <MainLayout>{children}</MainLayout>
+  // Wrap with SearchProvider and MainLayout for authenticated routes
+  return (
+    <SearchProvider>
+      <MainLayout>{children}</MainLayout>
+    </SearchProvider>
+  )
 }
