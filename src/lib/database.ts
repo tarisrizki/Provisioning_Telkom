@@ -396,7 +396,8 @@ export class DatabaseService {
         }
 
         return {
-          ao: row[aoIndex] || `AO_${index + 1}`,
+          order_id: row[aoIndex] || `AO_${index + 1}`, // Primary key for format_order table
+          ao: row[aoIndex] || `AO_${index + 1}`, // Legacy compatibility
           channel: row[channelIndex] || 'Unknown',
           date_created: parseDate(row[dateIndex]) || new Date().toISOString().split('T')[0],
           workorder: row[workOrderIndex] || `WO_${index + 1}`,
@@ -409,7 +410,7 @@ export class DatabaseService {
           status_date: parseDate(row[statusDateIndex]) || undefined,
           contact_phone: row[contactPhoneIndex] || undefined,
           booking_date: parseDate(row[bookingDateIndex]) || undefined,
-          hsa: row[hsaIndex] || undefined,
+          service_area: row[hsaIndex] || undefined, // Maps to service_area in format_order table
           branch: row[branchIndex] || undefined,
           cluster: row[clusterIndex] || undefined,
           mitra: row[mitraIndex] || undefined,

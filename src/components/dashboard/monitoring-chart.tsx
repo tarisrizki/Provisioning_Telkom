@@ -87,7 +87,7 @@ export function MonitoringChart({ data, loading, error }: MonitoringChartProps) 
             
             {/* Progress Bar */}
             <div className="relative overflow-hidden">
-              <div className="w-full bg-[#0f172a] rounded-lg h-7 border border-gray-700/30">
+              <div className="w-full bg-[#1B2431] rounded-lg h-7 border border-gray-700/30">
                 <div 
                   className="h-full rounded-lg transition-all duration-500 ease-out flex items-center justify-start relative group-hover:brightness-110"
                   style={{ 

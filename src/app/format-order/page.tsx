@@ -141,7 +141,7 @@ export default function FormatOrderPage() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0f172a] p-6">
+      <div className="min-h-screen bg-[#1B2431] p-6">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white tracking-tight">Format Order Management</h1>
@@ -160,7 +160,7 @@ export default function FormatOrderPage() {
   // Show error state
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0f172a] p-6">
+      <div className="min-h-screen bg-[#1B2431] p-6">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold text-white tracking-tight">Format Order Management</h1>
@@ -183,7 +183,7 @@ export default function FormatOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f172a] p-6">
+    <div className="min-h-screen bg-[#1B2431] p-6">
       <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
       <div className="space-y-2">
@@ -207,7 +207,7 @@ export default function FormatOrderPage() {
                   className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                     selectedTab === tab
                       ? "bg-blue-600 text-white shadow-lg"
-                      : "bg-[#0f172a] text-gray-300 hover:bg-[#334155] hover:text-white"
+                      : "bg-[#1B2431] text-gray-300 hover:bg-[#334155] hover:text-white"
                   }`}
                 >
                   {getTabIcon(tab)}
@@ -224,7 +224,7 @@ export default function FormatOrderPage() {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-4">
                 <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                  <SelectTrigger className="w-[140px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -237,7 +237,7 @@ export default function FormatOrderPage() {
                 </Select>
 
                 <Select value={selectedChannel} onValueChange={setSelectedChannel}>
-                  <SelectTrigger className="w-[140px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -248,7 +248,7 @@ export default function FormatOrderPage() {
                 </Select>
 
                 <Select value={selectedDateCreated} onValueChange={setSelectedDateCreated}>
-                  <SelectTrigger className="w-[160px] bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[160px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -262,7 +262,7 @@ export default function FormatOrderPage() {
 
               <Button 
                 variant="outline" 
-                className="bg-[#0f172a] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
+                className="bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Reset Filters
@@ -363,7 +363,7 @@ export default function FormatOrderPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Total AO */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-300 text-sm font-medium">Total AO</span>
                   <span className="text-white font-semibold text-lg">{analysisData.totalAO.toLocaleString()}</span>
@@ -371,7 +371,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Channel Analysis */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Channel</span>
                   <span className="text-white font-semibold text-lg">{Object.values(analysisData.channelStats).reduce((a, b) => a + b, 0)}</span>
@@ -401,7 +401,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Work Zone Analysis */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Work Zone</span>
                   <span className="text-white font-semibold text-lg">{Object.values(analysisData.serviceAreaStats).reduce((a, b) => a + b, 0)}</span>
@@ -447,7 +447,7 @@ export default function FormatOrderPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Total AO */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-300 text-sm font-medium">Total AO</span>
                   <span className="text-white font-semibold text-lg">{analysisData.totalAO.toLocaleString()}</span>
@@ -455,7 +455,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Total Mitra Analysis */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Total Mitra</span>
                   <span className="text-white font-semibold text-lg">{Object.values(analysisData.mitraStats).reduce((a, b) => a + b, 0)}</span>
@@ -485,7 +485,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Top 5 Labor teknis Analysis */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Top 5 Labor teknis</span>
                   <span className="text-white font-semibold text-lg">{Object.values(analysisData.laborTeknisiStats).reduce((a, b) => a + b, 0)}</span>
@@ -533,7 +533,7 @@ export default function FormatOrderPage() {
                 {/* Left Column - Total AO and Update Lapangan */}
                 <div className="space-y-6">
                   {/* Total AO */}
-                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                  <div className="bg-gradient-to-br from-[#1B2431] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
                     <div className="flex items-center space-x-3 mb-4">
                       <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-xl border border-blue-500/20">
                         <Database className="h-6 w-6 text-blue-400" />
@@ -550,7 +550,7 @@ export default function FormatOrderPage() {
                   </div>
 
                   {/* Update Lapangan */}
-                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+                  <div className="bg-gradient-to-br from-[#1B2431] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
                     <div className="flex items-center space-x-3 mb-4">
                       <div className="p-3 bg-gradient-to-br from-green-500/20 to-green-600/20 rounded-xl border border-green-500/20">
                         <Upload className="h-6 w-6 text-green-400" />
@@ -591,7 +591,7 @@ export default function FormatOrderPage() {
 
                 {/* Right Column - Status BIMA */}
                 <div>
-                  <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner h-full">
+                  <div className="bg-gradient-to-br from-[#1B2431] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner h-full">
                     <div className="flex items-center space-x-3 mb-4">
                       <div className="p-3 bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 rounded-xl border border-yellow-500/20">
                         <CheckCircle className="h-6 w-6 text-yellow-400" />
@@ -657,7 +657,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Symptom */}
-              <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+              <div className="bg-gradient-to-br from-[#1B2431] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 bg-blue-500/20 rounded-lg">
@@ -707,7 +707,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Tindak Lanjut HD OPLANG */}
-              <div className="bg-gradient-to-br from-[#0f172a] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
+              <div className="bg-gradient-to-br from-[#1B2431] to-[#1a202c] rounded-xl p-6 border border-[#475569] shadow-inner">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 bg-indigo-500/20 rounded-lg">
@@ -759,7 +759,7 @@ export default function FormatOrderPage() {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Total AO */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-300 text-sm font-medium">Total AO</span>
                   <span className="text-white font-semibold text-lg">{manjaAnalysisData.totalAO.toLocaleString()}</span>
@@ -767,7 +767,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Kategori MANJA */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Kategori MANJA</span>
                   <span className="text-white font-semibold text-lg">0</span>
@@ -820,7 +820,7 @@ export default function FormatOrderPage() {
               </div>
 
               {/* Umur MANJA */}
-              <div className="bg-[#0f172a] rounded-lg p-4 border border-[#475569]">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-gray-300 text-sm font-medium">Umur MANJA</span>
                   <span className="text-white font-semibold text-lg">0</span>

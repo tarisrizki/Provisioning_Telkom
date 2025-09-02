@@ -24,9 +24,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full bg-[#0f172a]">
+    <html lang="en" className="h-full bg-sidebar">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full w-full m-0 p-0 bg-[#0f172a]`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full w-full m-0 p-0 bg-sidebar`}
         style={{ 
           overscrollBehavior: 'none',
           WebkitOverflowScrolling: 'touch'
