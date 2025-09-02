@@ -4,29 +4,12 @@ import { useState } from "react"
 import { X, Download, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { FormatOrder } from "@/lib/supabase"
 
 interface DetailModalProps {
   isOpen: boolean
   onClose: () => void
-  orderData: {
-    orderId?: string
-    channel?: string
-    dateCreated?: string
-    workOrder?: string
-    soOrderNo?: string
-    serviceArea?: string
-    branch?: string
-    cluster?: string
-    mitra?: string
-    laborTeknis?: string
-    updateLapaorgan?: string
-    symptom?: string
-    hasilQeqrisis?: string
-    statusRma?: string
-    kategoriManja?: string
-    umurManja?: string
-    [key: string]: unknown
-  } | null
+  orderData: FormatOrder | null
 }
 
 export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
@@ -36,351 +19,176 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
   const tabs = [
     { id: "detail-customer", label: "Detail Customer" },
-    { id: "service-area", label: "Service Area" },
-    { id: "mitra", label: "Mitra" },
-    { id: "update-lapangan", label: "Update Lapangan" },
+    { id: "aktivasi", label: "Aktivasi" },
+    { id: "update-lapangan", label: "Update lapangan" },
     { id: "manja", label: "MANJA" }
   ]
 
-  // Generate dynamic data based on orderData
-  const generateDynamicData = () => {
-    const timestamp = new Date().toLocaleString('id-ID')
-    
-    return {
-      detailCustomer: {
-        noService: `FG${Math.floor(Math.random() * 99999999)}`,
-        description: `V${Math.floor(Math.random() * 999999)}_SMOOGA`,
-        address: `JL Sastro Aceh ${Math.floor(Math.random() * 9999)}`,
-        customerName: ['SAIFUL JAMI', 'BUDI SANTOSO', 'SARI DEWI', 'AHMAD HIDAYAT', 'NURUL AINI'][Math.floor(Math.random() * 5)],
-        workZone: Math.floor(Math.random() * 200) + 1,
-        routingDate: timestamp,
-        statusData: timestamp,
-        contractId: Math.floor(Math.random() * 999999999999),
-        dop: `DOP-${Math.floor(Math.random() * 999)}-FEK${Math.floor(Math.random() * 999)}`
-      },
-      serviceArea: {
-        serviceArea: ['LAMUGA', 'LAPVISA', 'MELLABOCU', 'SERVICELATER', 'MAIL'][Math.floor(Math.random() * 5)],
-        branch: ['BALAI', 'AC241', '29/12/21', '09/12/21'][Math.floor(Math.random() * 4)],
-        area: ['LANGSA', 'BARRETA', 'PINK WESTERN', 'BAHANA ACEH', 'MELLABORU'][Math.floor(Math.random() * 5)],
-        symptom: ['ATM', 'RMA', 'ODP FAIL', 'COMPLETE', 'ASSIGNED'][Math.floor(Math.random() * 5)],
-        subTipeMitra: `${['FAUZAN', 'BINAI', 'ISAL', 'BUDIAH'][Math.floor(Math.random() * 4)]}/${Math.floor(Math.random() * 999999999)}`,
-        keterangan: `>${Math.floor(Math.random() * 20) + 1} HARI`,
-        statusLapangan: ['CLOSED', 'OPEN', 'IN PROGRESS', 'PENDING'][Math.floor(Math.random() * 4)],
-        symptom2: ['COMPUTED', 'ANOMALI', 'FO TES', 'OUTLET RTC'][Math.floor(Math.random() * 4)],
-        engineeringMMG: `${['Budiah Nadh', 'Ahmad', 'Sari', 'Budi'][Math.floor(Math.random() * 4)]} CONFIG`
-      },
-      mitra: {
-        mitraName: ['FAUZAN', 'BINAI', 'ISAL', 'BUDIAH', 'AHMAD'][Math.floor(Math.random() * 5)],
-        mitraId: Math.floor(Math.random() * 999999999),
-        type: ['Technical', 'Support', 'Engineering', 'Field'][Math.floor(Math.random() * 4)],
-        status: ['Active', 'Inactive', 'Suspended', 'Pending'][Math.floor(Math.random() * 4)],
-        areaCoverage: ['LAMUGA', 'LAPVISA', 'MELLABOCU', 'SERVICELATER'][Math.floor(Math.random() * 4)],
-        performance: `${Math.floor(Math.random() * 40) + 60}%`
-      },
-      updateLapangan: {
-        hasilHD: `FU ${Math.floor(Math.random() * 1000)}`,
-        keteranganHD: (Math.random() * 10).toFixed(8),
-        subTipeMitra: `${['odp-imbe-try', 'mitra-tech', 'field-support'][Math.floor(Math.random() * 3)]}/${Math.floor(Math.random() * 99)}`,
-        pic: ['ISAL', 'BUDI', 'SARI', 'AHMAD', 'NURUL'][Math.floor(Math.random() * 5)],
-        statusUC: ['Done Cancel', 'In Progress', 'Completed', 'Failed'][Math.floor(Math.random() * 4)],
-        keteranganUC: ['-', 'Pending Review', 'Under Investigation'][Math.floor(Math.random() * 3)],
-        statusBlok: ['NONE FAIL', 'BLOCKED', 'CLEAR', 'PENDING'][Math.floor(Math.random() * 4)],
-        statusDC: ['CANCELED', 'ACTIVE', 'SUSPENDED', 'PENDING'][Math.floor(Math.random() * 4)],
-        statusWPRO: ['-', 'IN PROGRESS', 'COMPLETED', 'FAILED'][Math.floor(Math.random() * 4)],
-        statusMALUA: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
-        umur: `> ${Math.floor(Math.random() * 10) + 1} hari`,
-        keteranganMALUA: ['Lewat MALUA', 'Dalam MALUA', 'Pending MALUA'][Math.floor(Math.random() * 3)],
-        statusMMG: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
-        tanggalPS: timestamp
-      },
-      manja: {
-        subTipeMitra: 'Umum - 3 hari',
-        keteranganMALUA: ['Lewat MALUA', 'Dalam MALUA', 'Pending MALUA'][Math.floor(Math.random() * 3)],
-        statusMMG: ['-', 'ACTIVE', 'INACTIVE', 'PENDING'][Math.floor(Math.random() * 4)],
-        tanggalPS: timestamp
-      }
+  // Helper function to get display value or fallback
+  const getDisplayValue = (value: string | undefined | null, fallback: string = '-') => {
+    return value && value.trim() !== '' ? value : fallback
+  }
+
+  // Helper function to format date
+  const formatDate = (dateString: string | undefined | null) => {
+    if (!dateString) return '-'
+    try {
+      return new Date(dateString).toLocaleString('id-ID')
+    } catch {
+      return dateString
     }
   }
 
-  const dynamicData = generateDynamicData()
-
   const renderDetailContent = () => {
+    if (!orderData) {
+      return (
+        <div className="text-center text-gray-400 py-8">
+          No data available
+        </div>
+      )
+    }
+
     switch (activeTab) {
       case "detail-customer":
         return (
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">No Service:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.noService}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Description:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.description}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Address:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.address}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Customer Name:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.customerName}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Work Zone:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.workZone}</span>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Routing Date:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.routingDate}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Status Data:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.statusData}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Contract ID:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.contractId}</span>
-                </div>
-              </div>
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">DOP:</span>
-                  <span className="text-white font-semibold">{dynamicData.detailCustomer.dop}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
-
-      case "service-area":
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Service Area:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.serviceArea}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Branch:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.branch}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Area:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.area}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Symptom:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.symptom}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.subTipeMitra}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Keterangan:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.keterangan}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status Lapangan:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.statusLapangan}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Symptom 2:</span>
-                    <span className="text-white font-semibold">{dynamicData.serviceArea.symptom2}</span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">NO Service:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.service_no)}</span>
               </div>
             </div>
             <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-300 text-sm font-medium">Engineering MMG:</span>
-                <div className="flex items-center space-x-3">
-                  <span className="text-white font-semibold">{dynamicData.serviceArea.engineeringMMG}</span>
-                  <Button size="sm" className="h-8 w-8 p-0 bg-white text-gray-800 hover:bg-gray-100">
-                    <Plus className="h-4 w-4" />
-                  </Button>
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Description:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.description)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Address:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.address)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Customer Name:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.customer_name)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Work Zone:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.workzone)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Tanggal PS:</span>
+                <span className="text-white font-semibold">{formatDate(orderData.tanggal_ps)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Status Date:</span>
+                <span className="text-white font-semibold">{formatDate(orderData.status_date)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">Contact PHO:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.contact_phone)}</span>
+              </div>
+            </div>
+            <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+              <div className="flex flex-col">
+                <span className="text-gray-300 text-sm font-medium mb-1">ODP:</span>
+                <span className="text-white font-semibold">{getDisplayValue(orderData.odp)}</span>
+              </div>
+            </div>
+          </div>
+        )
+
+      case "aktivasi":
+        return (
+          <div className="space-y-6">
+            <h3 className="text-white text-xl font-bold mb-4">Mitra</h3>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">SYMPTOM:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.symptom)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Labor Teknisi:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.labor_teknisi)}</span>
                 </div>
               </div>
             </div>
           </div>
         )
 
-      case "mitra":
-        return (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Mitra Name:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.mitraName}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Mitra ID:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.mitraId}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Type:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.type}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.status}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Area Coverage:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.areaCoverage}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Performance:</span>
-                    <span className="text-white font-semibold">{dynamicData.mitra.performance}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )
+
 
       case "update-lapangan":
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Hasil HD:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.hasilHD}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Keterangan HD:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganHD}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.subTipeMitra}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">PIC:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.pic}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status UC:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusUC}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Keterangan UC:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganUC}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status Blok:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusBlok}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status DC:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusDC}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status WPRO:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusWPRO}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Status MALUA:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.statusMALUA}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Umur:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.umur}</span>
-                  </div>
-                </div>
-                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-300 text-sm font-medium">Keterangan MALUA:</span>
-                    <span className="text-white font-semibold">{dynamicData.updateLapangan.keteranganMALUA}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
+            <h3 className="text-white text-xl font-bold mb-4">Update Lapangan</h3>
+            <div className="grid grid-cols-3 gap-4">
               <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Status MMG:</span>
-                  <span className="text-white font-semibold">{dynamicData.updateLapangan.statusMMG}</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">TINJUT HD OPLANG:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.tinjut_hd_oplang)}</span>
                 </div>
               </div>
               <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Tanggal PS:</span>
-                  <span className="text-white font-semibold">{dynamicData.updateLapangan.tanggalPS}</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Keterangan HD OPLANG:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.keterangan_hd_oplang)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">SUBERRORCODE:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.suberrorcode)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">UIC:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.uic)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Update UIC:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.update_uic)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Keterangan UIC:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.keterangan_uic)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Update Lapangan:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.update_lapangan)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">SYMPTOM:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.symptom)}</span>
+                </div>
+              </div>
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Engineering MEMO:</span>
+                  <span className="text-white font-semibold">{getDisplayValue(orderData.engineering_memo)}</span>
                 </div>
               </div>
             </div>
@@ -390,31 +198,24 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
       case "manja":
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+            <h3 className="text-white text-xl font-bold mb-4">Manajemen Janji</h3>
+            <div className="grid grid-cols-3 gap-4">
               <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Sub Tipe Mitra:</span>
-                  <span className="text-white font-semibold">{dynamicData.manja.subTipeMitra}</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Umur MANJA:</span>
+                  <span className="text-white font-semibold">Umur &gt; 3 hari</span>
                 </div>
               </div>
               <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Keterangan MALUA:</span>
-                  <span className="text-white font-semibold">{dynamicData.manja.keteranganMALUA}</span>
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Status MMG:</span>
-                  <span className="text-white font-semibold">{dynamicData.manja.statusMMG}</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Kategori MANJA:</span>
+                  <span className="text-white font-semibold">Lewat MANJA</span>
                 </div>
               </div>
               <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-300 text-sm font-medium">Tanggal PS:</span>
-                  <span className="text-white font-semibold">{dynamicData.manja.tanggalPS}</span>
+                <div className="flex flex-col">
+                  <span className="text-gray-300 text-sm font-medium mb-1">Booking date:</span>
+                  <span className="text-white font-semibold">{formatDate(orderData.booking_date)}</span>
                 </div>
               </div>
             </div>
@@ -433,9 +234,11 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
         <div className="flex items-center justify-between p-6 border-b border-[#475569] bg-[#1B2431]">
           <div className="flex items-center space-x-4">
             <h2 className="text-xl font-bold text-white">
-              {orderData?.orderId || "AD-60250828041731268865d0"}
+              {orderData?.order_id || "No Order ID"}
             </h2>
-            <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-medium">COMPLETE</Badge>
+            <Badge className="bg-green-600 text-white px-3 py-1 text-sm font-medium">
+              {orderData?.status_bima || "UNKNOWN"}
+            </Badge>
           </div>
           <div className="flex items-center space-x-3">
             <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569]">
@@ -458,16 +261,20 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
           <div className="w-80 bg-[#334155] p-6 border-r border-[#475569]">
             <div className="space-y-6">
               <div className="text-center">
-                <h3 className="text-white font-semibold text-lg">DIGIPOS</h3>
+                <h3 className="text-white font-semibold text-lg">{orderData?.channel || "CHANNEL"}</h3>
               </div>
               <div className="space-y-4">
                 <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                   <span className="text-gray-300 text-sm font-medium">Order Created:</span>
-                  <p className="text-white font-semibold mt-1">{new Date().toLocaleString('id-ID')}</p>
+                  <p className="text-white font-semibold mt-1">{formatDate(orderData?.date_created)}</p>
                 </div>
                 <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
                   <span className="text-gray-300 text-sm font-medium">Work Order:</span>
-                  <p className="text-white font-semibold mt-1">WO-{Math.floor(Math.random() * 999999999)}</p>
+                  <p className="text-white font-semibold mt-1">{getDisplayValue(orderData?.workorder)}</p>
+                </div>
+                <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                  <span className="text-gray-300 text-sm font-medium">SC Order No:</span>
+                  <p className="text-white font-semibold mt-1">{getDisplayValue(orderData?.sc_order_no)}</p>
                 </div>
               </div>
             </div>
@@ -502,3 +309,4 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
     </div>
   )
 }
+

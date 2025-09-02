@@ -11,10 +11,7 @@ import { DetailModal } from "@/components/format-order/detail-modal"
 import { useTabData } from "@/hooks/use-format-order"
 import { useAnalysisData } from "@/hooks/use-analysis-data"
 
-interface TabData {
-  orderId: string
-  [key: string]: string
-}
+import { FormatOrder } from "@/lib/supabase"
 
 export default function FormatOrderPage() {
   const [selectedTab, setSelectedTab] = useState("Work Order")
@@ -53,7 +50,7 @@ export default function FormatOrderPage() {
 
   // Modal state
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
-  const [selectedOrderData, setSelectedOrderData] = useState<TabData | null>(null)
+  const [selectedOrderData, setSelectedOrderData] = useState<FormatOrder | null>(null)
 
   const tabs = ["Work Order", "Mitra", "Update lapangan", "MANJA"]
   const filters = ["Oktober", "November", "Desember", "Januari"]
@@ -94,7 +91,7 @@ export default function FormatOrderPage() {
   }
 
   // Function to open detail modal
-  const openDetailModal = (orderData: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
+  const openDetailModal = (orderData: FormatOrder) => {
     setSelectedOrderData(orderData)
     setIsDetailModalOpen(true)
   }
@@ -106,7 +103,7 @@ export default function FormatOrderPage() {
   }
 
   const renderTableRow = (rowData: string[], index: number) => {
-    const orderData = formatOrderData[index] // Get full order data for modal
+    const orderData = formatOrderData[index] as FormatOrder // Get full order data for modal
     return (
       <tr 
         key={index} 
