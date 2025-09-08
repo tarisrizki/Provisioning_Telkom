@@ -236,7 +236,7 @@ export default function MonitoringPage() {
       
         </div>
 
-        {/* KPI Cards */}
+        {/* KPI Cards ??????????????????????????????????????????????*/}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredData.kpiCards.map((card, index) => (
             <Card key={index} className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
@@ -256,12 +256,11 @@ export default function MonitoringPage() {
         </div>
 
         {/* Filters */}
-        <Card className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
-          <CardContent className="p-6">
+        
             <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-0">
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                  <SelectTrigger className="w-[160px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[160px] bg-[#323D4E] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -274,7 +273,7 @@ export default function MonitoringPage() {
                 </Select>
 
                 <Select value={selectedBranch} onValueChange={setSelectedBranch}>
-                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[140px] bg-[#323D4E] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -287,7 +286,7 @@ export default function MonitoringPage() {
                 </Select>
 
                 <Select value={selectedWOK} onValueChange={setSelectedWOK}>
-                  <SelectTrigger className="w-[120px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                  <SelectTrigger className="w-[120px] bg-[#323D4E] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
@@ -303,14 +302,14 @@ export default function MonitoringPage() {
               <Button 
                 onClick={handleResetFilter}
                 variant="outline" 
-                className="bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
+                className="bg-[#323D4E] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="h-4 w-4 mr-2 text-yellow-400" />
                 Reset Filter
               </Button>
+
             </div>
-          </CardContent>
-        </Card>
+       
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
