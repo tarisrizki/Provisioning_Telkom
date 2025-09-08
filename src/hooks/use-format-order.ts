@@ -10,7 +10,6 @@ interface UseFormatOrderOptions {
     dateCreated?: string
     branch?: string
     serviceArea?: string
-    mitra?: string
     updateLapangan?: string
     statusBima?: string
   }
@@ -70,9 +69,6 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
       }
       if (filters.serviceArea) {
         query = query.ilike('service_area', `%${filters.serviceArea}%`)
-      }
-      if (filters.mitra) {
-        query = query.ilike('mitra', `%${filters.mitra}%`)
       }
       if (filters.updateLapangan) {
         query = query.ilike('update_lapangan', `%${filters.updateLapangan}%`)
@@ -158,14 +154,11 @@ export function useTabData(tab: string, options: UseFormatOrderOptions = {}) {
       case "Work Order":
         return data.map(item => [
           item.order_id,
-          item.channel || '-',
           item.date_created || '-',
           item.workorder || '-',
-          item.sc_order_no || '-'
-        ])
-      case "Mitra":
-        return data.map(item => [
-          item.order_id,
+          item.service_no || '-',
+          item.workzone || '-',
+          item.odp || '-',
           item.mitra || '-',
           item.labor_teknisi || '-'
         ])
@@ -175,26 +168,57 @@ export function useTabData(tab: string, options: UseFormatOrderOptions = {}) {
           item.update_lapangan || '-',
           item.symptom || '-',
           item.tinjut_hd_oplang || '-',
+          item.keterangan_hd_oplang || '-',
           item.status_bima || '-'
         ])
       case "MANJA":
-        // Calculate kategori and umur manja from existing data
+        // Calculate kategori, umur, and sisa manja from existing data
         const getKategoriManja = (item: FormatOrder) => {
-          // This would need business logic to determine MANJA category
-          // For now, return a placeholder based on order_id existence
-          return item.order_id ? 'Normal' : 'Unknown'
+          // Business logic for MANJA category based on booking date and current status
+          if (!item.booking_date) return 'No Booking Date'
+          
+          const bookingDate = new Date(item.booking_date)
+          const currentDate = new Date()
+          const daysDiff = Math.floor((currentDate.getTime() - bookingDate.getTime()) / (1000 * 3600 * 24))
+          
+          if (daysDiff <= 0) return 'MANJA H'
+          if (daysDiff === 1) return 'MANJA H+'
+          if (daysDiff === 2) return 'MANJA H++'
+          if (daysDiff >= 3) return 'Lewat MANJA'
+          
+          return 'MANJA HI'
         }
         
         const getUmurManja = (item: FormatOrder) => {
-          // This would need business logic to calculate MANJA age
-          // For now, return a placeholder based on order_id existence
-          return item.order_id ? '0 hari' : 'N/A'
+          // Calculate age in days from booking date
+          if (!item.booking_date) return '0 hari'
+          
+          const bookingDate = new Date(item.booking_date)
+          const currentDate = new Date()
+          const daysDiff = Math.floor((currentDate.getTime() - bookingDate.getTime()) / (1000 * 3600 * 24))
+          
+          return daysDiff >= 0 ? `${daysDiff} hari` : '0 hari'
+        }
+        
+        const getSisaManja = (item: FormatOrder) => {
+          // Calculate remaining MANJA days (3 days SLA - current age)
+          if (!item.booking_date) return '3 hari'
+          
+          const bookingDate = new Date(item.booking_date)
+          const currentDate = new Date()
+          const daysDiff = Math.floor((currentDate.getTime() - bookingDate.getTime()) / (1000 * 3600 * 24))
+          const remainingDays = 3 - daysDiff
+          
+          if (remainingDays <= 0) return '0 hari (Lewat SLA)'
+          return `${remainingDays} hari`
         }
         
         return data.map(item => [
           item.order_id,
+          item.booking_date || '-',
           getKategoriManja(item),
-          getUmurManja(item)
+          getUmurManja(item),
+          getSisaManja(item)
         ])
       default:
         return []

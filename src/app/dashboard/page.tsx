@@ -5,18 +5,20 @@ export const dynamic = 'force-dynamic'
 import { useDashboard } from "@/hooks/use-dashboard"
 import { useBimaStatus } from "@/hooks/use-bima-status"
 import { useUpdateLapangan } from "@/hooks/use-update-lapangan"
+import { useDashboardKPI } from "@/hooks/use-dashboard-kpi"
 import { 
   MonthlyTrendChart, 
   BIMAStatusChart, 
   FieldUpdates
 } from "@/components/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Upload, TrendingUp, TrendingDown, BarChart3, PieChart, Activity } from "lucide-react"
+import { Upload, TrendingUp, BarChart3, PieChart, Activity } from "lucide-react"
 
 export default function DashboardPage() {
   const { csvData } = useDashboard()
   const { data: bimaStatusData, loading: bimaLoading, error: bimaError } = useBimaStatus()
   const { data: updateLapanganData, loading: updateLapanganLoading, error: updateLapanganError } = useUpdateLapangan()
+  const { kpiData, isLoading: kpiLoading } = useDashboardKPI()
 
 
 
@@ -69,50 +71,59 @@ export default function DashboardPage() {
         </div> */}
 
         {/* KPI Cards Section */}
-        {/* Olah ini untuk memanggil fungsi di database */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* PS Card */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="py-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wide">PS</h3>
                 <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0</div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {kpiLoading ? "..." : kpiData.ps.toLocaleString()}
+              </div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                <span>Data dari Supabase</span>
               </div>
             </CardContent>
           </Card> 
 
+          {/* RE Card */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wide">RE</h3>
                 <div className="h-3 w-3 rounded-full bg-blue-500/20 border-2 border-white/20"></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0 hr</div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {kpiLoading ? "..." : `${kpiData.re.toLocaleString()} hr`}
+              </div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                <span>Data dari Supabase</span>
               </div>
             </CardContent>
           </Card>
 
+          {/* PS/RE Ratio Card */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wide">PS/RE</h3>
                 <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {kpiLoading ? "..." : `${kpiData.psReRatio}%`}
+              </div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                <span>Data dari Supabase</span>
               </div>
             </CardContent>
           </Card>
 
+          {/* Target Static Card */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
@@ -121,7 +132,6 @@ export default function DashboardPage() {
               </div>
               <div className="text-4xl font-bold text-white mb-3 tracking-tight">75,12%</div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
-                {/* <TrendingDown className="h-4 w-4 mr-2" /> */}
                 <span>Per bulan</span>
               </div>
             </CardContent>

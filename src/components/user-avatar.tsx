@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { ChevronDown, User, Key, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
+import { useAuth } from "@/contexts/auth-context"
 
 interface UserAvatarProps {
   name?: string
@@ -11,10 +12,15 @@ interface UserAvatarProps {
   avatarUrl?: string
 }
 
-export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: UserAvatarProps) {
+export function UserAvatar({ name, role, avatarUrl }: UserAvatarProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { user, logout } = useAuth()
+
+  // Use auth user data if no props provided
+  const displayName = name || user?.name || "User"
+  const displayRole = role || (user?.role === 'admin' ? 'Admin' : 'User') || "User"
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -29,15 +35,13 @@ export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: Use
   }, [])
 
   const handleLogout = () => {
-    // Add logout logic here
-    console.log('Logging out...')
-    // You can redirect to login page or clear auth tokens
     setIsDropdownOpen(false)
+    logout()
   }
 
   const handleManageAccount = () => {
-    // Navigate to settings/profile page
-    router.push('/settings')
+    // Navigate to manage account page
+    router.push('/manage-account')
     setIsDropdownOpen(false)
   }
 
@@ -59,20 +63,20 @@ export function UserAvatar({ name = "Moni Roy", role = "Admin", avatarUrl }: Use
           {avatarUrl ? (
             <Image 
               src={avatarUrl} 
-              alt={name} 
+              alt={displayName} 
               width={40}
               height={40}
               className="w-full h-full rounded-full object-cover"
             />
           ) : (
-            <span>{name.charAt(0)}</span>
+            <span>{displayName.charAt(0)}</span>
           )}
         </div>
         
         {/* User Info */}
         <div className="text-left">
-          <div className="text-white font-medium text-sm">{name}</div>
-          <div className="text-gray-400 text-xs">{role}</div>
+          <div className="text-white font-medium text-sm">{displayName}</div>
+          <div className="text-gray-400 text-xs">{displayRole}</div>
         </div>
         
         {/* Chevron Icon */}

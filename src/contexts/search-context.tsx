@@ -19,6 +19,8 @@ interface SearchContextType {
   isSearching: boolean
   performSearch: (query: string) => void
   clearSearch: () => void
+  searchError: string | null
+  recentSearches: string[]
 }
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined)
@@ -27,14 +29,37 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('recent-searches')
+      return saved ? JSON.parse(saved) : []
+    }
+    return []
+  })
+
+  const addToRecentSearches = useCallback((query: string) => {
+    const trimmed = query.trim()
+    if (trimmed.length < 2) return
+    
+    setRecentSearches(prev => {
+      const updated = [trimmed, ...prev.filter(q => q !== trimmed)].slice(0, 5)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('recent-searches', JSON.stringify(updated))
+      }
+      return updated
+    })
+  }, [])
 
   const performSearch = useCallback(async (query: string) => {
     if (!query.trim()) {
       setSearchResults([])
+      setSearchError(null)
       return
     }
 
     setIsSearching(true)
+    setSearchError(null)
     
     try {
       const results: SearchResult[] = []
@@ -113,17 +138,24 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       })
 
       setSearchResults(results.slice(0, 8)) // Limit to 8 results
+      
+      // Add to recent searches if we found results
+      if (results.length > 0) {
+        addToRecentSearches(query)
+      }
     } catch (error) {
       console.error('Search error:', error)
+      setSearchError('Search failed. Please try again.')
       setSearchResults([])
     } finally {
       setIsSearching(false)
     }
-  }, [])
+  }, [addToRecentSearches])
 
   const clearSearch = useCallback(() => {
     setSearchQuery('')
     setSearchResults([])
+    setSearchError(null)
   }, [])
 
   return (
@@ -133,7 +165,9 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       searchResults,
       isSearching,
       performSearch,
-      clearSearch
+      clearSearch,
+      searchError,
+      recentSearches
     }}>
       {children}
     </SearchContext.Provider>

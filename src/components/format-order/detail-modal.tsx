@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { X, Download, Plus, Copy, Check } from "lucide-react"
+import { X, Download, Copy, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"

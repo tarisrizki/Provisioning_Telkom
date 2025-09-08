@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { MainLayout } from "@/components/main-layout"
 import { SearchProvider } from "@/contexts/search-context"
+import { AuthProvider } from "@/contexts/auth-context"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -16,15 +17,18 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   
   const isPublicRoute = publicRoutes.includes(pathname)
   
-  if (isPublicRoute) {
-    // Return children directly for public routes (like login)
-    return <div className="h-full w-full bg-[#1B2431]">{children}</div>
-  }
-  
-  // Wrap with SearchProvider and MainLayout for authenticated routes
+  // Always wrap with AuthProvider
   return (
-    <SearchProvider>
-      <MainLayout>{children}</MainLayout>
-    </SearchProvider>
+    <AuthProvider>
+      {isPublicRoute ? (
+        // Return children directly for public routes (like login)
+        <div className="h-full w-full bg-[#1B2431]">{children}</div>
+      ) : (
+        // Wrap with SearchProvider and MainLayout for authenticated routes
+        <SearchProvider>
+          <MainLayout>{children}</MainLayout>
+        </SearchProvider>
+      )}
+    </AuthProvider>
   )
 }

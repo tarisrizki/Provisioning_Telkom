@@ -8,16 +8,22 @@ import { useSearch } from '@/contexts/search-context'
 interface SearchDropdownProps {
   isOpen: boolean
   onClose: () => void
+  selectedIndex?: number
 }
 
-export function SearchDropdown({ isOpen, onClose }: SearchDropdownProps) {
-  const { searchResults, isSearching, searchQuery, clearSearch } = useSearch()
+export function SearchDropdown({ isOpen, onClose, selectedIndex = -1 }: SearchDropdownProps) {
+  const { searchResults, isSearching, searchQuery, clearSearch, searchError, recentSearches, setSearchQuery, performSearch } = useSearch()
   const router = useRouter()
 
   const handleResultClick = (url: string) => {
     router.push(url)
     clearSearch()
     onClose()
+  }
+
+  const handleRecentSearchClick = (query: string) => {
+    setSearchQuery(query)
+    performSearch(query)
   }
 
   const getIcon = (page: string) => {
@@ -46,22 +52,49 @@ export function SearchDropdown({ isOpen, onClose }: SearchDropdownProps) {
           <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-blue-400" />
           <p className="text-gray-400 text-sm">Searching...</p>
         </div>
+      ) : searchError ? (
+        <div className="p-4 text-center">
+          <div className="text-red-400 text-sm mb-2">⚠️ {searchError}</div>
+          <p className="text-gray-500 text-xs">Please check your connection and try again</p>
+        </div>
       ) : searchQuery && searchResults.length === 0 ? (
         <div className="p-4 text-center">
           <Search className="h-8 w-8 mx-auto mb-2 text-gray-500" />
           <p className="text-gray-400 text-sm">No results found for &ldquo;{searchQuery}&rdquo;</p>
           <p className="text-gray-500 text-xs mt-1">Try searching for pages, orders, reports, or data</p>
         </div>
+      ) : !searchQuery && recentSearches.length > 0 ? (
+        <div className="py-2">
+          <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-[#475569]">
+            Recent Searches
+          </div>
+          {recentSearches.map((query, index) => (
+            <button
+              key={`recent-${index}`}
+              onClick={() => handleRecentSearchClick(query)}
+              className="w-full px-3 py-2 text-left hover:bg-[#475569] transition-colors border-b border-[#404552] last:border-b-0 focus:outline-none text-gray-300 text-sm"
+            >
+              <div className="flex items-center space-x-3">
+                <Search className="h-3 w-3 text-gray-500" />
+                <span>{query}</span>
+              </div>
+            </button>
+          ))}
+        </div>
       ) : searchResults.length > 0 ? (
         <div className="py-2">
           <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-[#475569]">
             Search Results ({searchResults.length})
           </div>
-          {searchResults.map((result) => (
+          {searchResults.map((result, index) => (
             <button
               key={result.id}
               onClick={() => handleResultClick(result.url)}
-              className="w-full px-3 py-3 text-left hover:bg-[#475569] transition-colors border-b border-[#404552] last:border-b-0 focus:outline-none focus:bg-[#475569]"
+              className={`w-full px-3 py-3 text-left transition-colors border-b border-[#404552] last:border-b-0 focus:outline-none ${
+                index === selectedIndex 
+                  ? 'bg-[#475569] text-white' 
+                  : 'hover:bg-[#475569] hover:text-white'
+              }`}
             >
               <div className="flex items-start space-x-3">
                 <div className="flex-shrink-0 mt-0.5 text-blue-400">

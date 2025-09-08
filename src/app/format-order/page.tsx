@@ -6,7 +6,7 @@ import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Download, FileText, Users, Activity, BarChart3, RefreshCw, Database, Upload, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { Download, FileText, Activity, BarChart3, RefreshCw, Database, Upload, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { DetailModal } from "@/components/format-order/detail-modal"
 import { useTabData } from "@/hooks/use-format-order"
 import { useAnalysisData } from "@/hooks/use-analysis-data"
@@ -52,7 +52,7 @@ export default function FormatOrderPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedOrderData, setSelectedOrderData] = useState<FormatOrder | null>(null)
 
-  const tabs = ["Work Order", "Mitra", "Update lapangan", "MANJA"]
+  const tabs = ["Work Order", "Update lapangan", "MANJA"]
   const filters = ["Oktober", "November", "Desember", "Januari"]
 
 
@@ -64,15 +64,13 @@ export default function FormatOrderPage() {
   const getCurrentTableHeaders = () => {
     switch (selectedTab) {
       case "Work Order":
-        return ["Order ID", "Channel", "Date Created", "Work Order", "SC Order NO"]
-      case "Mitra":
-        return ["Order ID", "Mitra", "Labor teknisi"]
+        return ["Order ID", "Date Created", "Work Order", "Service NO", "Work Zone", "ODP", "Mitra", "Labor Teknisi"]
       case "Update lapangan":
-        return ["Order ID", "Update lapangan", "Symptom", "TINJUT HD OPLANG", "Status BIMA"]
+        return ["Order ID", "Update lapangan", "Symptom", "TINJUT HD OPLANG", "KET HD OPLANG", "Status BIMA"]
       case "MANJA":
-        return ["Order ID", "Kategori MANJA", "Umur MANJA"]
+        return ["Order ID", "Booking Date", "Kategori MANJA", "Umur MANJA", "Sisa MANJA"]
       default:
-        return ["Order ID", "Channel", "Date Created", "Work Order", "SC Order NO"]
+        return ["Order ID", "Date Created", "Work Order", "Service NO", "Work Zone", "ODP", "Mitra", "Labor Teknisi"]
     }
   }
 
@@ -123,9 +121,6 @@ export default function FormatOrderPage() {
     switch (tabName) {
       case "Work Order":
         return <FileText className="h-4 w-4" />
-
-      case "Mitra":
-        return <Users className="h-4 w-4" />
       case "Update lapangan":
         return <Activity className="h-4 w-4" />
       case "MANJA":
@@ -432,87 +427,6 @@ export default function FormatOrderPage() {
 
 
 
-        {selectedTab === "Mitra" && (
-          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-white flex items-center space-x-3">
-                <div className="p-2 bg-orange-500/20 rounded-lg">
-                  <Users className="h-5 w-5 text-orange-400" />
-                </div>
-                <span className="text-xl font-semibold">Analisis</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Total AO */}
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-300 text-sm font-medium">Total AO</span>
-                  <span className="text-white font-semibold text-lg">{analysisData.totalAO.toLocaleString()}</span>
-                </div>
-              </div>
-
-              {/* Total Mitra Analysis */}
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Total Mitra</span>
-                  <span className="text-white font-semibold text-lg">{Object.values(analysisData.mitraStats).reduce((a, b) => a + b, 0)}</span>
-                </div>
-                <div className="space-y-3">
-                  {getTopItems(analysisData.mitraStats, 5).map(([mitra, count], index) => (
-                    <div key={mitra} className="relative">
-                      <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                        <div 
-                          className={`${index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-blue-400' : 'bg-blue-300'} h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300`} 
-                          style={{width: `${getPercentageWidth(count, analysisData.totalAO)}%`}}
-                        >
-                          <span className="text-white text-sm font-medium">{count}</span>
-                        </div>
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
-                          {mitra}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {getTopItems(analysisData.mitraStats).length === 0 && (
-                    <div className="text-center text-gray-400 py-4">
-                      No mitra data available
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Top 5 Labor teknis Analysis */}
-              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-gray-300 text-sm font-medium">Top 5 Labor teknis</span>
-                  <span className="text-white font-semibold text-lg">{Object.values(analysisData.laborTeknisiStats).reduce((a, b) => a + b, 0)}</span>
-                </div>
-                <div className="space-y-3">
-                  {getTopItems(analysisData.laborTeknisiStats, 5).map(([labor, count], index) => (
-                    <div key={labor} className="relative">
-                      <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
-                        <div 
-                          className={`${index === 0 ? 'bg-blue-500' : index === 1 ? 'bg-blue-400' : 'bg-blue-300'} h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300`} 
-                          style={{width: `${getPercentageWidth(count, analysisData.totalAO)}%`}}
-                        >
-                          <span className="text-white text-sm font-medium">{count}</span>
-                        </div>
-                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
-                          {labor.length > 25 ? `${labor.substring(0, 25)}...` : labor}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {getTopItems(analysisData.laborTeknisiStats).length === 0 && (
-                    <div className="text-center text-gray-400 py-4">
-                      No labor teknisi data available
-                    </div>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {selectedTab === "Update lapangan" && (
           <Card className="bg-gradient-to-br from-[#1e293b] via-[#2d3748] to-[#334155] border-[#475569] shadow-2xl hover:shadow-purple-500/10 transition-all duration-300">

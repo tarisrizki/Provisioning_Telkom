@@ -1,4 +1,5 @@
 export { useDashboard } from './use-dashboard'
+export { useDashboardKPI } from './use-dashboard-kpi'
 export { useLaporan } from './use-laporan'
 export { useUpload } from './use-upload'
 export { useBimaStatus } from './use-bima-status'
