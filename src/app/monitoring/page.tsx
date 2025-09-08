@@ -4,14 +4,14 @@ import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-
-import { TrendingUp, RefreshCw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
+import { useTodayOrders } from "@/hooks/use-today-orders"
+import { TrendingUp, AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
+import { RefreshCw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
 import { MonitoringChart, HSAWorkOrderChart } from "@/components/dashboard"
 import { useMonitoring, useHSAWorkOrder } from "@/hooks"
-
-
-
+import { useTodayWorkComplete } from "@/hooks/use-work-complete"
+import { useTodayWorkCancel } from "@/hooks/use-today-work-cancel"
+import { useTodayWorkFail } from "@/hooks/use-today-work-fail"
 import { TrendingDown} from "lucide-react"
 
 // Interfaces will be used when data is fetched from Supabase
@@ -22,11 +22,14 @@ export default function MonitoringPage() {
   const [selectedMonth, setSelectedMonth] = useState("October")
   const [selectedBranch, setSelectedBranch] = useState("Branch")
   const [selectedWOK, setSelectedWOK] = useState("WOK")
-  
+  const { data: todayOrders, loading: todayOrdersLoading, error: todayOrdersError } = useTodayOrders()
+  const { data: workComplete, loading: workCompleteLoading, error: workCompleteError } = useTodayWorkComplete()
   // Fetch monitoring data from Supabase
   const { data: monitoringData, loading: monitoringLoading, error: monitoringError } = useMonitoring()
   const { data: hsaWorkOrderData, loading: hsaLoading, error: hsaError } = useHSAWorkOrder()
-
+  const { data: workCancel, loading: workCancelLoading, error: workCancelError } = useTodayWorkCancel()
+  const { data: workFail, loading: workFailLoading, error: workFailError } = useTodayWorkFail()
+  
   // Data will be fetched from Supabase - no filtering logic needed for now
   const filteredData = useMemo(() => {
     return {
@@ -62,61 +65,175 @@ export default function MonitoringPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Data Work Order */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Data Work Order</h3>
-                <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
+                <div className={`h-3 w-3 rounded-full border-2 border-white/20 ${
+                  todayOrdersLoading 
+                    ? 'bg-yellow-500/20 animate-pulse' 
+                    : todayOrdersError 
+                      ? 'bg-red-500/20' 
+                      : 'bg-green-500/20'
+                }`}></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0</div>
+              
+              {/* // memanggil fungsi di database untuk mendapatkan data hari ini */}
+
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {todayOrdersLoading ? (
+                  <div className="animate-pulse bg-gray-600 h-10 w-24 rounded"></div>
+                ) : todayOrdersError ? (
+                  <span className="text-red-400 text-xl">Error</span>
+                ) : (
+                  todayOrders.toLocaleString('id-ID')
+                )}
+              </div>
+              
               <div className="flex items-center text-gray-400 text-sm font-medium">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                {todayOrdersError ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 mr-2 text-red-400" />
+                    <span className="text-red-400">Gagal memuat data</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingUp className="h-4 w-4 mr-2" />
+                    <span>Total work order hari ini</span>
+                  </>
+                )}
+              </div>
+              
+              {/* Optional: Show last updated time */}
+              {!todayOrdersLoading && !todayOrdersError && (
+                <div className="mt-2 text-xs text-gray-500">
+                  Terakhir diperbarui: {new Date().toLocaleTimeString('id-ID')}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Work Complete */}
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Work Complete</h3>
+                <div className={`h-3 w-3 rounded-full border-2 border-white/20 ${
+                  workCompleteLoading 
+                    ? 'bg-yellow-500/20 animate-pulse' 
+                    : workCompleteError 
+                      ? 'bg-red-500/20' 
+                      : 'bg-green-500/20'
+                }`}></div>
+              </div>
+              
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {workCompleteLoading ? (
+                  <div className="animate-pulse bg-gray-600 h-10 w-24 rounded"></div>
+                ) : workCompleteError ? (
+                  <span className="text-red-400 text-xl">Error</span>
+                ) : (
+                  workComplete.toLocaleString('id-ID')
+                )}
+              </div>
+              
+              <div className="flex items-center text-gray-400 text-sm font-medium">
+                {workCompleteError ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 mr-2 text-red-400" />
+                    <span className="text-red-400">Gagal memuat data</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    <span>Selesai hari ini</span>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
 
+          {/* Work Cancel */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Avg Provisioning Time</h3>
-                <div className="h-3 w-3 rounded-full bg-blue-500/20 border-2 border-white/20"></div>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Work Cancel</h3>
+                <div className={`h-3 w-3 rounded-full border-2 border-white/20 ${
+                  workCancelLoading 
+                    ? 'bg-yellow-500/20 animate-pulse' 
+                    : workCancelError 
+                      ? 'bg-red-500/20' 
+                      : 'bg-orange-500/20'
+                }`}></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0 hr</div>
+              
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {workCancelLoading ? (
+                  <div className="animate-pulse bg-gray-600 h-10 w-24 rounded"></div>
+                ) : workCancelError ? (
+                  <span className="text-red-400 text-xl">Error</span>
+                ) : (
+                  workCancel.toLocaleString('id-ID')
+                )}
+              </div>
+              
               <div className="flex items-center text-gray-400 text-sm font-medium">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                {workCancelError ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 mr-2 text-red-400" />
+                    <span className="text-red-400">Gagal memuat data</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle className="h-4 w-4 mr-2 text-orange-400" />
+                    <span>Dibatalkan hari ini</span>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
-
+          {/* Work Fail */}
           <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Success Rate</h3>
-                <div className="h-3 w-3 rounded-full bg-green-500/20 border-2 border-white/20"></div>
+                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Work Fail</h3>
+                <div className={`h-3 w-3 rounded-full border-2 border-white/20 ${
+                  workFailLoading 
+                    ? 'bg-yellow-500/20 animate-pulse' 
+                    : workFailError 
+                      ? 'bg-red-500/20' 
+                      : 'bg-red-500/20'
+                }`}></div>
               </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
+              
+              <div className="text-4xl font-bold text-white mb-3 tracking-tight">
+                {workFailLoading ? (
+                  <div className="animate-pulse bg-gray-600 h-10 w-24 rounded"></div>
+                ) : workFailError ? (
+                  <span className="text-red-400 text-xl">Error</span>
+                ) : (
+                  workFail.toLocaleString('id-ID')
+                )}
+              </div>
+              
               <div className="flex items-center text-gray-400 text-sm font-medium">
-                <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
+                {workFailError ? (
+                  <>
+                    <AlertCircle className="h-4 w-4 mr-2 text-red-400" />
+                    <span className="text-red-400">Gagal memuat data</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle className="h-4 w-4 mr-2 text-red-400" />
+                    <span>Gagal hari ini</span>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
-
-          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-gray-300 tracking-wide">Failure Rate</h3>
-                <div className="h-3 w-3 rounded-full bg-red-500/20 border-2 border-white/20"></div>
-              </div>
-              <div className="text-4xl font-bold text-white mb-3 tracking-tight">0%</div>
-              <div className="flex items-center text-gray-400 text-sm font-medium">
-                <TrendingDown className="h-4 w-4 mr-2" />
-                <span>Data akan dimuat dari Supabase</span>
-              </div>
-            </CardContent>
-          </Card>
+          
+      
         </div>
 
         {/* KPI Cards */}
