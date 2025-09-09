@@ -162,6 +162,16 @@ export function useTabData(tab: string, options: UseFormatOrderOptions = {}) {
           item.mitra || '-',
           item.labor_teknisi || '-'
         ])
+      case "Aktivasi":
+        return data.map(item => [
+          item.order_id,
+          item.workorder || '-',
+          item.service_no || '-',
+          item.mitra || '-',
+          item.uic || '-', // Using UIC as SN
+          item.keterangan_uic || '-', // Using keterangan_uic as KET
+          item.status_bima || '-' // Using status_bima as Status
+        ])
       case "Update lapangan":
         return data.map(item => [
           item.order_id,

@@ -52,7 +52,7 @@ export default function FormatOrderPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
   const [selectedOrderData, setSelectedOrderData] = useState<FormatOrder | null>(null)
 
-  const tabs = ["Work Order", "Update lapangan", "MANJA"]
+  const tabs = ["Work Order", "Aktivasi", "Update lapangan", "MANJA"]
   const filters = ["Oktober", "November", "Desember", "Januari"]
 
 
@@ -65,6 +65,8 @@ export default function FormatOrderPage() {
     switch (selectedTab) {
       case "Work Order":
         return ["Order ID", "Date Created", "Work Order", "Service NO", "Work Zone", "ODP", "Mitra", "Labor Teknisi"]
+      case "Aktivasi":
+        return ["Order ID", "Work Order", "Service HD", "Mitra", "SN", "KET", "Status"]
       case "Update lapangan":
         return ["Order ID", "Update lapangan", "Symptom", "TINJUT HD OPLANG", "KET HD OPLANG", "Status BIMA"]
       case "MANJA":
@@ -121,6 +123,8 @@ export default function FormatOrderPage() {
     switch (tabName) {
       case "Work Order":
         return <FileText className="h-4 w-4" />
+      case "Aktivasi":
+        return <CheckCircle className="h-4 w-4" />
       case "Update lapangan":
         return <Activity className="h-4 w-4" />
       case "MANJA":
@@ -419,6 +423,126 @@ export default function FormatOrderPage() {
                       No service area data available
                     </div>
                   )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Analysis Section for Aktivasi */}
+        {selectedTab === "Aktivasi" && (
+          <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-white flex items-center space-x-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <BarChart3 className="h-5 w-5 text-green-400" />
+                </div>
+                <span className="text-xl font-semibold">Analisis</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Total AO */}
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300 text-sm font-medium">Total AO</span>
+                  <span className="text-white font-semibold text-lg">10,069</span>
+                </div>
+              </div>
+
+              {/* Status Analysis */}
+              <div className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-300 text-sm font-medium">Status</span>
+                  <span className="text-white font-semibold text-lg">10,069</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-500 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '28%'}}>
+                        <span className="text-white text-sm font-medium">28</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        COMPLETE
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '30%'}}>
+                        <span className="text-white text-sm font-medium">30</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        FO ACT - ONT MATILOSS
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-400 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-medium">26</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        FO DATA BELUM PI - PUSH DAMAN
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-300 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '26%'}}>
+                        <span className="text-white text-sm font-medium">26</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        RET BLM START - PUSH OPEN ONT
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-300 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '28%'}}>
+                        <span className="text-white text-sm font-medium">28</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        INPUT ULANG
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-300 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '22%'}}>
+                        <span className="text-white text-sm font-medium">22</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        PUSH SYAP - ACT IOMP
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-200 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '38%'}}>
+                        <span className="text-slate-800 text-sm font-medium">38</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        PUSH EVGAP - CG
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="relative">
+                    <div className="w-full bg-[#1e293b] rounded-lg h-8 relative overflow-hidden border border-[#475569]">
+                      <div className="bg-blue-200 h-8 rounded-lg absolute left-0 top-0 flex items-center justify-start pl-3 transition-all duration-300" style={{width: '26%'}}>
+                        <span className="text-slate-800 text-sm font-medium">26</span>
+                      </div>
+                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 text-sm font-medium">
+                        WAIT CLOSE TEKHISH
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
