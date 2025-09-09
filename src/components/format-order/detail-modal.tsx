@@ -492,26 +492,28 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
 
             {/* Desktop: Horizontal tabs */}
             <div className="hidden sm:block">
-              <div className="w-full px-2 sm:px-4 py-2 overflow-x-auto hide-scrollbar">
-                <div className="flex items-center bg-gradient-to-r from-[#223048] to-[#2a3b55] rounded-xl gap-2 min-w-max p-1">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => {
-                        setActiveTab(tab.id)
-                        if (tab.id === "detail-customer" || tab.id === "update-lapangan") {
-                          setPageByTab((p) => ({ ...p, [tab.id]: 0 }))
-                        }
-                      }}
-                      className={`px-3 sm:px-5 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
-                        activeTab === tab.id
-                          ? "text-white bg-blue-600 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
-                          : "text-gray-300 hover:text-white hover:bg-[#334155]"
-                      }`}
-                    >
-                      {tab.label}
-                    </button>
-                  ))}
+              <div className="w-full px-4 sm:px-6 py-2">
+                <div className="flex justify-center">
+                  <div className="flex items-center bg-gradient-to-r from-[#223048] to-[#2a3b55] rounded-xl gap-30 p-1 px-80">
+                    {tabs.map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => {
+                          setActiveTab(tab.id)
+                          if (tab.id === "detail-customer" || tab.id === "update-lapangan") {
+                            setPageByTab((p) => ({ ...p, [tab.id]: 0 }))
+                          }
+                        }}
+                        className={`px-3 sm:px-5 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
+                          activeTab === tab.id
+                            ? "text-white bg-blue-600 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
+                            : "text-gray-300 hover:text-white hover:bg-[#334155]"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
