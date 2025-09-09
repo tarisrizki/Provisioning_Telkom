@@ -430,128 +430,101 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
         .hide-scrollbar::-webkit-scrollbar { display: none; }
       `}</style>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-        <div className="bg-[#1e293b] rounded-none sm:rounded-lg w-full sm:max-w-6xl max-h-[100svh] md:max-h-[90vh] overflow-y-auto hide-scrollbar shadow-2xl border border-[#475569]">
-        {/* Header */}
-        <div className="flex items-center justify-between p-3 sm:p-6 border-b border-[#475569] bg-[#1B2431] sticky top-0 z-20">
-          <div className="flex items-center space-x-3">
-            <span className="rounded-md bg-[#2a3444] text-white/90 px-4 py-2 text-sm font-semibold tracking-wide">
-              {orderData?.order_id || "No Order ID"}
-            </span>
-            <Badge className={`${getStatusBimaColor(orderData?.status_bima)} rounded-md text-white px-4 py-2 text-sm font-semibold uppercase`}>
-              {orderData?.status_bima || "UNKNOWN"}
-            </Badge>
+        <div className="bg-[#1e293b] rounded-none sm:rounded-lg w-full sm:max-w-6xl h-screen sm:h-auto max-h-[100svh] md:max-h-[90vh] overflow-y-auto hide-scrollbar shadow-2xl border border-[#475569]">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 sm:p-6 border-b border-[#475569] bg-[#1B2431] sticky top-0 z-20">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <span className="rounded-md bg-[#2a3444] text-white/90 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold tracking-wide">
+                {orderData?.order_id || "No Order ID"}
+              </span>
+              <Badge className={`${getStatusBimaColor(orderData?.status_bima)} rounded-md text-white px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold uppercase`}>
+                {orderData?.status_bima || "UNKNOWN"}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] flex-1 sm:flex-none">
+                <Download className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Export</span>
+                <span className="sm:hidden">Export</span>
+              </Button>
+              <Button
+                onClick={onClose}
+                variant="ghost"
+                className="text-gray-400 hover:text-white hover:bg-[#334155] flex-shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569]">
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
-            <Button
-              onClick={onClose}
-              variant="ghost"
-              className="text-gray-400 hover:text-white hover:bg-[#334155]"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+
+          {/* Tabs - Mobile Vertical Layout */}
+          <div className="border-b border-[#475569] bg-[#1B2431] sticky top-[120px] sm:top-[72px] z-10">
+            {/* Mobile: Vertical tabs */}
+            <div className="block sm:hidden">
+              <div className="w-full px-3 py-3">
+                <div className="bg-gradient-to-b from-[#223048] to-[#2a3b55] rounded-xl p-2 space-y-2">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id)
+                        if (tab.id === "detail-customer" || tab.id === "update-lapangan") {
+                          setPageByTab((p) => ({ ...p, [tab.id]: 0 }))
+                        }
+                      }}
+                      className={`w-full px-4 py-3 text-sm font-medium transition-all duration-200 rounded-lg text-left ${
+                        activeTab === tab.id
+                          ? "text-white bg-blue-600 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
+                          : "text-gray-300 hover:text-white hover:bg-[#334155]"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span>{tab.label}</span>
+                        {activeTab === tab.id && (
+                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop: Horizontal tabs */}
+            <div className="hidden sm:block">
+              <div className="w-full px-2 sm:px-4 py-2 overflow-x-auto hide-scrollbar">
+                <div className="flex items-center bg-gradient-to-r from-[#223048] to-[#2a3b55] rounded-xl gap-2 min-w-max p-1">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setActiveTab(tab.id)
+                        if (tab.id === "detail-customer" || tab.id === "update-lapangan") {
+                          setPageByTab((p) => ({ ...p, [tab.id]: 0 }))
+                        }
+                      }}
+                      className={`px-3 sm:px-5 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
+                        activeTab === tab.id
+                          ? "text-white bg-blue-600 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
+                          : "text-gray-300 hover:text-white hover:bg-[#334155]"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div className="flex-1 p-3 sm:p-6 bg-[#1e293b] min-h-0">
+            <div className="w-full">
+              {renderDetailContent()}
+            </div>
           </div>
         </div>
-
-        {/* Content */}
-        <div className="flex flex-col">
-          {/* Left Panel (no divider so content can span full width below) */}
-          {/* <div className="w-full bg-[#1e293b] p-6">
-            <div className="space-y-8">
-              <div>
-                <p className="text-gray-400 text-xs font-medium">Channel</p>
-                <h3 className="text-white font-semibold text-lg mt-1">{orderData?.channel || "-"}</h3>
-              </div>
-              <div>
-                <p className="text-gray-400 text-xs font-medium">Date created</p>
-                <p className="text-white font-semibold text-lg mt-1">{formatDate(orderData?.date_created)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-xs font-medium">Work order</p>
-                <p className="text-white font-semibold text-lg mt-1">{getDisplayValue(orderData?.workorder)}</p>
-              </div>
-              <div>
-                <p className="text-gray-400 text-xs font-medium">SC Order No</p>
-                <div className="text-white font-semibold text-lg mt-1">
-                  <TruncatedText 
-                    text={getDisplayValue(orderData?.sc_order_no)} 
-                    maxLength={25}
-                    className="text-white font-semibold"
-                  />
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          {/* Right Panel - full width */}
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4">
-            <div className="bg-[#1e293b] rounded-none sm:rounded-lg w-full sm:max-w-6xl h-screen sm:h-auto max-h-[100svh] md:max-h-[90vh] overflow-y-auto hide-scrollbar shadow-2xl border border-[#475569]">
-              {/* Header */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 sm:p-6 border-b border-[#475569] bg-[#1B2431] sticky top-0 z-20">
-                <div className="flex items-center flex-wrap gap-2 sm:gap-3">
-                  <span className="rounded-md bg-[#2a3444] text-white/90 px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold tracking-wide">
-                    {orderData?.order_id || "No Order ID"}
-                  </span>
-                  <Badge className={`${getStatusBimaColor(orderData?.status_bima)} rounded-md text-white px-3 py-1.5 sm:px-4 sm:py-2 text-sm font-semibold uppercase`}>
-                    {orderData?.status_bima || "UNKNOWN"}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] w-full sm:w-auto">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                  <Button
-                    onClick={onClose}
-                    variant="ghost"
-                    className="text-gray-400 hover:text-white hover:bg-[#334155]"
-                  >
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <div className="border-b border-[#475569] bg-[#1B2431] sticky top-[56px] sm:top-[72px] z-10">
-                <div className="w-full px-2 sm:px-4 py-2 overflow-x-auto hide-scrollbar">
-                  <div className="flex items-center bg-gradient-to-r from-[#223048] to-[#2a3b55] rounded-xl gap-2 min-w-max p-1">
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab.id}
-                        onClick={() => {
-                          setActiveTab(tab.id)
-                          if (tab.id === "detail-customer" || tab.id === "update-lapangan") {
-                            setPageByTab((p) => ({ ...p, [tab.id]: 0 }))
-                          }
-                        }}
-                        className={`px-3 sm:px-5 py-2 text-sm font-medium transition-all duration-200 whitespace-nowrap rounded-lg ${
-                          activeTab === tab.id
-                            ? "text-white bg-blue-600 shadow-[0_0_0_1px_rgba(59,130,246,0.35)]"
-                            : "text-gray-300 hover:text-white hover:bg-[#334155]"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Tab Content */}
-              <div className="flex-1 p-3 sm:p-6 bg-[#1e293b] min-h-0">
-                <div className="w-full">
-                  {renderDetailContent()}
-                </div>
-              </div>
-            </div>
-          </div>
-
-                </div>
       </div>
-    </div>
     </TooltipProvider>
   )
 }
