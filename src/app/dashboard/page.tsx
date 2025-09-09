@@ -13,13 +13,14 @@ import {
 } from "@/components/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, TrendingUp, BarChart3, PieChart, Activity } from "lucide-react"
+import { useREStats } from "@/hooks/use-re-stats"
 
 export default function DashboardPage() {
   const { csvData } = useDashboard()
   const { data: bimaStatusData, loading: bimaLoading, error: bimaError } = useBimaStatus()
   const { data: updateLapanganData, loading: updateLapanganLoading, error: updateLapanganError } = useUpdateLapangan()
   const { kpiData, isLoading: kpiLoading } = useDashboardKPI()
-
+  const { data: reStats, loading: reLoading, error: reError } = useREStats()
 
 
   // Show message if no data available
@@ -97,11 +98,11 @@ export default function DashboardPage() {
                 <div className="h-3 w-3 rounded-full bg-blue-500/20 border-2 border-white/20"></div>
               </div>
               <div className="text-4xl font-bold text-white mb-3 tracking-tight">
-                {kpiLoading ? "..." : `${kpiData.re.toLocaleString()} hr`}
+                {reLoading ? 'Loading...' : reStats?.total_re || 0}
               </div>
               <div className="flex items-center text-gray-400 text-sm font-medium">
                 <TrendingUp className="h-4 w-4 mr-2" />
-                <span>Data dari Supabase</span>
+                <span>Cancelled orders bulan ini</span>
               </div>
             </CardContent>
           </Card>

@@ -237,7 +237,7 @@ export default function MonitoringPage() {
         </div>
 
         {/* KPI Cards ??????????????????????????????????????????????*/}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {filteredData.kpiCards.map((card, index) => (
             <Card key={index} className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl hover:shadow-2xl transition-all duration-300">
               <CardContent className="p-6">
@@ -253,7 +253,7 @@ export default function MonitoringPage() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </div> */}
 
         {/* Filters */}
         
