@@ -21,12 +21,7 @@ const adminOnlyRoutes = [
 const publicRoutes = [
   '/',
   '/api/auth/login',
-  '/api/auth/logout',
-  '/test-connection',
-  '/test-data',
-  '/test-env',
-  '/debug-connection',
-  '/simple-login-test'
+  '/api/auth/logout'
 ]
 
 export function middleware(request: NextRequest) {

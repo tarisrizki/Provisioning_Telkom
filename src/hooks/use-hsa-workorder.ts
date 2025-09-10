@@ -53,7 +53,7 @@ export function useHSAWorkOrder() {
         const { data: testData, error: testError } = await supabase
           .from('format_order')
           .select('service_area')
-          .limit(5)
+          .range(0, 4) // Get first 5 records as test
 
         if (testError) {
           console.error('HSAWorkOrder: Test query failed:', testError)

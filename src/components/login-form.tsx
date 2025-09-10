@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Eye, EyeOff } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/auth-context"
 
 export function LoginForm() {
   const [username, setUsername] = useState("")
@@ -11,6 +12,7 @@ export function LoginForm() {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -18,21 +20,13 @@ export function LoginForm() {
     setError("")
     
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, password }),
-      })
+      const result = await login(username, password)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (result.success) {
         // Redirect to dashboard
         router.push('/dashboard')
       } else {
-        setError(data.error || "Username atau password salah!")
+        setError(result.error || "Username atau password salah!")
       }
     } catch (error) {
       console.error('Login error:', error)

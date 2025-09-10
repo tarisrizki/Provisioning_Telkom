@@ -1,308 +1,76 @@
 # Provisioning Telkom Application
 
-A comprehensive application for managing Telkom provisioning work orders with CSV data upload capabilities.
+A comprehensive web application for managing Telkom provisioning work orders with real-time dashboard analytics and CSV data upload capabilities.
 
-## Features
+## 🚀 Features
 
-- **CSV Data Upload**: Upload and process large CSV files with comprehensive data mapping
-- **Dashboard Analytics**: Real-time monitoring of work order statistics and performance metrics with live Supabase data
-- **Data Management**: Complete CRUD operations for work orders and upload history
-- **Performance Optimization**: Streaming CSV parsing and batch database operations
-- **Responsive Design**: Modern UI with mobile-friendly interface
-- **Real-time BIMA Status**: Live distribution charts from Supabase database
+- **Real-time Dashboard**: Live analytics and metrics from Supabase database
+- **CSV Data Upload**: Process large CSV files with automatic column mapping
+- **Work Order Management**: Complete CRUD operations for provisioning data
+- **BIMA Status Tracking**: Live status distribution and monitoring
+- **Performance Analytics**: Branch performance and channel statistics
+- **Responsive Design**: Mobile-friendly modern UI
 
-## Environment Setup
+## 🛠️ Quick Setup
 
-Create a `.env.local` file in the root directory with your Supabase credentials:
-
+### 1. Environment Configuration
+Create `.env.local` file:
 ```env
-# Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
-### Supabase Integration
-
-The application now connects directly to Supabase for real-time data:
-
-- **BIMA Status Distribution**: Automatically fetches and displays status distribution from `format_order` table
-- **Real-time Updates**: Charts update automatically when data changes
-- **Error Handling**: Comprehensive error states and loading indicators
-- **Performance**: Optimized queries for large datasets (>10,000 records)
-
-## Database Structure
-
-### Work Orders Table
-The application now supports a comprehensive work order structure based on the actual CSV data format:
-
-#### Core Fields
-- `ao` - Account Officer number (required)
-- `workorder` - Work order number (required)
-- `channel` - Sales channel
-- `date_created` - Order creation date (flexible format support)
-- `hsa` - HSA number
-- `branch` - Branch location
-
-#### Customer & Location
-- `customer_name` - Customer name
-- `address` - Customer address
-- `workzone` - Work zone
-- `contact_phone` - Contact phone number
-- `booking_date` - Booking date (flexible format support)
-- `status_date` - Status update date (flexible format support)
-
-#### Technical Details
-- `odp` - ODP information
-- `service_no` - Service number
-- `description` - Work description
-- `symptom` - Problem symptoms
-- `engineering_memo` - Engineering notes
-- `update_lapangan` - Field updates
-
-#### Coordinates & GPS
-- `tikor_inputan_pelanggan` - Input coordinates
-- `tikor_real_pelanggan` - Real coordinates
-- `lat_inputan` / `long_inputan` - Input latitude/longitude
-- `lat_real` / `long_real` - Real latitude/longitude
-- `selisih` - Coordinate difference
-
-#### Manja Management
-- `umur_manja` - Manja age
-- `kategori_manja` - Manja category
-- `sheet_aktivasi` - Activation sheet
-- `tanggal_ps` - PS date (flexible format support)
-- `sisa_manja` - Remaining manja
-
-#### Status & Tracking
-- `status_bima` - BIMA status
-- `status_dsc` - DSC status
-- `sending_status` - Sending status
-- `username` - Operator username
-- `timestamp` - Processing timestamp
-
-## Setup Instructions
-
-### 1. Database Setup
-
-#### **Option A: Fresh Installation**
-Run the SQL script in your Supabase SQL editor:
-
-```sql
--- Copy and paste the contents of database-setup.sql
--- This will create all necessary tables, indexes, and views
-```
-
-#### **Option B: Update Existing Table**
-If you already have the table and encounter "value too long" errors:
-
-**🚨 EMERGENCY SOLUTION (Recommended for immediate fix)**
-```sql
--- Copy and paste the contents of migration-emergency-fix.sql
--- This updates ALL VARCHAR columns to maximum safe sizes (VARCHAR(2000))
--- Converts critical fields to TEXT (unlimited length)
--- Use this if you're getting errors right now!
-```
-
-**Solution 1: Comprehensive Update**
-```sql
--- Copy and paste the contents of migration-comprehensive-update.sql
--- This updates ALL VARCHAR columns to maximum safe sizes
-```
-
-**Solution 2: Basic Update**
-```sql
--- Copy and paste the contents of migration-update-column-sizes.sql
--- This updates standard VARCHAR columns to larger sizes
-```
-
-**Last Resort: Drop and Recreate**
-```sql
--- If migration fails, drop the table and run database-setup.sql
--- WARNING: This will delete all existing data!
-```
-
-### 2. Environment Variables
-
-Create a `.env.local` file with your Supabase credentials:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-```
-
-### 3. Install Dependencies
-
+### 2. Install & Run
 ```bash
 npm install
-```
-
-### 4. Run Development Server
-
-```bash
 npm run dev
 ```
 
-## CSV Upload Format
+### 3. Database Setup
+The application requires a Supabase database with `format_order` table. Contact the development team for database schema.
 
-The application automatically maps CSV columns to database fields. Supported column names include:
+## 📊 CSV Upload Format
 
 ### Required Columns
-- `AO` - Account Officer
-- `WORKORDER` - Work Order Number
+- `AO` - Account Officer number
+- `WORKORDER` - Work order number
 
-### Important Columns (Auto-mapped)
-- `CHANNEL` - Sales Channel
-- `DATE CREATED` - Creation Date
-- `HSA` - HSA Number
-- `BRANCH` - Branch Location
-- `UPDATE LAPANGAN` - Field Updates
-- `SYMPTOM` - Problem Symptoms
-- `TINJUT HD OPLANG` - HD/OPLANG Review
-- `KATEGORI MANJA` - Manja Category
-- `STATUS BIMA` - BIMA Status
+### Key Columns (Auto-mapped)
+- `CHANNEL`, `DATE CREATED`, `HSA`, `BRANCH`
+- `UPDATE LAPANGAN`, `SYMPTOM`, `STATUS BIMA`
+- `CUSTOMER NAME`, `ADDRESS`, `SERVICE NO`
+- And 40+ other columns with flexible naming support
 
-### Additional Supported Columns
-- `ODP`, `SERVICE NO.`, `DESCRIPTION`
-- `ADDRESS`, `CUSTOMER NAME`, `WORKZONE`
-- `STATUS DATE`, `CONTACT PHONE`, `BOOKING DATE`
-- `CLUSTER`, `MITRA`, `LABOR TEKNISI`
-- `ENGINEERING MEMO`, `TIKOR INPUTAN PELANGGAN`
-- `SHEET AKTIVASI`, `TANGGAL PS`, `KETERANGAN HD OPLANG`
-- `UIC`, `UPDATE UIC`, `KETERANGAN UIC`
-- `STATUS DSC`, `SISA MANJA`, `BULAN ORDER`
-- `BULAN PS`, `BACKUP`, `LAT INPUTAN`, `LONG INPUTAN`
-- `LAT REAL`, `LONG REAL`, `USERNAME`, `SENDING STATUS`
+## 🔧 Technical Stack
 
-## Data Processing Features
+- **Frontend**: Next.js 15.4.6 with TypeScript
+- **Backend**: Supabase PostgreSQL
+- **UI**: Modern responsive design with charts
+- **Data Processing**: Streaming CSV parser with pagination
+- **Performance**: Optimized for 10,000+ records
 
-### Smart Column Mapping
-- Automatic detection of column variations
-- Flexible matching for different naming conventions
-- Support for Indonesian and English column names
+## 📝 Key Pages
 
-### Flexible Date Format Support
-- **Date fields now use TEXT type** for maximum compatibility
-- **Supported formats**:
-  - `DD/MM/YYYY HH.MM` (e.g., "02/07/2025 15.00")
-  - `DD/MM/YYYY HH:MM` (e.g., "01/07/2025 15:55")
-  - `DD/MM/YYYY` (e.g., "02/07/2025")
-  - `YYYY-MM-DD` (e.g., "2025-07-02")
-  - Any other date format your CSV contains
-- **Affected fields**: `date_created`, `status_date`, `booking_date`, `tanggal_ps`
-- **No more timestamp parsing errors** - dates are stored as-is
+- `/dashboard` - Real-time analytics and KPI monitoring
+- `/format-order` - CSV upload and data management
+- `/laporan` - Comprehensive reporting and filtering
+- `/monitoring` - System performance monitoring
 
-### Data Validation
-- CSV structure validation
-- Data integrity checks
-- Automatic data type conversion
+## 🐛 Common Issues & Solutions
 
-### Performance Optimization
-- Streaming CSV parsing for large files
-- Batch database operations
-- IndexedDB and localStorage for temporary storage
-- Progress tracking and cancellation support
+### CSV Upload Errors
+- **"Value too long"**: Database column size limit reached
+- **"Invalid date format"**: Date fields now support any format
+- **Solution**: Contact admin for database migration
 
-## API Endpoints
+### Connection Issues
+- Verify Supabase credentials in `.env.local`
+- Check network connectivity and database access
 
-### Work Orders
-- `GET /api/work-orders` - Fetch work orders with filtering
-- `POST /api/work-orders` - Create new work orders
-- `PUT /api/work-orders/:id` - Update work order
-- `DELETE /api/work-orders/:id` - Delete work order
+## 📞 Support
 
-### Uploads
-- `GET /api/uploads` - Fetch upload history
-- `POST /api/uploads` - Create upload record
+For technical support or access to database schema, contact the development team.
 
-### Analytics
-- `GET /api/stats` - Get work order statistics
-- `GET /api/metrics` - Get dashboard metrics
+## 📄 License
 
-## Dashboard Features
-
-### Real-time Metrics
-- Total work orders count
-- Status distribution charts
-- Branch performance analysis
-- Channel statistics
-- Manja management insights
-
-### Data Visualization
-- Interactive charts and graphs
-- Performance trend analysis
-- Geographic data mapping
-- Status tracking dashboard
-
-## Browser Support
-
-- **Modern Browsers**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
-- **Mobile**: iOS Safari 13+, Chrome Mobile 80+
-- **Storage**: IndexedDB, localStorage, sessionStorage
-
-## Performance Considerations
-
-- **File Size Limit**: Up to 50MB CSV files
-- **Memory Usage**: Optimized for large datasets
-- **Processing Speed**: Streaming parsing with progress tracking
-- **Database**: Batch operations for optimal performance
-
-## Troubleshooting
-
-### Common Issues
-
-1. **CSV Upload Fails**
-   - Check file format (must be CSV)
-   - Verify column headers match expected format
-   - Ensure file size is under 50MB
-
-2. **Database Connection Issues**
-   - Verify Supabase credentials in `.env.local`
-   - Check network connectivity
-   - Ensure database tables are created
-
-3. **Performance Issues**
-   - Use smaller CSV files for testing
-   - Check browser console for errors
-   - Verify database indexes are created
-
-4. **"Value too long for type character varying" Error**
-   - This error occurs when CSV data is longer than the database column limit
-   - **EMERGENCY SOLUTION**: Run the emergency migration script immediately
-     - Copy and paste `migration-emergency-fix.sql` to your Supabase SQL editor
-     - This updates ALL VARCHAR columns to maximum safe sizes (VARCHAR(2000))
-     - Converts critical fields to TEXT (unlimited length)
-   - **Solution 1**: Run the comprehensive migration script
-     - Copy and paste `migration-comprehensive-update.sql` to your Supabase SQL editor
-     - This updates ALL VARCHAR columns to maximum safe sizes
-   - **Solution 2**: Run the basic migration script
-     - Copy and paste `migration-update-column-sizes.sql` to your Supabase SQL editor
-     - This updates standard VARCHAR columns to larger sizes
-   - **Solution 3**: Drop and recreate the table (if no important data)
-     - Use the updated `database-setup.sql` with larger column sizes
-   - **Column sizes after emergency update**:
-     - Core fields: `VARCHAR(2000)` (AO, Workorder, ODP, HSA, Username) - Maximum safety
-     - Standard fields: `VARCHAR(1000)` (Channel, Branch, Status, etc.) - High safety
-     - Short fields: `VARCHAR(200)` (Phone, Month, etc.) - Safe
-     - Long text: `TEXT` (Address, Description, Notes - unlimited)
-
-5. **"Invalid input syntax for type timestamp with time zone" Error**
-   - This error occurs when date formats in CSV don't match PostgreSQL timestamp format
-   - **SOLUTION**: Run the emergency migration script to convert date fields to TEXT
-   - **What it fixes**:
-     - `date_created` - Now supports any date format
-     - `status_date` - Now supports any date format  
-     - `booking_date` - Now supports any date format (e.g., "02/07/2025 15.00")
-     - `tanggal_ps` - Now supports any date format
-   - **Supported date formats**:
-     - `DD/MM/YYYY HH.MM` (e.g., "02/07/2025 15.00")
-     - `DD/MM/YYYY HH:MM` (e.g., "01/07/2025 15:55")
-     - `DD/MM/YYYY` (e.g., "02/07/2025")
-     - Any other format your CSV contains
-
-### Support
-
-For technical support or feature requests, please refer to the project documentation or contact the development team.
-
-## License
-
-This project is proprietary software developed for Telkom Indonesia.
+Proprietary software developed for Telkom Indonesia.

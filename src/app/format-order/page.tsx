@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -19,8 +19,8 @@ import { useAuth } from "@/contexts/auth-context"
 
 import { FormatOrder } from "@/lib/supabase"
 
-export default function FormatOrderPage() {
-  const { user, isAdmin } = useAuth()
+function FormatOrderContent() {
+  const { isAdmin } = useAuth()
   const [selectedTab, setSelectedTab] = useState("Work Order")
   const [selectedFilter, setSelectedFilter] = useState("Oktober")
   const [selectedChannel, setSelectedChannel] = useState("Channel")
@@ -1235,5 +1235,13 @@ export default function FormatOrderPage() {
         </div>
       </div>
     </ProtectedRoute>
+  )
+}
+
+export default function FormatOrderPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FormatOrderContent />
+    </Suspense>
   )
 }

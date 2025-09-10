@@ -753,14 +753,33 @@ export class DatabaseService {
   static async getDataIntegrityReport(): Promise<{ success: boolean; data?: DataIntegrityReport; error?: string }> {
     try {
       const supabase = createSupabaseClient()
-      const { data, error } = await supabase
-        .from(TABLES.WORK_ORDERS)
-        .select('*')
-        .limit(100)
+      
+      // Fetch all data using pagination for comprehensive integrity check
+      let allData: Array<Record<string, unknown>> = []
+      let page = 0
+      let hasMore = true
+      const pageSize = 1000
 
-      if (error) {
-        return { success: false, error: error.message }
+      while (hasMore) {
+        const { data: pageData, error } = await supabase
+          .from(TABLES.WORK_ORDERS)
+          .select('*')
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) {
+          return { success: false, error: error.message }
+        }
+
+        if (pageData && pageData.length > 0) {
+          allData = [...allData, ...pageData]
+          hasMore = pageData.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
       }
+
+      const data = allData
 
       if (!data || data.length === 0) {
         return { success: false, error: 'No data found' }
@@ -800,15 +819,34 @@ export class DatabaseService {
   static async getUploadHistory(): Promise<{ success: boolean; data?: UploadHistoryRecord[]; error?: string }> {
     try {
       const supabase = createSupabaseClient()
-      const { data, error } = await supabase
-        .from(TABLES.UPLOADS)
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
+      
+      // Fetch all upload history using pagination
+      let allData: UploadHistoryRecord[] = []
+      let page = 0
+      let hasMore = true
+      const pageSize = 1000
 
-      if (error) {
-        return { success: false, error: error.message }
+      while (hasMore) {
+        const { data: pageData, error } = await supabase
+          .from(TABLES.UPLOADS)
+          .select('*')
+          .order('created_at', { ascending: false })
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (error) {
+          return { success: false, error: error.message }
+        }
+
+        if (pageData && pageData.length > 0) {
+          allData = [...allData, ...pageData]
+          hasMore = pageData.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
       }
+
+      const data = allData
 
       return { success: true, data: data || [] }
     } catch (error) {

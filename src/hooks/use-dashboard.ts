@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react"
 import { createColumnMapping } from "@/lib/utils"
-import { supabase } from "@/lib/supabase"
+import { supabase, type FormatOrder } from "@/lib/supabase"
 
 interface CSVData {
   headers: string[]
@@ -78,20 +78,46 @@ export function useDashboard() {
       // Always try to get fresh data from Supabase first
       console.log("Dashboard: Fetching fresh data from work_orders table...")
       
-      // Get all format orders from database
-      const { data: formatOrders, error, count } = await supabase
-        .from('format_order')
-        .select('*', { count: 'exact' })
-        .limit(10000)
+      // Get all format orders from database using pagination
+      let allFormatOrders: FormatOrder[] = []
+      let page = 0
+      const pageSize = 1000
+      let hasMore = true
+      let totalCount = 0
+
+      // Pagination to get all data
+      while (hasMore) {
+        const { data: formatOrders, error, count } = await supabase
+          .from('format_order')
+          .select('*', { count: page === 0 ? 'exact' : undefined })
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+        
+        console.log(`Dashboard: Loading page ${page + 1}, got ${formatOrders?.length || 0} records`)
+
+        if (error) {
+          console.error("Dashboard: Supabase error:", error)
+          break
+        }
+
+        if (formatOrders && formatOrders.length > 0) {
+          allFormatOrders = [...allFormatOrders, ...formatOrders]
+          if (page === 0 && count) {
+            totalCount = count
+          }
+          hasMore = formatOrders.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
+      }
       
-      console.log("Dashboard: Raw result from Supabase:", {
-        hasData: !!formatOrders,
-        dataLength: formatOrders?.length || 0,
-        count: count,
-        error: error
+      console.log("Dashboard: All data loaded:", {
+        totalRecords: allFormatOrders.length,
+        actualCount: totalCount,
+        pages: page
       })
       
-      if (!error && formatOrders && formatOrders.length > 0) {
+      if (allFormatOrders && allFormatOrders.length > 0) {
         // Define the specific columns we want to display
         const headers = [
           "ORDER_ID", 
@@ -107,7 +133,7 @@ export function useDashboard() {
         ]
         
         // Convert format orders to table format
-        const rows = formatOrders.map(fo => [
+        const rows = allFormatOrders.map(fo => [
           fo.order_id || "",
           fo.channel || "",
           fo.date_created || "",
@@ -123,8 +149,8 @@ export function useDashboard() {
         const supabaseCSVData = { headers, rows }
         
         console.log("Dashboard: Data loaded from Supabase", {
-          totalWorkOrders: count || 0,
-          actualRows: formatOrders.length,
+          totalWorkOrders: allFormatOrders.length,
+          actualRows: allFormatOrders.length,
           headers: headers.length,
           sampleData: {
             firstRow: rows[0],
@@ -132,7 +158,7 @@ export function useDashboard() {
           }
         })
         
-        console.log("Dashboard: First few format orders from Supabase:", formatOrders.slice(0, 3))
+        console.log("Dashboard: First few format orders from Supabase:", allFormatOrders.slice(0, 3))
         
         setCsvData(supabaseCSVData)
         setLastUpdate(new Date())
@@ -150,10 +176,9 @@ export function useDashboard() {
       } else {
         console.log("Dashboard: No data found in Supabase database")
         console.log("Dashboard: Result details:", {
-          hasData: !!formatOrders,
-          dataLength: formatOrders?.length || 0,
-          error: error,
-          count: count
+          hasData: !!allFormatOrders,
+          dataLength: allFormatOrders?.length || 0,
+          totalRecords: allFormatOrders.length
         })
         
         // Try to get count separately
@@ -167,12 +192,35 @@ export function useDashboard() {
           
           if (totalCount && totalCount > 0) {
             console.log("Dashboard: Found data count, trying to fetch actual data...")
-            const { data: actualData, error: actualError } = await supabase
-              .from('format_order')
-              .select('*')
-              .limit(Math.min(totalCount, 10000))
             
-            if (!actualError && actualData && actualData.length > 0) {
+            // Fetch all data using pagination
+            let allActualData: FormatOrder[] = []
+            let page = 0
+            let hasMore = true
+            const pageSize = 1000
+
+            while (hasMore) {
+              const { data: actualData, error: actualError } = await supabase
+                .from('format_order')
+                .select('*')
+                .range(page * pageSize, (page + 1) * pageSize - 1)
+
+              if (actualError) {
+                console.error("Dashboard: Error fetching paginated data:", actualError)
+                break
+              }
+
+              if (actualData && actualData.length > 0) {
+                allActualData = [...allActualData, ...actualData]
+                hasMore = actualData.length === pageSize
+                page++
+                console.log(`Dashboard: Loaded page ${page}, got ${actualData.length} records, total: ${allActualData.length}`)
+              } else {
+                hasMore = false
+              }
+            }
+
+            if (allActualData.length > 0) {
               console.log("Dashboard: Successfully fetched data on second attempt!")
               
               const headers = [
@@ -180,7 +228,7 @@ export function useDashboard() {
                 "UPDATE_LAPANGAN", "SYMPTOM", "TINJUT_HD_OPLANG", "STATUS_BIMA"
               ]
               
-              const rows = actualData.map(fo => [
+              const rows = allActualData.map((fo: FormatOrder) => [
                 fo.order_id || "", fo.channel || "", fo.date_created || "", fo.workorder || "", fo.service_area || "",
                 fo.branch || "", fo.update_lapangan || "", fo.symptom || "", fo.tinjut_hd_oplang || "",
                 fo.status_bima || ""
@@ -189,7 +237,7 @@ export function useDashboard() {
               const retryData = { headers, rows }
               console.log("Dashboard: Data loaded on retry:", {
                 totalWorkOrders: totalCount || 0,
-                actualRows: actualData.length,
+                actualRows: allActualData.length,
                 headers: headers.length
               })
               

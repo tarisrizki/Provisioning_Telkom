@@ -1,18 +1,14 @@
 import { Loader2, AlertCircle } from 'lucide-react'
-
-interface FieldUpdateData {
-  name: string
-  value: number
-  displayName: string
-}
+import { UpdateLapanganData } from '@/hooks/use-update-lapangan'
 
 interface FieldUpdatesProps {
-  data: FieldUpdateData[]
+  data: UpdateLapanganData[]
   loading?: boolean
   error?: string | null
 }
 
 export function FieldUpdates({ data, loading, error }: FieldUpdatesProps) {
+  console.log('FieldUpdates received:', { data, loading, error })
 
 
   // Loading state

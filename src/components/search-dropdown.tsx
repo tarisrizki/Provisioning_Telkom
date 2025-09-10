@@ -1,6 +1,5 @@
 "use client"
 
-import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Search, FileText, BarChart3, Database, Settings, Loader2 } from 'lucide-react'
 import { useSearch } from '@/contexts/search-context'

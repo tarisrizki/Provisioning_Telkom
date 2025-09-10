@@ -70,9 +70,8 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         { title: 'Format Order', description: 'Manage work orders and provisioning', url: '/format-order', page: 'Format Order' },
         { title: 'Laporan', description: 'View reports and data analysis', url: '/laporan', page: 'Laporan' },
         { title: 'Monitoring', description: 'Monitor system performance', url: '/monitoring', page: 'Monitoring' },
-        { title: 'Settings', description: 'Application settings', url: '/settings', page: 'Settings' },
-        { title: 'Test Connection', description: 'Test database connection', url: '/test-connection', page: 'Test Connection' },
-        { title: 'Test Data', description: 'Test data functionality', url: '/test-data', page: 'Test Data' },
+        { title: 'User Management', description: 'Manage user accounts', url: '/user-management', page: 'User Management' },
+        { title: 'Manage Account', description: 'Account management', url: '/manage-account', page: 'Manage Account' },
       ]
 
       // Search in pages

@@ -1,9 +1,23 @@
 import { useState, useEffect, useCallback } from "react"
-import { supabase, FormatOrder } from "@/lib/supabase"
+import { supabase, type FormatOrder } from "@/lib/supabase"
 
 interface FilteredData {
   headers: string[]
   rows: string[][]
+}
+
+interface FilterState {
+  date: string
+  ao: string
+  channel: string
+  branch: string
+}
+
+interface DropdownState {
+  datePicker: boolean
+  ao: boolean
+  channel: boolean
+  branch: boolean
 }
 
 export function useLaporan() {
@@ -14,81 +28,79 @@ export function useLaporan() {
   const [error, setError] = useState<string | null>(null)
   const [totalCount, setTotalCount] = useState<number>(0)
   
-  // Filter states
-  const [dateFilter, setDateFilter] = useState("")
-  const [aoFilter, setAoFilter] = useState("")
-  const [channelFilter, setChannelFilter] = useState("")
-  const [branchFilter, setBranchFilter] = useState("")
+  // Consolidated filter states
+  const [filters, setFilters] = useState<FilterState>({
+    date: "",
+    ao: "",
+    channel: "",
+    branch: ""
+  })
   
-  // Dropdown states
-  const [showDatePicker, setShowDatePicker] = useState(false)
-  const [showAoDropdown, setShowAoDropdown] = useState(false)
-  const [showChannelDropdown, setShowChannelDropdown] = useState(false)
-  const [showBranchDropdown, setShowBranchDropdown] = useState(false)
+  // Consolidated dropdown states
+  const [dropdowns, setDropdowns] = useState<DropdownState>({
+    datePicker: false,
+    ao: false,
+    channel: false,
+    branch: false
+  })
 
   // Function to close all other dropdowns
   const closeOtherDropdowns = useCallback((currentDropdown: string) => {
-    if (currentDropdown !== 'date') setShowDatePicker(false)
-    if (currentDropdown !== 'ao') setShowAoDropdown(false)
-    if (currentDropdown !== 'channel') setShowChannelDropdown(false)
-    if (currentDropdown !== 'branch') setShowBranchDropdown(false)
+    setDropdowns(prev => ({
+      datePicker: currentDropdown === 'date' ? prev.datePicker : false,
+      ao: currentDropdown === 'ao' ? prev.ao : false,
+      channel: currentDropdown === 'channel' ? prev.channel : false,
+      branch: currentDropdown === 'branch' ? prev.branch : false
+    }))
     
     // If 'none' is passed, close all dropdowns
     if (currentDropdown === 'none') {
-      setShowDatePicker(false)
-      setShowAoDropdown(false)
-      setShowChannelDropdown(false)
-      setShowBranchDropdown(false)
+      setDropdowns({
+        datePicker: false,
+        ao: false,
+        channel: false,
+        branch: false
+      })
     }
   }, [])
 
   // Apply filters with specific data
   const applyFiltersWithData = useCallback((data: FilteredData) => {
-    console.log("Laporan: Applying filters to data", {
-      totalRows: data.rows.length,
-      filters: { aoFilter, channelFilter, dateFilter, branchFilter }
-    })
-
     let filtered = data.rows
 
     // Apply ORDER_ID filter
-    if (aoFilter) {
+    if (filters.ao) {
       filtered = filtered.filter(row => 
-        row[0]?.toLowerCase().includes(aoFilter.toLowerCase())
+        row[0]?.toLowerCase().includes(filters.ao.toLowerCase())
       )
     }
 
     // Apply Channel filter
-    if (channelFilter) {
+    if (filters.channel) {
       filtered = filtered.filter(row => 
-        row[1]?.toLowerCase().includes(channelFilter.toLowerCase())
+        row[1]?.toLowerCase().includes(filters.channel.toLowerCase())
       )
     }
 
     // Apply Date filter
-    if (dateFilter) {
+    if (filters.date) {
       filtered = filtered.filter(row => 
-        row[2]?.toLowerCase().includes(dateFilter.toLowerCase())
+        row[2]?.toLowerCase().includes(filters.date.toLowerCase())
       )
     }
 
     // Apply Branch filter
-    if (branchFilter) {
+    if (filters.branch) {
       filtered = filtered.filter(row => 
-        row[5]?.toLowerCase().includes(branchFilter.toLowerCase())
+        row[5]?.toLowerCase().includes(filters.branch.toLowerCase())
       )
     }
-
-    console.log("Laporan: Filtered data", {
-      originalRows: data.rows.length,
-      filteredRows: filtered.length
-    })
 
     setFilteredData({ headers: data.headers, rows: filtered })
     
     // Reset visible rows when filter changes
     setVisibleRows(50)
-  }, [aoFilter, channelFilter, dateFilter, branchFilter])
+  }, [filters])
 
   // Load data from Supabase database
   const loadCSVData = useCallback(async () => {
@@ -96,19 +108,39 @@ export function useLaporan() {
       setIsLoading(true)
       setError(null)
       
-      console.log("Laporan: Loading data from Supabase database...")
-      
-      // Get all format orders from database
-      const { data: formatOrders, error: supabaseError, count } = await supabase
-        .from('format_order')
-        .select('*', { count: 'exact' })
-        .limit(10000)
-      
-      if (supabaseError) {
-        throw new Error(supabaseError.message)
+      // Get all format orders from database using pagination
+      let allFormatOrders: FormatOrder[] = []
+      let page = 0
+      const pageSize = 1000
+      let hasMore = true
+      let totalCount = 0
+
+      // Pagination to get all data
+      while (hasMore) {
+        const { data: formatOrders, error: supabaseError, count } = await supabase
+          .from('format_order')
+          .select('*', { count: page === 0 ? 'exact' : undefined })
+          .range(page * pageSize, (page + 1) * pageSize - 1)
+
+        if (supabaseError) {
+          throw new Error(supabaseError.message)
+        }
+
+        if (formatOrders && formatOrders.length > 0) {
+          allFormatOrders = [...allFormatOrders, ...formatOrders]
+          if (page === 0 && count) {
+            totalCount = count
+          }
+          hasMore = formatOrders.length === pageSize
+          page++
+        } else {
+          hasMore = false
+        }
       }
+
+      setTotalCount(totalCount || allFormatOrders.length)
       
-      if (formatOrders && formatOrders.length > 0) {
+      if (allFormatOrders && allFormatOrders.length > 0) {
         // Define the specific columns we want to display
         const headers = [
           "ORDER_ID", 
@@ -125,7 +157,7 @@ export function useLaporan() {
         ]
         
         // Convert format orders to table format
-        const rows = formatOrders.map((fo: FormatOrder) => [
+        const rows = allFormatOrders.map((fo: FormatOrder) => [
           fo.order_id || "",
           fo.channel || "",
           fo.date_created || "",
@@ -141,21 +173,13 @@ export function useLaporan() {
         
         const data = { headers, rows }
         
-        console.log("Laporan: Data loaded successfully from Supabase", {
-          headers: data.headers.length,
-          rows: data.rows.length,
-          totalCount: count || 0
-        })
-        
         setCsvData(data)
-        setTotalCount(count || 0)
         
         // Apply initial filters
         if (data.rows.length > 0) {
           applyFiltersWithData(data)
         }
       } else {
-        console.log("Laporan: No data found in Supabase database")
         setCsvData(null)
         setFilteredData(null)
         setTotalCount(0)
@@ -180,14 +204,50 @@ export function useLaporan() {
 
   // Reset filters
   const resetFilters = useCallback(() => {
-    setDateFilter("")
-    setAoFilter("")
-    setChannelFilter("")
-    setBranchFilter("")
+    setFilters({
+      date: "",
+      ao: "",
+      channel: "",
+      branch: ""
+    })
     if (csvData) {
       applyFiltersWithData(csvData)
     }
   }, [csvData, applyFiltersWithData])
+
+  // Helper functions to update individual filters
+  const setDateFilter = useCallback((value: string) => {
+    setFilters(prev => ({ ...prev, date: value }))
+  }, [])
+
+  const setAoFilter = useCallback((value: string) => {
+    setFilters(prev => ({ ...prev, ao: value }))
+  }, [])
+
+  const setChannelFilter = useCallback((value: string) => {
+    setFilters(prev => ({ ...prev, channel: value }))
+  }, [])
+
+  const setBranchFilter = useCallback((value: string) => {
+    setFilters(prev => ({ ...prev, branch: value }))
+  }, [])
+
+  // Helper functions to update individual dropdown states
+  const setShowDatePicker = useCallback((value: boolean) => {
+    setDropdowns(prev => ({ ...prev, datePicker: value }))
+  }, [])
+
+  const setShowAoDropdown = useCallback((value: boolean) => {
+    setDropdowns(prev => ({ ...prev, ao: value }))
+  }, [])
+
+  const setShowChannelDropdown = useCallback((value: boolean) => {
+    setDropdowns(prev => ({ ...prev, channel: value }))
+  }, [])
+
+  const setShowBranchDropdown = useCallback((value: boolean) => {
+    setDropdowns(prev => ({ ...prev, branch: value }))
+  }, [])
 
   // Handle infinite scroll
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
@@ -205,32 +265,25 @@ export function useLaporan() {
     loadCSVData()
 
     // Listen for custom events (when data is uploaded in same tab)
-    const handleDataUpdate = (e: CustomEvent) => {
-      console.log("Laporan: Custom event 'csvDataUpdated' received", e)
-      loadCSVData()
-    }
+    const handleDataUpdate = () => loadCSVData()
 
     // Listen for window focus (when user returns to tab)
-    const handleWindowFocus = () => {
-      console.log("Laporan: Window focused, checking for data updates")
-      loadCSVData()
-    }
+    const handleWindowFocus = () => loadCSVData()
 
     // Listen for visibility change (when tab becomes visible)
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        console.log("Laporan: Tab became visible, checking for data updates")
         loadCSVData()
       }
     }
 
     // Add all event listeners
-    window.addEventListener('csvDataUpdated', handleDataUpdate as EventListener)
+    window.addEventListener('csvDataUpdated', handleDataUpdate)
     window.addEventListener('focus', handleWindowFocus)
     document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      window.removeEventListener('csvDataUpdated', handleDataUpdate as EventListener)
+      window.removeEventListener('csvDataUpdated', handleDataUpdate)
       window.removeEventListener('focus', handleWindowFocus)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
@@ -253,16 +306,16 @@ export function useLaporan() {
     totalCount,
     
     // Filter states
-    dateFilter,
-    aoFilter,
-    channelFilter,
-    branchFilter,
+    dateFilter: filters.date,
+    aoFilter: filters.ao,
+    channelFilter: filters.channel,
+    branchFilter: filters.branch,
     
     // Dropdown states
-    showDatePicker,
-    showAoDropdown,
-    showChannelDropdown,
-    showBranchDropdown,
+    showDatePicker: dropdowns.datePicker,
+    showAoDropdown: dropdowns.ao,
+    showChannelDropdown: dropdowns.channel,
+    showBranchDropdown: dropdowns.branch,
     
     // Actions
     setDateFilter,

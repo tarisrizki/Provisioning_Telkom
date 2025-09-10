@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { supabase, FormatOrder } from '@/lib/supabase'
+import { supabase, type FormatOrder } from '@/lib/supabase'
 
 interface AnalysisData {
   totalAO: number
@@ -14,6 +14,32 @@ interface AnalysisData {
   symptomStats: Record<string, number>
   tinjutStats: Record<string, number>
   manjaStats: Record<string, number>
+}
+
+// Helper function to create stats reducer
+const createStatsReducer = (fieldExtractor: (item: FormatOrder) => string | undefined) => 
+  (acc: Record<string, number>, item: FormatOrder) => {
+    const value = fieldExtractor(item)?.trim() || 'Unknown'
+    acc[value] = (acc[value] || 0) + 1
+    return acc
+  }
+
+// Helper function to calculate MANJA category
+const calculateManjaCategory = (item: FormatOrder): string => {
+  if (!item.booking_date || !item.date_created) return 'Normal'
+  
+  try {
+    const bookingDate = new Date(item.booking_date)
+    const createdDate = new Date(item.date_created)
+    const daysDiff = Math.floor((createdDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24))
+    
+    if (daysDiff > 3) return 'Lewat MANJA'
+    if (daysDiff > 1) return 'MANJA H+'
+    if (daysDiff > 0) return 'MANJA H++'
+    return 'MANJA HI'
+  } catch {
+    return 'Normal'
+  }
 }
 
 export function useAnalysisData() {
@@ -65,107 +91,32 @@ export function useAnalysisData() {
 
       console.log(`Analysis: Loaded ${allData.length} records for analysis`)
 
-      // Calculate all statistics
+      // Create stat reducers for each field
+      const channelReducer = createStatsReducer(item => item.channel)
+      const serviceAreaReducer = createStatsReducer(item => item.service_area)
+      const mitraReducer = createStatsReducer(item => item.mitra)
+      const laborTeknisiReducer = createStatsReducer(item => item.labor_teknisi)
+      const updateLapanganReducer = createStatsReducer(item => item.update_lapangan)
+      const statusBimaReducer = createStatsReducer(item => item.status_bima)
+      const symptomReducer = createStatsReducer(item => item.symptom)
+      const tinjutReducer = createStatsReducer(item => item.tinjut_hd_oplang)
+      const manjaReducer = createStatsReducer(calculateManjaCategory)
+
+      // Calculate all statistics efficiently
       const analysisData: AnalysisData = {
         totalAO: allData.length,
-        
-        // Channel distribution
-        channelStats: allData.reduce((acc: Record<string, number>, item) => {
-          const channel = item.channel?.trim() || 'Unknown'
-          acc[channel] = (acc[channel] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Service Area distribution
-        serviceAreaStats: allData.reduce((acc: Record<string, number>, item) => {
-          const serviceArea = item.service_area?.trim() || 'Unknown'
-          acc[serviceArea] = (acc[serviceArea] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Mitra distribution
-        mitraStats: allData.reduce((acc: Record<string, number>, item) => {
-          const mitra = item.mitra?.trim() || 'Unknown'
-          acc[mitra] = (acc[mitra] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Labor teknisi distribution
-        laborTeknisiStats: allData.reduce((acc: Record<string, number>, item) => {
-          const labor = item.labor_teknisi?.trim() || 'Unknown'
-          acc[labor] = (acc[labor] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Update lapangan distribution
-        updateLapanganStats: allData.reduce((acc: Record<string, number>, item) => {
-          const update = item.update_lapangan?.trim() || 'Unknown'
-          acc[update] = (acc[update] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Status BIMA distribution
-        statusBimaStats: allData.reduce((acc: Record<string, number>, item) => {
-          const status = item.status_bima?.trim() || 'Unknown'
-          acc[status] = (acc[status] || 0) + 1
-          return acc
-        }, {}),
-        
-        // Symptom distribution
-        symptomStats: allData.reduce((acc: Record<string, number>, item) => {
-          const symptom = item.symptom?.trim() || 'Unknown'
-          acc[symptom] = (acc[symptom] || 0) + 1
-          return acc
-        }, {}),
-        
-        // TINJUT HD OPLANG distribution
-        tinjutStats: allData.reduce((acc: Record<string, number>, item) => {
-          const tinjut = item.tinjut_hd_oplang?.trim() || 'Unknown'
-          acc[tinjut] = (acc[tinjut] || 0) + 1
-          return acc
-        }, {}),
-        
-        // MANJA analysis (calculate from existing data)
-        manjaStats: allData.reduce((acc: Record<string, number>, item) => {
-          // This would need business logic to determine MANJA category
-          // For now, we'll use a placeholder categorization
-          let category = 'Normal'
-          
-          // Example business logic - you can customize this
-          if (item.booking_date && item.date_created) {
-            try {
-              const bookingDate = new Date(item.booking_date)
-              const createdDate = new Date(item.date_created)
-              const daysDiff = Math.floor((createdDate.getTime() - bookingDate.getTime()) / (1000 * 60 * 60 * 24))
-              
-              if (daysDiff > 3) {
-                category = 'Lewat MANJA'
-              } else if (daysDiff > 1) {
-                category = 'MANJA H+'
-              } else if (daysDiff > 0) {
-                category = 'MANJA H++'
-              } else {
-                category = 'MANJA HI'
-              }
-            } catch {
-              category = 'Normal'
-            }
-          }
-          
-          acc[category] = (acc[category] || 0) + 1
-          return acc
-        }, {})
+        channelStats: allData.reduce(channelReducer, {}),
+        serviceAreaStats: allData.reduce(serviceAreaReducer, {}),
+        mitraStats: allData.reduce(mitraReducer, {}),
+        laborTeknisiStats: allData.reduce(laborTeknisiReducer, {}),
+        updateLapanganStats: allData.reduce(updateLapanganReducer, {}),
+        statusBimaStats: allData.reduce(statusBimaReducer, {}),
+        symptomStats: allData.reduce(symptomReducer, {}),
+        tinjutStats: allData.reduce(tinjutReducer, {}),
+        manjaStats: allData.reduce(manjaReducer, {})
       }
 
       setData(analysisData)
-      
-      console.log('Analysis data calculated:', {
-        totalRecords: analysisData.totalAO,
-        channels: Object.keys(analysisData.channelStats).length,
-        serviceAreas: Object.keys(analysisData.serviceAreaStats).length,
-        mitras: Object.keys(analysisData.mitraStats).length,
-        laborTeknisi: Object.keys(analysisData.laborTeknisiStats).length
-      })
       
     } catch (err) {
       console.error('Error fetching analysis data:', err)
