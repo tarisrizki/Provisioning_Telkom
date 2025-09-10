@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { Filter, Calendar, Upload, AlertCircle, Loader2, Database } from "lucide-react"
 import { useLaporan } from "@/hooks/use-laporan"
 import { FilterDropdown, DataTable } from "@/components/laporan"
+import ProtectedRoute from "@/components/protected-route"
 
 export default function LaporanPage() {
   const {
@@ -126,7 +127,8 @@ export default function LaporanPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <ProtectedRoute>
+      <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Laporan</h1>
@@ -361,7 +363,8 @@ export default function LaporanPage() {
             onScroll={handleScroll}
           />
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

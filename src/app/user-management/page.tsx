@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAuth } from "@/contexts/auth-context"
 import { authService, type User, type CreateUserData, type UpdateUserData } from "@/lib/auth-service"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import ProtectedRoute from "@/components/protected-route"
 import { 
   Users, 
   Plus, 
@@ -25,7 +25,6 @@ import {
 } from "lucide-react"
 
 export default function UserManagementPage() {
-  const { user, isAdmin } = useAuth()
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -54,13 +53,6 @@ export default function UserManagementPage() {
   useEffect(() => {
     loadUsers()
   }, [])
-
-  // Redirect if not admin
-  useEffect(() => {
-    if (user && !isAdmin) {
-      window.location.href = '/dashboard'
-    }
-  }, [user, isAdmin])
 
   // Load users from Supabase
   const loadUsers = async () => {
@@ -230,22 +222,9 @@ export default function UserManagementPage() {
     }
   }
 
-  if (!user || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-[#1B2431] flex items-center justify-center">
-        <Card className="bg-[#1e293b] border-[#334155]">
-          <CardContent className="p-8 text-center">
-            <Shield className="h-12 w-12 text-red-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-white mb-2">Access Denied</h2>
-            <p className="text-gray-400">You need admin privileges to access this page.</p>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-[#1B2431] p-6">
+    <ProtectedRoute requireAdmin={true}>
+      <div className="min-h-screen bg-[#1B2431] p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -680,6 +659,7 @@ export default function UserManagementPage() {
           </Card>
         </div>
       )}
-    </div>
+      </div>
+    </ProtectedRoute>
   )
 }

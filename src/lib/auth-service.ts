@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase'
-import bcrypt from 'bcryptjs'
 
 export interface User {
   id: string
@@ -62,16 +61,8 @@ class AuthService {
 
       const user = users[0]
       
-      // Check if password is hashed (starts with $2a$, $2b$, or $2y$) or plain text
-      let isValidPassword = false
-      
-      if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$') || user.password_hash.startsWith('$2y$')) {
-        // Hashed password - use bcrypt
-        isValidPassword = await bcrypt.compare(credentials.password, user.password_hash)
-      } else {
-        // Plain text password - direct comparison
-        isValidPassword = credentials.password === user.password_hash
-      }
+      // Direct password comparison (plain text)
+      const isValidPassword = credentials.password === user.password_hash
       
       if (!isValidPassword) {
         return { user: null, error: 'Invalid username or password' }
@@ -116,10 +107,7 @@ class AuthService {
   // Create new user (admin only)
   async createUser(userData: CreateUserData): Promise<{ user: User | null; error: string | null }> {
     try {
-      // Hash password
-      const saltRounds = 12
-      const hashedPassword = await bcrypt.hash(userData.password, saltRounds)
-
+      // Store password as plain text
       const { data: newUser, error } = await supabase
         .from('users')
         .insert([
@@ -127,7 +115,7 @@ class AuthService {
             username: userData.username,
             email: userData.email,
             name: userData.name,
-            password_hash: hashedPassword,
+            password_hash: userData.password, // Store as plain text
             role: userData.role,
             status: 'active'
           }
@@ -154,10 +142,9 @@ class AuthService {
     try {
       const updateData: Record<string, unknown> = { ...userData }
 
-      // Hash password if provided
+      // Store password as plain text if provided
       if (userData.password) {
-        const saltRounds = 12
-        updateData.password_hash = await bcrypt.hash(userData.password, saltRounds)
+        updateData.password_hash = userData.password // Store as plain text
         delete updateData.password
       }
 

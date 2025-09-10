@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Download, Plus, Copy, Check } from "lucide-react"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { X, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import * as XLSX from 'xlsx'
+
 import { FormatOrder } from "@/lib/supabase"
 
 interface DetailModalProps {
@@ -15,7 +17,7 @@ interface DetailModalProps {
 
 export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
   const [activeTab, setActiveTab] = useState("detail-customer")
-  const [copiedText, setCopiedText] = useState<string | null>(null)
+  const [isExporting, setIsExporting] = useState(false)
   // Pagination per main tab; each page holds up to 9 cards
   const [pageByTab, setPageByTab] = useState<Record<string, number>>({
     "detail-customer": 0,
@@ -36,6 +38,75 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
       })
     }
   }, [isOpen, orderData?.order_id])
+
+  // Export current order detail to Excel
+  const exportCurrentDetail = async () => {
+    if (!orderData) {
+      alert('No data to export')
+      return
+    }
+
+    setIsExporting(true)
+    try {
+      // Define Excel data based on all order fields
+      const excelData = [
+        ['Field', 'Value'],
+        ['Order ID', orderData.order_id || '-'],
+        ['Channel', orderData.channel || '-'],
+        ['Date Created', orderData.date_created ? new Date(orderData.date_created).toLocaleString('id-ID') : '-'],
+        ['Work Order', orderData.workorder || '-'],
+        ['Service NO', orderData.service_no || '-'],
+        ['Description', orderData.description || '-'],
+        ['Address', orderData.address || '-'],
+        ['Customer Name', orderData.customer_name || '-'],
+        ['Work Zone', orderData.workzone || '-'],
+        ['Tanggal PS', orderData.tanggal_ps ? new Date(orderData.tanggal_ps).toLocaleString('id-ID') : '-'],
+        ['Status Date', orderData.status_date ? new Date(orderData.status_date).toLocaleString('id-ID') : '-'],
+        ['Contact Phone', orderData.contact_phone || '-'],
+        ['ODP', orderData.odp || '-'],
+        ['Mitra', orderData.mitra || '-'],
+        ['Labor Teknisi', orderData.labor_teknisi || '-'],
+        ['SYMPTOM', orderData.symptom || '-'],
+        ['TINJUT HD OPLANG', orderData.tinjut_hd_oplang || '-'],
+        ['Keterangan HD OPLANG', orderData.keterangan_hd_oplang || '-'],
+        ['SUBERRORCODE', orderData.suberrorcode || '-'],
+        ['UIC', orderData.uic || '-'],
+        ['Update UIC', orderData.update_uic || '-'],
+        ['Keterangan UIC', orderData.keterangan_uic || '-'],
+        ['Update Lapangan', orderData.update_lapangan || '-'],
+        ['Engineering MEMO', orderData.engineering_memo || '-'],
+        ['Status BIMA', orderData.status_bima || '-'],
+        ['Booking Date', orderData.booking_date ? new Date(orderData.booking_date).toLocaleString('id-ID') : '-'],
+      ]
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.aoa_to_sheet(excelData)
+      const wb = XLSX.utils.book_new()
+      
+      // Set column widths
+      const colWidths = [
+        { wch: 25 }, // Field column
+        { wch: 50 }  // Value column
+      ]
+      ws['!cols'] = colWidths
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'Order Detail')
+      
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+      const filename = `order-detail-${orderData.order_id}-${timestamp}.xlsx`
+      
+      // Write file
+      XLSX.writeFile(wb, filename)
+      
+    } catch (error) {
+      console.error('Export error:', error)
+      alert('Failed to export data')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   if (!isOpen) return null
 
@@ -86,83 +157,6 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
     }
   }
 
-  // Helper function to copy text to clipboard
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedText(text)
-      setTimeout(() => setCopiedText(null), 2000)
-    } catch (err) {
-      console.error('Failed to copy text: ', err)
-    }
-  }
-
-  // Helper function to truncate text with tooltip
-  const TruncatedText = ({ text, maxLength = 30, className = "" }: { text: string, maxLength?: number, className?: string }) => {
-    if (!text || text.length <= maxLength) {
-      return <span className={className}>{text}</span>
-    }
-
-    const isCopied = copiedText === text
-
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <span className={`${className} cursor-help hover:text-blue-400 transition-colors duration-200 relative group`}>
-            {text.substring(0, maxLength)}...
-            <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-blue-400 transition-all duration-200 group-hover:w-full"></span>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent 
-          className="max-w-lg bg-gradient-to-br from-[#1e293b] to-[#334155] border border-[#475569] shadow-2xl rounded-xl p-4 backdrop-blur-sm"
-          side="top"
-          sideOffset={8}
-        >
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                <span className="text-xs font-semibold text-blue-400 uppercase tracking-wider">Full Text</span>
-              </div>
-              <button
-                onClick={() => copyToClipboard(text)}
-                className="flex items-center space-x-1 px-2 py-1 bg-[#1B2431] hover:bg-[#334155] rounded-md transition-colors duration-200 border border-[#475569]"
-              >
-                {isCopied ? (
-                  <>
-                    <Check className="w-3 h-3 text-green-400" />
-                    <span className="text-xs text-green-400">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3 h-3 text-gray-400" />
-                    <span className="text-xs text-gray-400">Copy</span>
-                  </>
-                )}
-              </button>
-            </div>
-            
-            <div className="bg-[#1B2431] rounded-lg p-3 border border-[#475569] relative">
-              <div className="absolute top-2 right-2 w-2 h-2 bg-green-400 rounded-full animate-ping opacity-75"></div>
-              <p className="text-white text-sm break-all leading-relaxed font-mono pr-4">{text}</p>
-            </div>
-            
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span className="flex items-center space-x-1">
-                <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
-                <span>Length: {text.length} characters</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <div className="w-1.5 h-1.5 bg-purple-400 rounded-full"></div>
-                <span>Hover to view</span>
-              </span>
-            </div>
-          </div>
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
   // Expandable text component to hide long content and reveal on click
   const ExpandableText = ({ text, maxLength = 60, className = "" }: { text: string | undefined | null, maxLength?: number, className?: string }) => {
     const [expanded, setExpanded] = useState(false)
@@ -195,12 +189,12 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
     return (
       <span className={className}>
         <span
-          style={expanded ? {} as any : {
+          style={expanded ? {} : {
             display: '-webkit-box',
             WebkitLineClamp: String(lines),
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden'
-          } as any}
+          } as React.CSSProperties}
         >
           {safe}
         </span>
@@ -210,46 +204,6 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
           </button>
         )}
       </span>
-    )
-  }
-
-  // Generic renderer for a list of field cards with slide controls (9 per page)
-  const CardsWithPagination = ({ fields, tabKey }: { fields: Array<{ label: string, value: React.ReactNode }>, tabKey: string }) => {
-    const pageSize = 9
-    const totalPages = Math.max(1, Math.ceil(fields.length / pageSize))
-    const currentPage = pageByTab[tabKey] ?? 0
-    const start = currentPage * pageSize
-    const pageFields = fields.slice(start, start + pageSize)
-
-    const go = (delta: number) => {
-      const next = Math.min(totalPages - 1, Math.max(0, currentPage + delta))
-      setPageByTab((p) => ({ ...p, [tabKey]: next }))
-    }
-
-    return (
-      <div className="space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {pageFields.map((f, idx) => (
-            <div key={`${f.label}-${idx}`} className="bg-[#1B2431] rounded-lg p-4 border border-[#475569]">
-              <div className="flex flex-col">
-                <span className="text-gray-300 text-sm font-medium mb-1">{f.label}</span>
-                <span className="text-white font-semibold">{f.value}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between pt-2">
-            <button onClick={() => go(-1)} className="px-3 py-2 rounded-md text-sm bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] disabled:opacity-40" disabled={currentPage === 0}>Sebelumnya</button>
-            <div className="flex items-center gap-2">
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <span key={i} className={`w-2.5 h-2.5 rounded-full ${i === currentPage ? 'bg-blue-500' : 'bg-[#475569]'}`}></span>
-              ))}
-            </div>
-            <button onClick={() => go(1)} className="px-3 py-2 rounded-md text-sm bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] disabled:opacity-40" disabled={currentPage >= totalPages - 1}>Berikutnya</button>
-          </div>
-        )}
-      </div>
     )
   }
 
@@ -351,10 +305,10 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
           {
             title: 'Detail Customer',
             fields: [
-              { label: 'Service Area', value: getDisplayValue((orderData as any)?.service_area) },
-              { label: 'Branch', value: getDisplayValue((orderData as any)?.branch) },
-              { label: 'WOK', value: getDisplayValue((orderData as any)?.wok) },
-              { label: 'Kategori', value: getDisplayValue((orderData as any)?.kategori) || '> 9 HARI' },
+              { label: 'Service Area', value: getDisplayValue(orderData?.service_area) },
+              { label: 'Branch', value: getDisplayValue(orderData?.branch) },
+              { label: 'Cluster', value: getDisplayValue(orderData?.cluster) },
+              { label: 'Mitra', value: getDisplayValue(orderData?.mitra) || '> 9 HARI' },
             ]
           },
           {
@@ -367,8 +321,8 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
               { label: 'Update UIC', value: getDisplayValue(orderData.update_uic) },
               { label: 'Keterangan UIC', value: <LineClampExpandable className="text-white font-semibold" text={orderData.keterangan_uic} lines={2} /> },
               { label: 'Status BIMA', value: getDisplayValue(orderData.status_bima) },
-              { label: 'Status DSC', value: getDisplayValue((orderData as any)?.status_dsc) },
-              { label: 'Status KPRO', value: getDisplayValue((orderData as any)?.status_kpro) },
+              { label: 'Status DSC', value: getDisplayValue(orderData?.status_dsc) },
+              { label: 'Status BIMA', value: getDisplayValue(orderData?.status_bima) },
             ]
           },
           {
@@ -376,7 +330,7 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
             fields: [
               { label: 'Umur MANJA', value: 'Umur > 3 hari' },
               { label: 'Kategori MANJA', value: 'Lewat MANJA' },
-              { label: 'Sheet Aktivasi', value: getDisplayValue((orderData as any)?.sheet_aktivasi) },
+              { label: 'Sheet Aktivasi', value: getDisplayValue(orderData?.sheet_aktivasi) },
               { label: 'Tanggal PS', value: formatDate(orderData.tanggal_ps) },
             ]
           },
@@ -386,7 +340,7 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
       case "aktivasi":
         const fieldsAkt = [
           { label: 'SYMPTOM:', value: getDisplayValue(orderData.symptom) },
-          { label: 'Labor Teknisi:', value: <LineClampExpandable className="text-white font-semibold" text={orderData.labor_teknisi as any} lines={2} /> },
+          { label: 'Labor Teknisi:', value: <LineClampExpandable className="text-white font-semibold" text={orderData?.labor_teknisi || ''} lines={2} /> },
         ]
         return <PageWithLeftPanel title="Mitra" fields={fieldsAkt} tabKey="aktivasi" />
 
@@ -404,8 +358,8 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
           { label: 'SYMPTOM:', value: getDisplayValue(orderData.symptom) },
           { label: 'Engineering MEMO:', value: <ExpandableText className="text-white font-semibold" text={orderData.engineering_memo} maxLength={80} /> },
           { label: 'Status BIMA', value: getDisplayValue(orderData.status_bima) },
-          { label: 'Status DSC', value: getDisplayValue((orderData as any)?.status_dsc) },
-          { label: 'Status KPRO', value: getDisplayValue((orderData as any)?.status_kpro) },
+          { label: 'Status DSC', value: getDisplayValue(orderData?.status_dsc) },
+          { label: 'Status BIMA', value: getDisplayValue(orderData?.status_bima) },
         ]
         return <PageWithLeftPanel title="Update Lapangan" fields={fieldsUL} tabKey="update-lapangan" />
 
@@ -442,10 +396,14 @@ export function DetailModal({ isOpen, onClose, orderData }: DetailModalProps) {
               </Badge>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-              <Button className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] flex-1 sm:flex-none">
+              <Button 
+                onClick={exportCurrentDetail}
+                disabled={isExporting}
+                className="bg-[#334155] hover:bg-[#475569] text-white border border-[#475569] flex-1 sm:flex-none disabled:opacity-50"
+              >
                 <Download className="h-4 w-4 mr-2" />
-                <span className="hidden sm:inline">Export</span>
-                <span className="sm:hidden">Export</span>
+                <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
+                <span className="sm:hidden">{isExporting ? 'Exporting...' : 'Export'}</span>
               </Button>
               <Button
                 onClick={onClose}

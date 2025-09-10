@@ -91,23 +91,53 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
       // Search in Supabase format_order data
       try {
-        const { data: formatOrders, error } = await supabase
+        // First try exact matches for order_id, workorder, and service_no
+        const { data: exactMatches, error: exactError } = await supabase
           .from('format_order')
-          .select('order_id, channel, workorder, customer_name, status_bima, mitra')
-          .or(`order_id.ilike.%${query}%,workorder.ilike.%${query}%,channel.ilike.%${query}%,customer_name.ilike.%${query}%,status_bima.ilike.%${query}%,mitra.ilike.%${query}%`)
-          .limit(5)
+          .select('*')
+          .or(`order_id.eq.${query},workorder.eq.${query},service_no.eq.${query}`)
+          .limit(3)
 
-        if (!error && formatOrders && formatOrders.length > 0) {
-          formatOrders.forEach((order, index) => {
+        const exactMatchIds = new Set<string>()
+
+        if (!exactError && exactMatches && exactMatches.length > 0) {
+          exactMatches.forEach((order, index) => {
+            exactMatchIds.add(order.order_id)
             results.push({
-              id: `order-${order.order_id}-${index}`,
-              title: `Order ${order.order_id}`,
-              description: `${order.workorder || 'N/A'} - ${order.channel || 'N/A'} - ${order.status_bima || 'N/A'}`,
+              id: `exact-${order.order_id}-${index}`,
+              title: `🎯 ${order.order_id} (Exact Match)`,
+              description: `${order.workorder || 'N/A'} - ${order.customer_name || order.channel || 'N/A'} - ${order.status_bima || 'N/A'}`,
               page: 'Format Order',
-              url: '/format-order',
+              url: `/format-order?openDetail=${order.order_id}`,
               data: order
             })
           })
+        }
+
+        // Then search for partial matches (only if we need more results)
+        const remainingSlots = 10 - results.length
+        if (remainingSlots > 0) {
+          const { data: formatOrders, error } = await supabase
+            .from('format_order')
+            .select('order_id, channel, workorder, customer_name, status_bima, mitra, service_no, address')
+            .or(`order_id.ilike.%${query}%,workorder.ilike.%${query}%,channel.ilike.%${query}%,customer_name.ilike.%${query}%,status_bima.ilike.%${query}%,mitra.ilike.%${query}%,service_no.ilike.%${query}%`)
+            .limit(remainingSlots)
+
+          if (!error && formatOrders && formatOrders.length > 0) {
+            formatOrders.forEach((order, index) => {
+              // Skip if this order was already added as exact match
+              if (!exactMatchIds.has(order.order_id)) {
+                results.push({
+                  id: `order-${order.order_id}-${index}`,
+                  title: `${order.order_id}`,
+                  description: `${order.workorder || 'N/A'} - ${order.customer_name || order.channel || 'N/A'} - ${order.status_bima || 'N/A'}`,
+                  page: 'Format Order',
+                  url: '/format-order',
+                  data: order
+                })
+              }
+            })
+          }
         }
       } catch (supabaseError) {
         console.log('Supabase search error:', supabaseError)

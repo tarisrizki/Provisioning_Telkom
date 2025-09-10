@@ -2,22 +2,39 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Download, FileText, Activity, BarChart3, RefreshCw, Database, Upload, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import * as XLSX from 'xlsx'
 import { DetailModal } from "@/components/format-order/detail-modal"
+import { EditableCell } from "@/components/format-order/editable-cell"
 import { useTabData } from "@/hooks/use-format-order"
 import { useAnalysisData } from "@/hooks/use-analysis-data"
+import ProtectedRoute from "@/components/protected-route"
+import { supabase } from "@/lib/supabase"
+import { useAuth } from "@/contexts/auth-context"
 
 import { FormatOrder } from "@/lib/supabase"
 
 export default function FormatOrderPage() {
+  const { user, isAdmin } = useAuth()
   const [selectedTab, setSelectedTab] = useState("Work Order")
   const [selectedFilter, setSelectedFilter] = useState("Oktober")
   const [selectedChannel, setSelectedChannel] = useState("Channel")
   const [selectedDateCreated, setSelectedDateCreated] = useState("Date created")
+  
+  const searchParams = useSearchParams()
+  const openDetailParam = searchParams.get('openDetail')
+  
+  // Track if we've already processed the openDetail parameter
+  const [hasProcessedOpenDetail, setHasProcessedOpenDetail] = useState(false)
+  
+  // Export states
+  const [isExportingFiltered, setIsExportingFiltered] = useState(false)
+  const [isExportingAll, setIsExportingAll] = useState(false)
 
   // Use Supabase hook to fetch data
   const {
@@ -66,7 +83,7 @@ export default function FormatOrderPage() {
       case "Work Order":
         return ["Order ID", "Date Created", "Work Order", "Service NO", "Work Zone", "ODP", "Mitra", "Labor Teknisi"]
       case "Aktivasi":
-        return ["Order ID", "Work Order", "Service HD", "Mitra", "SN", "KET", "Status"]
+        return ["Order ID", "Work Order", "Service NO", "Mitra", "UIC (SN)", "KET", "Status"]
       case "Update lapangan":
         return ["Order ID", "Update lapangan", "Symptom", "TINJUT HD OPLANG", "KET HD OPLANG", "Status BIMA"]
       case "MANJA":
@@ -96,14 +113,332 @@ export default function FormatOrderPage() {
     setIsDetailModalOpen(true)
   }
 
-  // Function to close detail modal
+  // Function to close detail modal and clean URL
   const closeDetailModal = () => {
     setIsDetailModalOpen(false)
     setSelectedOrderData(null)
+    
+    // Clean URL parameter when closing modal
+    if (openDetailParam) {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('openDetail')
+      window.history.replaceState({}, '', url.toString())
+      setHasProcessedOpenDetail(false)
+    }
   }
+
+  // Handle direct detail opening from URL parameter (only once per URL change)
+  useEffect(() => {
+    if (openDetailParam && !hasProcessedOpenDetail && formatOrderData.length > 0) {
+      setHasProcessedOpenDetail(true)
+      
+      // Find the order by order_id
+      const orderToOpen = formatOrderData.find(order => order.order_id === openDetailParam)
+      if (orderToOpen) {
+        openDetailModal(orderToOpen)
+      } else {
+        // If not found in current data, fetch specifically
+        const fetchSpecificOrder = async () => {
+          try {
+            const { data, error } = await supabase
+              .from('format_order')
+              .select('*')
+              .eq('order_id', openDetailParam)
+              .single()
+            
+            if (!error && data) {
+              openDetailModal(data as FormatOrder)
+            }
+          } catch (err) {
+            console.error('Error fetching specific order:', err)
+          }
+        }
+        fetchSpecificOrder()
+      }
+    }
+    
+    // Reset flag when openDetailParam changes or is removed
+    if (!openDetailParam && hasProcessedOpenDetail) {
+      setHasProcessedOpenDetail(false)
+    }
+  }, [openDetailParam, formatOrderData, hasProcessedOpenDetail])
+
+  // Function to handle cell updates
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleCellUpdate = (orderId: string, field: string, value: string) => {
+    // Update local data state to reflect changes immediately
+    refresh()
+  }
+
+  // Export functions
+  const exportToExcel = (data: FormatOrder[], filename: string) => {
+    if (!data || data.length === 0) {
+      alert('No data to export!')
+      return
+    }
+
+    // Get headers based on selected tab
+    const headers = getCurrentTableHeaders()
+    
+    // Get Excel data based on tab
+    let excelData: (string | number)[][]
+    
+    switch (selectedTab) {
+      case "Work Order":
+        excelData = data.map(item => [
+          item.order_id,
+          item.date_created || '-',
+          item.workorder || '-',
+          item.service_no || '-',
+          item.workzone || '-',
+          item.odp || '-',
+          item.mitra || '-',
+          item.labor_teknisi || '-'
+        ])
+        break
+      case "Aktivasi":
+        excelData = data.map(item => [
+          item.order_id,
+          item.workorder || '-',
+          item.service_no || '-',
+          item.mitra || '-',
+          item.uic || '-',
+          item.keterangan_uic || '-',
+          item.status_bima || '-'
+        ])
+        break
+      case "Update lapangan":
+        excelData = data.map(item => [
+          item.order_id,
+          item.update_lapangan || '-',
+          item.symptom || '-',
+          item.tinjut_hd_oplang || '-',
+          item.keterangan_hd_oplang || '-',
+          item.status_bima || '-'
+        ])
+        break
+      case "MANJA":
+        excelData = data.map(item => [
+          item.order_id,
+          item.booking_date || '-',
+          item.status_bima || '-', // kategori manja
+          '-', // umur manja (calculated field)
+          '-'  // sisa manja (calculated field)
+        ])
+        break
+      default:
+        excelData = data.map(item => [item.order_id, item.customer_name || '-', item.status_bima || '-'])
+    }
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.aoa_to_sheet([headers, ...excelData])
+    const wb = XLSX.utils.book_new()
+    
+    // Set column widths based on content
+    const colWidths = headers.map(() => ({ wch: 20 }))
+    ws['!cols'] = colWidths
+    
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, selectedTab)
+    
+    // Write Excel file
+    const excelFilename = filename.replace('.csv', '.xlsx')
+    XLSX.writeFile(wb, excelFilename)
+  }
+
+  // Export filtered data (current tab + filters)
+  const handleExportFiltered = async () => {
+    setIsExportingFiltered(true)
+    try {
+      // Use current filtered data from the tab
+      if (!formatOrderData || formatOrderData.length === 0) {
+        alert('No filtered data to export!')
+        return
+      }
+      
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+      const filename = `format-order-${selectedTab.toLowerCase().replace(' ', '-')}-filtered-${timestamp}.xlsx`
+      exportToExcel(formatOrderData, filename)
+    } catch (error) {
+      console.error('Export filtered error:', error)
+      alert('Error exporting filtered data')
+    } finally {
+      setIsExportingFiltered(false)
+    }
+  }
+
+  // Export all data from database (no filters, no pagination)
+  const handleExportAll = async () => {
+    setIsExportingAll(true)
+    try {
+      console.log('Fetching ALL data from database without any limits...')
+      
+      // Fetch ALL data from database without any filters or pagination
+      const { data: allData, error } = await supabase
+        .from('format_order')
+        .select('*')
+        .order('order_id')
+
+      if (error) {
+        console.error('Database error:', error)
+        throw error
+      }
+
+      console.log('Total data fetched for export:', allData?.length || 0)
+
+      if (!allData || allData.length === 0) {
+        alert('No data to export!')
+        return
+      }
+
+      // Create single comprehensive Excel sheet with all important columns
+      const headers = [
+        'Order ID', 'Channel', 'Date Created', 'Work Order', 'Service NO', 
+        'Customer Name', 'Address', 'Work Zone', 'ODP', 'Mitra', 'Labor Teknisi',
+        'SYMPTOM', 'TINJUT HD OPLANG', 'Keterangan HD OPLANG', 'UIC', 'Keterangan UIC',
+        'Update Lapangan', 'Engineering MEMO', 'Status BIMA', 'Booking Date'
+      ]
+      
+      const excelData = allData.map(item => [
+        item.order_id || '-',
+        item.channel || '-',
+        item.date_created || '-',
+        item.workorder || '-',
+        item.service_no || '-',
+        item.customer_name || '-',
+        item.address || '-',
+        item.workzone || '-',
+        item.odp || '-',
+        item.mitra || '-',
+        item.labor_teknisi || '-',
+        item.symptom || '-',
+        item.tinjut_hd_oplang || '-',
+        item.keterangan_hd_oplang || '-',
+        item.uic || '-',
+        item.keterangan_uic || '-',
+        item.update_lapangan || '-',
+        item.engineering_memo || '-',
+        item.status_bima || '-',
+        item.booking_date || '-'
+      ])
+
+      // Create workbook and worksheet
+      const ws = XLSX.utils.aoa_to_sheet([headers, ...excelData])
+      const wb = XLSX.utils.book_new()
+      
+      // Set column widths
+      const colWidths = headers.map(() => ({ wch: 20 }))
+      ws['!cols'] = colWidths
+      
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(wb, ws, 'All Data')
+
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-')
+      const filename = `format-order-all-data-${timestamp}.xlsx`
+      XLSX.writeFile(wb, filename)
+      
+      console.log(`Successfully exported ${allData.length} records to ${filename}`)
+    } catch (error) {
+      console.error('Export all error:', error)
+      alert('Error exporting all data')
+    } finally {
+      setIsExportingAll(false)
+    }
+  }
+
+  // Status options for Aktivasi dropdown
+  const statusOptions = [
+    { value: 'Pending', label: 'Pending' },
+    { value: 'In Progress', label: 'In Progress' },
+    { value: 'Completed', label: 'Completed' },
+    { value: 'Failed', label: 'Failed' },
+    { value: 'Cancelled', label: 'Cancelled' }
+  ]
 
   const renderTableRow = (rowData: string[], index: number) => {
     const orderData = formatOrderData[index] as FormatOrder // Get full order data for modal
+    
+    // Special rendering for Aktivasi tab with editable cells
+    if (selectedTab === "Aktivasi") {
+      return (
+        <tr 
+          key={index} 
+          className="border-b border-[#334155] hover:bg-[#334155]/30 transition-colors"
+        >
+          {/* Order ID - not editable, clickable for detail */}
+          <td 
+            className="px-6 py-4 text-sm text-gray-300 cursor-pointer hover:bg-[#334155]/50 font-medium"
+            onClick={() => openDetailModal(orderData)}
+            title="Click to view order details"
+          >
+            {rowData[0]}
+          </td>
+          {/* Work Order - editable, no click action */}
+          <td className="px-6 py-4 text-sm bg-[#1e293b]/30">
+            <EditableCell
+              value={orderData.workorder || ''}
+              orderId={orderData.order_id}
+              field="workorder"
+              type="text"
+              isAdmin={isAdmin}
+              onUpdate={handleCellUpdate}
+            />
+          </td>
+          {/* Service NO - not editable, clickable for detail */}
+          <td 
+            className="px-6 py-4 text-sm text-gray-300 cursor-pointer hover:bg-[#334155]/50"
+            onClick={() => openDetailModal(orderData)}
+            title="Click to view order details"
+          >
+            {rowData[2] || '-'}
+          </td>
+          {/* Mitra - not editable, clickable for detail */}
+          <td 
+            className="px-6 py-4 text-sm text-gray-300 cursor-pointer hover:bg-[#334155]/50"
+            onClick={() => openDetailModal(orderData)}
+            title="Click to view order details"
+          >
+            {rowData[3] || '-'}
+          </td>
+          {/* UIC (SN) - editable, no click action */}
+          <td className="px-6 py-4 text-sm bg-[#1e293b]/30">
+            <EditableCell
+              value={orderData.uic || ''}
+              orderId={orderData.order_id}
+              field="uic"
+              type="text"
+              isAdmin={isAdmin}
+              onUpdate={handleCellUpdate}
+            />
+          </td>
+          {/* KET - editable, no click action */}
+          <td className="px-6 py-4 text-sm bg-[#1e293b]/30">
+            <EditableCell
+              value={orderData.keterangan_uic || ''}
+              orderId={orderData.order_id}
+              field="keterangan_uic"
+              type="text"
+              isAdmin={isAdmin}
+              onUpdate={handleCellUpdate}
+            />
+          </td>
+          {/* Status - editable, no click action */}
+          <td className="px-6 py-4 text-sm bg-[#1e293b]/30">
+            <EditableCell
+              value={orderData.status_bima || ''}
+              orderId={orderData.order_id}
+              field="status_bima"
+              type="select"
+              options={statusOptions}
+              isAdmin={isAdmin}
+              onUpdate={handleCellUpdate}
+            />
+          </td>
+        </tr>
+      )
+    }
+
+    // Default rendering for other tabs
     return (
       <tr 
         key={index} 
@@ -179,10 +514,12 @@ export default function FormatOrderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1B2431] p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#1B2431] p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
       {/* Header */}
-      <div className="space-y-2">
+      <div className="flex justify-between items-start">
+        <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white tracking-tight">Format Order Management</h1>
           <p className="text-gray-400 text-lg">
             Manage and analyze your provisioning orders across different categories.
@@ -190,6 +527,16 @@ export default function FormatOrderPage() {
           <div className="text-sm text-green-400">
             📊 Total records: {totalCount.toLocaleString()} • Page {currentPage} of {totalPages}
           </div>
+        </div>
+        {/* Export All Button */}
+        <Button 
+          onClick={handleExportAll}
+          disabled={isExportingAll}
+          className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg"
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isExportingAll ? 'Exporting...' : 'Export All Data'}
+        </Button>
       </div>
 
         {/* Tabs Navigation */}
@@ -265,10 +612,12 @@ export default function FormatOrderPage() {
               </Button>
 
               <Button 
+                onClick={handleExportFiltered}
+                disabled={isExportingFiltered}
                 className="bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg"
               >
                 <Download className="h-4 w-4 mr-2" />
-                Export Data
+                {isExportingFiltered ? 'Exporting...' : 'Export Filtered Data'}
               </Button>
             </div>
           </CardContent>
@@ -883,7 +1232,8 @@ export default function FormatOrderPage() {
           onClose={closeDetailModal}
           orderData={selectedOrderData}
         />
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

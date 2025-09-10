@@ -12,7 +12,7 @@ import { useMonitoring, useHSAWorkOrder } from "@/hooks"
 import { useTodayWorkComplete } from "@/hooks/use-work-complete"
 import { useTodayWorkCancel } from "@/hooks/use-today-work-cancel"
 import { useTodayWorkFail } from "@/hooks/use-today-work-fail"
-import { TrendingDown} from "lucide-react"
+import ProtectedRoute from "@/components/protected-route"
 
 // Interfaces will be used when data is fetched from Supabase
 
@@ -54,8 +54,9 @@ export default function MonitoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1B2431] p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#1B2431] p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white tracking-tight">Monitoring Dashboard</h1>
@@ -352,7 +353,8 @@ export default function MonitoringPage() {
             </CardContent>
           </Card>
         </div>
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

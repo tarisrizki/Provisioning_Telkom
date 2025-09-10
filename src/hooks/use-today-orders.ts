@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 export function useTodayOrders() {
   const [data, setData] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchTodayOrders() {
@@ -18,7 +18,8 @@ export function useTodayOrders() {
         if (error) throw error
         setData(result || 0)
       } catch (err) {
-        setError(err.message)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        setError(errorMessage)
         console.error('Error fetching today orders:', err)
       } finally {
         setLoading(false)

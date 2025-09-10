@@ -13,6 +13,7 @@ import {
 } from "@/components/dashboard"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload, TrendingUp, BarChart3, PieChart, Activity } from "lucide-react"
+import ProtectedRoute from "@/components/protected-route"
 
 export default function DashboardPage() {
   const { csvData } = useDashboard()
@@ -60,8 +61,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1B2431] p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-[#1B2431] p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         {/* <div className="space-y-2">
           <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Overview</h1>
@@ -195,7 +197,8 @@ export default function DashboardPage() {
         </div>
 
 
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }
