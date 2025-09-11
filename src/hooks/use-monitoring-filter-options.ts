@@ -1,59 +1,34 @@
-"use client"
-
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
-interface FilterOptions {
+export interface MonitoringFilterOptions {
   months: string[]
-  channels: string[]
-  serviceAreas: string[]
   branches: string[]
   clusters: string[]
-  workZones: string[]
   loading: boolean
   error: string | null
 }
 
-export function useFilterOptions(): FilterOptions {
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+export function useMonitoringFilterOptions() {
+  const [filterOptions, setFilterOptions] = useState<MonitoringFilterOptions>({
     months: [],
-    channels: [],
-    serviceAreas: [],
     branches: [],
     clusters: [],
-    workZones: [],
     loading: true,
     error: null
   })
 
   useEffect(() => {
-    const fetchFilterOptions = async () => {
+    async function fetchFilterOptions() {
       try {
         setFilterOptions(prev => ({ ...prev, loading: true, error: null }))
 
-        // Fetch unique values for each filter
+        // Fetch unique values for each filter from format_order table
         const [
-          channelsData,
-          serviceAreasData,
           branchesData,
           clustersData,
-          workZonesData,
           datesData
         ] = await Promise.all([
-          // Channels
-          supabase
-            .from('format_order')
-            .select('channel')
-            .not('channel', 'is', null)
-            .not('channel', 'eq', ''),
-          
-          // Service Areas
-          supabase
-            .from('format_order')
-            .select('service_area')
-            .not('service_area', 'is', null)
-            .not('service_area', 'eq', ''),
-          
           // Branches
           supabase
             .from('format_order')
@@ -61,19 +36,12 @@ export function useFilterOptions(): FilterOptions {
             .not('branch', 'is', null)
             .not('branch', 'eq', ''),
           
-          // Clusters
+          // Clusters  
           supabase
             .from('format_order')
             .select('cluster')
             .not('cluster', 'is', null)
             .not('cluster', 'eq', ''),
-          
-          // Work Zones
-          supabase
-            .from('format_order')
-            .select('workzone')
-            .not('workzone', 'is', null)
-            .not('workzone', 'eq', ''),
           
           // All date columns for months extraction
           supabase
@@ -82,24 +50,12 @@ export function useFilterOptions(): FilterOptions {
         ])
 
         // Process unique values
-        const uniqueChannels = [...new Set(
-          channelsData.data?.map(item => item.channel).filter(Boolean) || []
-        )].sort()
-
-        const uniqueServiceAreas = [...new Set(
-          serviceAreasData.data?.map(item => item.service_area).filter(Boolean) || []
-        )].sort()
-
         const uniqueBranches = [...new Set(
           branchesData.data?.map(item => item.branch).filter(Boolean) || []
         )].sort()
 
         const uniqueClusters = [...new Set(
           clustersData.data?.map(item => item.cluster).filter(Boolean) || []
-        )].sort()
-
-        const uniqueWorkZones = [...new Set(
-          workZonesData.data?.map(item => item.workzone).filter(Boolean) || []
         )].sort()
 
         // Extract unique months from all date columns
@@ -153,17 +109,14 @@ export function useFilterOptions(): FilterOptions {
 
         setFilterOptions({
           months: monthNames,
-          channels: uniqueChannels,
-          serviceAreas: uniqueServiceAreas,
           branches: uniqueBranches,
           clusters: uniqueClusters,
-          workZones: uniqueWorkZones,
           loading: false,
           error: null
         })
 
       } catch (error) {
-        console.error('Error fetching filter options:', error)
+        console.error('Error fetching monitoring filter options:', error)
         setFilterOptions(prev => ({
           ...prev,
           loading: false,

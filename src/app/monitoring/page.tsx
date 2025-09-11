@@ -8,7 +8,7 @@ import { useTodayOrders } from "@/hooks/use-today-orders"
 import { TrendingUp, AlertCircle, CheckCircle, XCircle, AlertTriangle } from "lucide-react"
 import { RefreshCw, BarChart3, PieChart as PieChartIcon } from "lucide-react"
 import { MonitoringChart, HSAWorkOrderChart } from "@/components/dashboard"
-import { useMonitoring, useHSAWorkOrder } from "@/hooks"
+import { useMonitoring, useHSAWorkOrder, useMonitoringFilterOptions } from "@/hooks"
 import { useTodayWorkComplete } from "@/hooks/use-work-complete"
 import { useTodayWorkCancel } from "@/hooks/use-today-work-cancel"
 import { useTodayWorkFail } from "@/hooks/use-today-work-fail"
@@ -19,14 +19,25 @@ import ProtectedRoute from "@/components/protected-route"
 // All data will be fetched from Supabase
 
 export default function MonitoringPage() {
-  const [selectedMonth, setSelectedMonth] = useState("October")
-  const [selectedBranch, setSelectedBranch] = useState("Branch")
-  const [selectedWOK, setSelectedWOK] = useState("WOK")
+  const [selectedMonth, setSelectedMonth] = useState("Pilih Bulan")
+  const [selectedBranch, setSelectedBranch] = useState("Pilih Branch")
+  const [selectedCluster, setSelectedCluster] = useState("Pilih Cluster")
+  
+  // Fetch filter options
+  const { months, branches, clusters, loading: filterLoading } = useMonitoringFilterOptions()
+  
+  // Create filter object for hooks
+  const filters = useMemo(() => ({
+    month: selectedMonth,
+    branch: selectedBranch,
+    cluster: selectedCluster
+  }), [selectedMonth, selectedBranch, selectedCluster])
+  
   const { data: todayOrders, loading: todayOrdersLoading, error: todayOrdersError } = useTodayOrders()
   const { data: workComplete, loading: workCompleteLoading, error: workCompleteError } = useTodayWorkComplete()
-  // Fetch monitoring data from Supabase
-  const { data: monitoringData, loading: monitoringLoading, error: monitoringError } = useMonitoring()
-  const { data: hsaWorkOrderData, loading: hsaLoading, error: hsaError } = useHSAWorkOrder()
+  // Fetch monitoring data from Supabase with filters
+  const { data: monitoringData, loading: monitoringLoading, error: monitoringError } = useMonitoring(filters)
+  const { data: hsaWorkOrderData, loading: hsaLoading, error: hsaError } = useHSAWorkOrder(filters)
   const { data: workCancel, loading: workCancelLoading, error: workCancelError } = useTodayWorkCancel()
   const { data: workFail, loading: workFailLoading, error: workFailError } = useTodayWorkFail()
   
@@ -39,18 +50,22 @@ export default function MonitoringPage() {
     }
   }, [])
 
-  const monthOptions = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ]
-
-  const branchOptions = ["Branch", "Banda Aceh", "Langsa", "Lhokseumawe", "Meulaboh", "Sigli"]
-  const wokOptions = ["WOK", "WOK-001", "WOK-002", "WOK-003", "WOK-004"]
+  // Create dropdown options with default values
+  const monthOptions = ["Pilih Bulan", ...months]
+  const branchOptions = ["Pilih Branch", ...branches]
+  const clusterOptions = ["Pilih Cluster", ...clusters]
 
   const handleResetFilter = () => {
-    setSelectedMonth("October")
-    setSelectedBranch("Branch")
-    setSelectedWOK("WOK")
+    setSelectedMonth("Pilih Bulan")
+    setSelectedBranch("Pilih Branch")
+    setSelectedCluster("Pilih Cluster")
+  }
+
+  // Check if any filter is active
+  const hasActiveFilters = () => {
+    return selectedMonth !== "Pilih Bulan" || 
+           selectedBranch !== "Pilih Branch" || 
+           selectedCluster !== "Pilih Cluster"
   }
 
   return (
@@ -259,6 +274,22 @@ export default function MonitoringPage() {
         {/* Filters */}
         <Card className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
           <CardContent className="p-6">
+            <div className="flex flex-wrap items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <BarChart3 className="h-5 w-5 text-blue-400" />
+                <h3 className="text-lg font-semibold text-white">Filter Data</h3>
+                {hasActiveFilters() && (
+                  <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs font-medium">
+                    Filter Aktif
+                  </span>
+                )}
+                {filterLoading && (
+                  <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full text-xs font-medium animate-pulse">
+                    Loading...
+                  </span>
+                )}
+              </div>
+            </div>
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center space-x-4">
                 <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -287,28 +318,30 @@ export default function MonitoringPage() {
                   </SelectContent>
                 </Select>
 
-                <Select value={selectedWOK} onValueChange={setSelectedWOK}>
-                  <SelectTrigger className="w-[120px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                <Select value={selectedCluster} onValueChange={setSelectedCluster}>
+                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1e293b] border-[#475569]">
-                    {wokOptions.map((wok) => (
-                      <SelectItem key={wok} value={wok} className="text-white hover:bg-[#334155] focus:bg-[#334155]">
-                        {wok}
+                    {clusterOptions.map((cluster) => (
+                      <SelectItem key={cluster} value={cluster} className="text-white hover:bg-[#334155] focus:bg-[#334155]">
+                        {cluster}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <Button 
-                onClick={handleResetFilter}
-                variant="outline" 
-                className="bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Reset Filter
-              </Button>
+              {hasActiveFilters() && (
+                <Button 
+                  onClick={handleResetFilter}
+                  variant="outline" 
+                  className="bg-[#dc2626] border-[#dc2626] text-white hover:bg-[#b91c1c] hover:border-[#b91c1c] transition-all duration-200 shadow-md"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reset Filter
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

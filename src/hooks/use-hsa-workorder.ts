@@ -7,13 +7,19 @@ export interface HSAWorkOrderData {
   color: string
 }
 
-export function useHSAWorkOrder() {
+export interface HSAWorkOrderFilters {
+  month?: string
+  branch?: string
+  cluster?: string
+}
+
+export function useHSAWorkOrder(filters?: HSAWorkOrderFilters) {
   const [data, setData] = useState<HSAWorkOrderData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    console.log('HSAWorkOrder: Hook initialized, starting data fetch...')
+    console.log('HSAWorkOrder: Hook initialized, starting data fetch with filters:', filters)
     
     // Color palette untuk HSA yang berbeda
     const hsaColors = [
@@ -39,7 +45,7 @@ export function useHSAWorkOrder() {
         setLoading(true)
         setError(null)
         
-        console.log('HSAWorkOrder: Starting to fetch data from Supabase...')
+        console.log('HSAWorkOrder: Starting to fetch data from Supabase with filters...')
         console.log('HSAWorkOrder: Supabase client available:', !!supabase)
         
         // Check if Supabase is configured
@@ -48,20 +54,47 @@ export function useHSAWorkOrder() {
           throw new Error('Supabase client not configured')
         }
 
-        // Test simple query first
-        console.log('HSAWorkOrder: Testing simple query...')
-        const { data: testData, error: testError } = await supabase
+        // Build query with filters
+        let query = supabase
           .from('format_order')
-          .select('service_area')
-          .range(0, 4) // Get first 5 records as test
+          .select('service_area, branch, cluster, date_created, status_date, booking_date, tanggal_ps')
+          .not('service_area', 'is', null)
+          .not('service_area', 'eq', '')
 
-        if (testError) {
-          console.error('HSAWorkOrder: Test query failed:', testError)
-          throw new Error(`Database connection failed: ${testError.message}`)
+        // Apply filters
+        if (filters?.branch && filters.branch !== "Pilih Branch") {
+          console.log('HSA: Applying branch filter:', filters.branch)
+          query = query.ilike('branch', `%${filters.branch}%`)
+        }
+        if (filters?.cluster && filters.cluster !== "Pilih Cluster") {
+          console.log('HSA: Applying cluster filter:', filters.cluster)
+          query = query.ilike('cluster', `%${filters.cluster}%`)
+        }
+        if (filters?.month && filters.month !== "Pilih Bulan") {
+          // Handle month filtering for format like "Oktober 2024"
+          const monthMap: {[key: string]: string} = {
+            "Januari": "01", "Februari": "02", "Maret": "03", "April": "04",
+            "Mei": "05", "Juni": "06", "Juli": "07", "Agustus": "08", 
+            "September": "09", "Oktober": "10", "November": "11", "Desember": "12"
+          }
+          
+          const parts = filters.month.split(' ')
+          if (parts.length === 2) {
+            const monthName = parts[0]
+            const year = parts[1]
+            const monthNum = monthMap[monthName]
+            if (monthNum) {
+              const lastDay = new Date(parseInt(year), parseInt(monthNum), 0).getDate()
+              const startDate = `${year}-${monthNum}-01`
+              const endDate = `${year}-${monthNum}-${lastDay.toString().padStart(2, '0')}`
+              console.log('HSA: Applying month filter:', startDate, 'to', endDate)
+              
+              // Use OR condition to check multiple date columns
+              query = query.or(`and(date_created.gte.${startDate},date_created.lte.${endDate}),and(status_date.gte.${startDate},status_date.lte.${endDate}),and(booking_date.gte.${startDate},booking_date.lte.${endDate}),and(tanggal_ps.gte.${startDate},tanggal_ps.lte.${endDate})`)
+            }
+          }
         }
 
-        console.log('HSAWorkOrder: Test query successful, sample data:', testData)
-        
         // Fetch all service_area data with pagination
         let allData: Array<{service_area?: string}> = []
         let page = 0
@@ -73,11 +106,7 @@ export function useHSAWorkOrder() {
         while (hasMore) {
           console.log(`HSAWorkOrder: Fetching page ${page + 1}...`)
           
-          const { data: hsaData, error } = await supabase
-            .from('format_order')
-            .select('service_area')
-            .not('service_area', 'is', null)
-            .not('service_area', 'eq', '')
+          const { data: hsaData, error } = await query
             .range(page * pageSize, (page + 1) * pageSize - 1)
 
           if (error) {
@@ -173,7 +202,7 @@ export function useHSAWorkOrder() {
     }
 
     fetchHSAWorkOrderData()
-  }, [])
+  }, [filters])
 
   return { data, loading, error }
 }

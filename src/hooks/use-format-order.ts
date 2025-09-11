@@ -6,12 +6,16 @@ import { supabase, FormatOrder } from '@/lib/supabase'
 interface UseFormatOrderOptions {
   pageSize?: number
   filters?: {
+    month?: string
     channel?: string
     dateCreated?: string
     branch?: string
     serviceArea?: string
     updateLapangan?: string
     statusBima?: string
+    sa?: string
+    cluster?: string
+    workZone?: string
   }
 }
 
@@ -50,6 +54,16 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
       setLoading(true)
       setError(null)
 
+      console.log('Fetching data with filters:', filters) // Debug log
+
+      // Test basic connection first
+      const testQuery = await supabase.from('format_order').select('count', { count: 'exact', head: true })
+      console.log('Database connection test:', testQuery)
+
+      if (testQuery.error) {
+        throw new Error(`Database connection failed: ${testQuery.error.message}`)
+      }
+
       // Build query
       let query = supabase
         .from('format_order')
@@ -58,17 +72,57 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
         .order('created_at', { ascending: false })
 
       // Apply filters
-      if (filters.channel) {
+      if (filters.channel && filters.channel !== "Pilih Channel") {
+        console.log('Applying channel filter:', filters.channel) // Debug log
         query = query.ilike('channel', `%${filters.channel}%`)
+      }
+      if (filters.month && filters.month !== "Pilih Bulan") {
+        // Handle month filtering for format like "Oktober 2024"
+        const monthMap: {[key: string]: string} = {
+          "Januari": "01", "Februari": "02", "Maret": "03", "April": "04",
+          "Mei": "05", "Juni": "06", "Juli": "07", "Agustus": "08", 
+          "September": "09", "Oktober": "10", "November": "11", "Desember": "12"
+        }
+        
+        // Extract month and year from filter like "Oktober 2024"
+        const parts = filters.month.split(' ')
+        if (parts.length === 2) {
+          const monthName = parts[0]
+          const year = parts[1]
+          const monthNum = monthMap[monthName]
+          if (monthNum) {
+            // Get the last day of the month
+            const lastDay = new Date(parseInt(year), parseInt(monthNum), 0).getDate()
+            const startDate = `${year}-${monthNum}-01`
+            const endDate = `${year}-${monthNum}-${lastDay.toString().padStart(2, '0')}`
+            console.log('Applying month filter:', startDate, 'to', endDate) // Debug log
+            
+            // Use OR condition to check multiple date columns
+            query = query.or(`and(date_created.gte.${startDate},date_created.lte.${endDate}),and(status_date.gte.${startDate},status_date.lte.${endDate}),and(booking_date.gte.${startDate},booking_date.lte.${endDate}),and(tanggal_ps.gte.${startDate},tanggal_ps.lte.${endDate})`)
+          }
+        }
       }
       if (filters.dateCreated) {
         query = query.gte('date_created', filters.dateCreated)
       }
-      if (filters.branch) {
+      if (filters.branch && filters.branch !== "Pilih Branch") {
+        console.log('Applying branch filter:', filters.branch) // Debug log
         query = query.ilike('branch', `%${filters.branch}%`)
       }
-      if (filters.serviceArea) {
+      if (filters.serviceArea && filters.serviceArea !== "Pilih SA") {
         query = query.ilike('service_area', `%${filters.serviceArea}%`)
+      }
+      if (filters.sa && filters.sa !== "Pilih SA") {
+        console.log('Applying SA filter:', filters.sa) // Debug log
+        query = query.ilike('service_area', `%${filters.sa}%`)
+      }
+      if (filters.cluster && filters.cluster !== "Pilih Cluster") {
+        console.log('Applying cluster filter:', filters.cluster) // Debug log
+        query = query.ilike('cluster', `%${filters.cluster}%`)
+      }
+      if (filters.workZone && filters.workZone !== "Pilih Work Zone") {
+        console.log('Applying workZone filter:', filters.workZone) // Debug log
+        query = query.ilike('workzone', `%${filters.workZone}%`)
       }
       if (filters.updateLapangan) {
         query = query.ilike('update_lapangan', `%${filters.updateLapangan}%`)
@@ -80,15 +134,25 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
       const { data: result, error: queryError, count } = await query
 
       if (queryError) {
-        throw queryError
+        console.error('Supabase query error details:', queryError)
+        throw new Error(`Database query failed: ${queryError.message || 'Unknown database error'}`)
       }
 
+      console.log('Query result count:', count, 'Data length:', result?.length) // Debug log
       setData(result || [])
       setTotalCount(count || 0)
       setCurrentPage(page)
     } catch (err) {
       console.error('Error fetching format_order data:', err)
-      setError(err instanceof Error ? err.message : 'Failed to fetch data')
+      let errorMessage = 'Failed to fetch data'
+      
+      if (err instanceof Error) {
+        errorMessage = err.message
+      } else if (typeof err === 'object' && err !== null) {
+        errorMessage = JSON.stringify(err)
+      }
+      
+      setError(errorMessage)
       setData([])
       setTotalCount(0)
     } finally {
@@ -119,6 +183,7 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
   }, [currentPage, fetchData])
 
   const setFilters = useCallback((newFilters: UseFormatOrderOptions['filters']) => {
+    console.log('setFilters called with:', newFilters)
     setFiltersState(newFilters || {})
     setCurrentPage(1) // Reset to first page when filters change
   }, [])
