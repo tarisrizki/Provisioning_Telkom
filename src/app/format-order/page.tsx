@@ -13,6 +13,7 @@ import { DetailModal } from "@/components/format-order/detail-modal"
 import { EditableCell } from "@/components/format-order/editable-cell"
 import { useTabData } from "@/hooks/use-format-order"
 import { useAnalysisData } from "@/hooks/use-analysis-data"
+import { useFilterOptions } from "@/hooks/use-filter-options"
 import ProtectedRoute from "@/components/protected-route"
 import { supabase } from "@/lib/supabase"
 import { useAuth } from "@/contexts/auth-context"
@@ -22,9 +23,25 @@ import { FormatOrder } from "@/lib/supabase"
 function FormatOrderContent() {
   const { isAdmin } = useAuth()
   const [selectedTab, setSelectedTab] = useState("Work Order")
-  const [selectedFilter, setSelectedFilter] = useState("Oktober")
-  const [selectedChannel, setSelectedChannel] = useState("Channel")
-  const [selectedDateCreated, setSelectedDateCreated] = useState("Date created")
+  
+  // Filter states for each tab
+  const [selectedMonth, setSelectedMonth] = useState("Pilih Bulan")
+  const [selectedChannel, setSelectedChannel] = useState("Pilih Channel")
+  const [selectedSA, setSelectedSA] = useState("Pilih SA")
+  const [selectedBranch, setSelectedBranch] = useState("Pilih Branch")
+  const [selectedCluster, setSelectedCluster] = useState("Pilih Cluster")
+  const [selectedWorkZone, setSelectedWorkZone] = useState("Pilih Work Zone")
+  
+  // Get dynamic filter options from database
+  const { 
+    months, 
+    channels, 
+    serviceAreas, 
+    branches, 
+    clusters, 
+    workZones, 
+    loading: filterLoading 
+  } = useFilterOptions()
   
   const searchParams = useSearchParams()
   const openDetailParam = searchParams.get('openDetail')
@@ -49,14 +66,39 @@ function FormatOrderContent() {
     hasPreviousPage,
     nextPage,
     previousPage,
-    refresh
+    refresh,
+    setFilters
   } = useTabData(selectedTab, {
     pageSize: 50,
     filters: {
-      channel: selectedChannel !== "Channel" ? selectedChannel : undefined,
-      dateCreated: selectedDateCreated !== "Date created" ? selectedDateCreated : undefined
+      month: selectedMonth,
+      channel: selectedChannel,
+      branch: selectedBranch,
+      sa: selectedSA,
+      cluster: selectedCluster,
+      workZone: selectedWorkZone
     }
   })
+
+  // Update filters when filter values change
+  useEffect(() => {
+    const newFilters = {
+      month: selectedMonth,
+      channel: selectedChannel,
+      branch: selectedBranch,
+      sa: selectedSA,
+      cluster: selectedCluster,
+      workZone: selectedWorkZone
+    }
+    
+    console.log('Updating filters:', newFilters)
+    setFilters(newFilters)
+  }, [selectedMonth, selectedChannel, selectedBranch, selectedSA, selectedCluster, selectedWorkZone, setFilters])
+
+  // Reset filters when tab changes
+  useEffect(() => {
+    resetFilters()
+  }, [selectedTab])
 
   // Use analysis data for all statistics (fetches all data, not paginated)
   const {
@@ -70,7 +112,72 @@ function FormatOrderContent() {
   const [selectedOrderData, setSelectedOrderData] = useState<FormatOrder | null>(null)
 
   const tabs = ["Work Order", "Aktivasi", "Update lapangan", "MANJA"]
-  const filters = ["Oktober", "November", "Desember", "Januari"]
+  
+  // Get filter config for current tab using dynamic data
+  const getFiltersForTab = () => {
+    const monthOptions = ["Pilih Bulan", ...months]
+    const channelOptions = ["Pilih Channel", ...channels]
+    const serviceAreaOptions = ["Pilih SA", ...serviceAreas]
+    const branchOptions = ["Pilih Branch", ...branches]
+    const clusterOptions = ["Pilih Cluster", ...clusters]
+    const workZoneOptions = ["Pilih Work Zone", ...workZones]
+
+    switch (selectedTab) {
+      case "Work Order":
+        return [
+          { key: "month", label: "Bulan", value: selectedMonth, setter: setSelectedMonth, options: monthOptions },
+          { key: "channel", label: "Channel", value: selectedChannel, setter: setSelectedChannel, options: channelOptions },
+          { key: "sa", label: "SA", value: selectedSA, setter: setSelectedSA, options: serviceAreaOptions },
+          { key: "branch", label: "Branch", value: selectedBranch, setter: setSelectedBranch, options: branchOptions },
+          { key: "cluster", label: "Cluster", value: selectedCluster, setter: setSelectedCluster, options: clusterOptions }
+        ]
+      case "Aktivasi":
+        return [
+          { key: "month", label: "Bulan", value: selectedMonth, setter: setSelectedMonth, options: monthOptions },
+          { key: "channel", label: "Channel", value: selectedChannel, setter: setSelectedChannel, options: channelOptions },
+          { key: "workZone", label: "Work Zone", value: selectedWorkZone, setter: setSelectedWorkZone, options: workZoneOptions },
+          { key: "sa", label: "Service Area", value: selectedSA, setter: setSelectedSA, options: serviceAreaOptions }
+        ]
+      case "Update lapangan":
+        return [
+          { key: "month", label: "Bulan", value: selectedMonth, setter: setSelectedMonth, options: monthOptions },
+          { key: "channel", label: "Channel", value: selectedChannel, setter: setSelectedChannel, options: channelOptions },
+          { key: "sa", label: "SA", value: selectedSA, setter: setSelectedSA, options: serviceAreaOptions },
+          { key: "branch", label: "Branch", value: selectedBranch, setter: setSelectedBranch, options: branchOptions },
+          { key: "cluster", label: "Cluster", value: selectedCluster, setter: setSelectedCluster, options: clusterOptions }
+        ]
+      case "MANJA":
+        return [
+          { key: "month", label: "Bulan", value: selectedMonth, setter: setSelectedMonth, options: monthOptions },
+          { key: "channel", label: "Channel", value: selectedChannel, setter: setSelectedChannel, options: channelOptions },
+          { key: "sa", label: "SA", value: selectedSA, setter: setSelectedSA, options: serviceAreaOptions },
+          { key: "branch", label: "Branch", value: selectedBranch, setter: setSelectedBranch, options: branchOptions },
+          { key: "cluster", label: "Cluster", value: selectedCluster, setter: setSelectedCluster, options: clusterOptions }
+        ]
+      default:
+        return []
+    }
+  }
+
+  // Reset all filters
+  const resetFilters = () => {
+    setSelectedMonth("Pilih Bulan")
+    setSelectedChannel("Pilih Channel")
+    setSelectedSA("Pilih SA")
+    setSelectedBranch("Pilih Branch")
+    setSelectedCluster("Pilih Cluster")
+    setSelectedWorkZone("Pilih Work Zone")
+  }
+
+  // Check if any filter is active
+  const hasActiveFilters = () => {
+    return selectedMonth !== "Pilih Bulan" || 
+           selectedChannel !== "Pilih Channel" || 
+           selectedSA !== "Pilih SA" || 
+           selectedBranch !== "Pilih Branch" || 
+           selectedCluster !== "Pilih Cluster" || 
+           selectedWorkZone !== "Pilih Work Zone"
+  }
 
 
 
@@ -564,53 +671,51 @@ function FormatOrderContent() {
         {/* Filters */}
         <Card className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
           <CardContent className="p-6">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center space-x-4">
-                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
-                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1e293b] border-[#475569]">
-                    {filters.map((filter) => (
-                      <SelectItem key={filter} value={filter} className="text-white hover:bg-[#334155] focus:bg-[#334155]">
-                        {filter}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <Select value={selectedChannel} onValueChange={setSelectedChannel}>
-                  <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1e293b] border-[#475569]">
-                    <SelectItem value="Channel" className="text-white hover:bg-[#334155] focus:bg-[#334155]">Channel</SelectItem>
-                    <SelectItem value="DIGIPOS" className="text-white hover:bg-[#334155] focus:bg-[#334155]">DIGIPOS</SelectItem>
-                    <SelectItem value="ATM" className="text-white hover:bg-[#334155] focus:bg-[#334155]">ATM</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                <Select value={selectedDateCreated} onValueChange={setSelectedDateCreated}>
-                  <SelectTrigger className="w-[160px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1e293b] border-[#475569]">
-                    <SelectItem value="Date created" className="text-white hover:bg-[#334155] focus:bg-[#334155]">Date created</SelectItem>
-                    <SelectItem value="Today" className="text-white hover:bg-[#334155] focus:bg-[#334155]">Today</SelectItem>
-                    <SelectItem value="This Week" className="text-white hover:bg-[#334155] focus:bg-[#334155]">This Week</SelectItem>
-                    <SelectItem value="This Month" className="text-white hover:bg-[#334155] focus:bg-[#334155]">This Month</SelectItem>
-                  </SelectContent>
-                </Select>
+            {filterLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <div className="text-white">Loading filter options...</div>
               </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center space-x-4 flex-wrap">
+                  {getFiltersForTab().map((filter) => (
+                    <Select key={filter.key} value={filter.value} onValueChange={filter.setter}>
+                      <SelectTrigger className="w-[140px] bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] transition-colors">
+                        <SelectValue placeholder={filter.label} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1e293b] border-[#475569] max-h-[200px] overflow-y-auto">
+                        {filter.options.map((option) => (
+                          <SelectItem key={option} value={option} className="text-white hover:bg-[#334155] focus:bg-[#334155]">
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ))}
+                </div>
 
-              <Button 
-                variant="outline" 
-                className="bg-[#1B2431] border-[#475569] text-white hover:bg-[#1e293b] hover:border-[#64748b] transition-all duration-200 shadow-md"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Reset Filters
-              </Button>
+                <Button 
+                  onClick={resetFilters}
+                  variant="outline" 
+                  disabled={!hasActiveFilters()}
+                  className={`border-[#475569] text-white hover:border-[#64748b] transition-all duration-200 shadow-md ${
+                    hasActiveFilters() 
+                      ? 'bg-red-600/20 hover:bg-red-600/30 border-red-500 text-red-400' 
+                      : 'bg-[#1B2431] hover:bg-[#1e293b]'
+                  }`}
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Reset Filters {hasActiveFilters() && `(${Object.values({selectedMonth, selectedChannel, selectedSA, selectedBranch, selectedCluster, selectedWorkZone}).filter(v => v !== "All").length})`}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Export Buttons */}
+        <Card className="bg-gradient-to-r from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
+          <CardContent className="p-6">
+            <div className="flex flex-wrap items-center gap-4">
               <Button 
                 onClick={handleExportFiltered}
                 disabled={isExportingFiltered}
@@ -619,6 +724,15 @@ function FormatOrderContent() {
                 <Download className="h-4 w-4 mr-2" />
                 {isExportingFiltered ? 'Exporting...' : 'Export Filtered Data'}
               </Button>
+              
+              <Button 
+                onClick={handleExportAll}
+                disabled={isExportingAll}
+                className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg"
+              >
+                <Database className="h-4 w-4 mr-2" />
+                {isExportingAll ? 'Exporting...' : 'Export All Data'}
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -626,11 +740,21 @@ function FormatOrderContent() {
         {/* Data Table */}
         <Card className="bg-gradient-to-br from-[#1e293b] to-[#334155] border-[#475569] shadow-xl">
           <CardHeader className="pb-4">
-            <CardTitle className="text-white flex items-center space-x-3">
-              <div className="p-2 bg-green-500/20 rounded-lg">
-                <FileText className="h-5 w-5 text-green-400" />
+            <CardTitle className="text-white flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-green-500/20 rounded-lg">
+                  <FileText className="h-5 w-5 text-green-400" />
+                </div>
+                <span className="text-xl font-semibold">{selectedTab} Data</span>
+                {hasActiveFilters() && (
+                  <div className="px-2 py-1 bg-blue-500/20 border border-blue-500/30 rounded-md text-xs text-blue-400">
+                    Filtered ({Object.values({selectedMonth, selectedChannel, selectedSA, selectedBranch, selectedCluster, selectedWorkZone}).filter(v => v !== "All").length} active)
+                  </div>
+                )}
               </div>
-              <span className="text-xl font-semibold">{selectedTab} Data</span>
+              <div className="text-sm text-gray-400">
+                Total: {totalCount} records
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>

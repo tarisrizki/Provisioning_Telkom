@@ -8,13 +8,19 @@ export interface MonitoringData {
   color: string
 }
 
-export function useMonitoring() {
+export interface MonitoringFilters {
+  month?: string
+  branch?: string
+  cluster?: string
+}
+
+export function useMonitoring(filters?: MonitoringFilters) {
   const [data, setData] = useState<MonitoringData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    console.log('Monitoring: Hook initialized, starting data fetch...')
+    console.log('Monitoring: Hook initialized, starting data fetch with filters:', filters)
     
     // Mapping dari data Supabase ke display names dan warna
     const statusMappingLocal: Record<string, { displayName: string; color: string }> = {
@@ -36,25 +42,62 @@ export function useMonitoring() {
         setLoading(true)
         setError(null)
         
-        console.log('Monitoring: Starting to fetch data from Supabase...')
+        console.log('Monitoring: Starting to fetch data from Supabase with filters...')
         
         // Check if Supabase is configured
         if (!supabase) {
           throw new Error('Supabase client not configured')
         }
         
-        // Fetch all update_lapangan data with pagination
+        // Build query with filters
+        let query = supabase
+          .from('format_order')
+          .select('update_lapangan, branch, cluster, date_created, status_date, booking_date, tanggal_ps')
+          .not('update_lapangan', 'is', null)
+          .not('update_lapangan', 'eq', '')
+
+        // Apply filters
+        if (filters?.branch && filters.branch !== "Pilih Branch") {
+          console.log('Applying branch filter:', filters.branch)
+          query = query.ilike('branch', `%${filters.branch}%`)
+        }
+        if (filters?.cluster && filters.cluster !== "Pilih Cluster") {
+          console.log('Applying cluster filter:', filters.cluster)
+          query = query.ilike('cluster', `%${filters.cluster}%`)
+        }
+        if (filters?.month && filters.month !== "Pilih Bulan") {
+          // Handle month filtering for format like "Oktober 2024"
+          const monthMap: {[key: string]: string} = {
+            "Januari": "01", "Februari": "02", "Maret": "03", "April": "04",
+            "Mei": "05", "Juni": "06", "Juli": "07", "Agustus": "08", 
+            "September": "09", "Oktober": "10", "November": "11", "Desember": "12"
+          }
+          
+          const parts = filters.month.split(' ')
+          if (parts.length === 2) {
+            const monthName = parts[0]
+            const year = parts[1]
+            const monthNum = monthMap[monthName]
+            if (monthNum) {
+              const lastDay = new Date(parseInt(year), parseInt(monthNum), 0).getDate()
+              const startDate = `${year}-${monthNum}-01`
+              const endDate = `${year}-${monthNum}-${lastDay.toString().padStart(2, '0')}`
+              console.log('Applying month filter:', startDate, 'to', endDate)
+              
+              // Use OR condition to check multiple date columns
+              query = query.or(`and(date_created.gte.${startDate},date_created.lte.${endDate}),and(status_date.gte.${startDate},status_date.lte.${endDate}),and(booking_date.gte.${startDate},booking_date.lte.${endDate}),and(tanggal_ps.gte.${startDate},tanggal_ps.lte.${endDate})`)
+            }
+          }
+        }
+
+        // Fetch all data with pagination
         let allData: Array<{update_lapangan: string}> = []
         let page = 0
         const pageSize = 1000
         let hasMore = true
 
         while (hasMore) {
-          const { data: updateData, error } = await supabase
-            .from('format_order')
-            .select('update_lapangan')
-            .not('update_lapangan', 'is', null)
-            .not('update_lapangan', 'eq', '')
+          const { data: updateData, error } = await query
             .range(page * pageSize, (page + 1) * pageSize - 1)
 
           if (error) {
@@ -126,7 +169,7 @@ export function useMonitoring() {
     }
 
     fetchMonitoringData()
-  }, [])
+  }, [filters])
 
   return { data, loading, error }
 }
