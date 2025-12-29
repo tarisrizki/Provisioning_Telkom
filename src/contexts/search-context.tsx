@@ -88,11 +88,12 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         }
       })
 
-      // Search in Supabase format_order data
-      try {
-        // First try exact matches for order_id, workorder, and service_no
-        const { data: exactMatches, error: exactError } = await supabase
-          .from('format_order')
+      // Search in Supabase format_order data (if configured)
+      if (supabase) {
+        try {
+          // First try exact matches for order_id, workorder, and service_no
+          const { data: exactMatches, error: exactError } = await supabase
+            .from('format_order')
           .select('*')
           .or(`order_id.eq.${query},workorder.eq.${query},service_no.eq.${query}`)
           .limit(3)
@@ -138,9 +139,10 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
             })
           }
         }
-      } catch (supabaseError) {
-        console.log('Supabase search error:', supabaseError)
-        // Continue with other search results even if Supabase search fails
+        } catch (supabaseError) {
+          console.log('Supabase search error:', supabaseError)
+          // Continue with other search results even if Supabase search fails
+        }
       }
 
       // Add quick access results based on search terms

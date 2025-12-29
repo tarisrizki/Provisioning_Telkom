@@ -9,6 +9,12 @@ export function useTodayOrders() {
 
   useEffect(() => {
     async function fetchTodayOrders() {
+      if (!supabase) {
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
+      
       try {
         setLoading(true)
         

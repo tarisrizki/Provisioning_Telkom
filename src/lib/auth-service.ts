@@ -1,4 +1,5 @@
-import { supabase } from '@/lib/supabase'
+// Internal Auth Service with LocalStorage Support
+// CRUD operations stored in browser localStorage
 
 export interface User {
   id: string
@@ -35,176 +36,281 @@ export interface UpdateUserData {
   status?: 'active' | 'inactive'
 }
 
+interface InternalUser extends User {
+  password: string
+}
+
+// Default users - will be loaded into localStorage on first run
+const DEFAULT_USERS: InternalUser[] = [
+  {
+    id: '1',
+    username: 'admin',
+    email: 'admin@telkom.co.id',
+    name: 'Administrator',
+    password: 'admin123',
+    role: 'admin',
+    status: 'active',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: '2',
+    username: 'user',
+    email: 'user@telkom.co.id',
+    name: 'User Biasa',
+    password: 'user123',
+    role: 'user',
+    status: 'active',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: '3',
+    username: 'taris',
+    email: 'taris@telkom.co.id',
+    name: 'Taris Rizki',
+    password: 'taris123',
+    role: 'admin',
+    status: 'active',
+    created_at: '2024-01-01T00:00:00Z',
+    updated_at: '2024-01-01T00:00:00Z',
+  },
+]
+
+const STORAGE_KEY = 'provisioning_users'
+
 class AuthService {
+  private users: InternalUser[] = []
+
+  constructor() {
+    this.loadUsers()
+  }
+
+  // Load users from localStorage or initialize with defaults
+  private loadUsers(): void {
+    if (typeof window === 'undefined') {
+      this.users = [...DEFAULT_USERS]
+      return
+    }
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored) {
+        this.users = JSON.parse(stored)
+      } else {
+        this.users = [...DEFAULT_USERS]
+        this.saveUsers()
+      }
+    } catch {
+      this.users = [...DEFAULT_USERS]
+    }
+  }
+
+  // Save users to localStorage
+  private saveUsers(): void {
+    if (typeof window === 'undefined') return
+    
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.users))
+    } catch {
+      // Ignore localStorage errors
+    }
+  }
+
+  // Generate unique ID
+  private generateId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2)
+  }
+
   // Login user
   async login(credentials: LoginCredentials): Promise<{ user: User | null; error: string | null }> {
     try {
-      console.log('Attempting login for username:', credentials.username)
-      
-      const { data: users, error } = await supabase
-        .from('users')
-        .select('*')
-        .eq('username', credentials.username)
-        .eq('status', 'active')
-        .limit(1)
+      this.loadUsers()
 
-      console.log('Supabase query result:', { users, error })
+      const foundUser = this.users.find(
+        u => u.username === credentials.username && u.status === 'active'
+      )
 
-      if (error) {
-        console.error('Supabase error:', error)
-        return { user: null, error: `Database error: ${error.message}` }
+      if (!foundUser) {
+        return { user: null, error: 'Username atau password salah' }
       }
 
-      if (!users || users.length === 0) {
-        return { user: null, error: 'Invalid username or password' }
+      if (credentials.password !== foundUser.password) {
+        return { user: null, error: 'Username atau password salah' }
       }
 
-      const user = users[0]
-      
-      // Direct password comparison (plain text)
-      const isValidPassword = credentials.password === user.password_hash
-      
-      if (!isValidPassword) {
-        return { user: null, error: 'Invalid username or password' }
-      }
+      foundUser.last_login = new Date().toISOString()
+      this.saveUsers()
 
-      // Update last login
-      await supabase
-        .from('users')
-        .update({ last_login: new Date().toISOString() })
-        .eq('id', user.id)
-
-      // Remove password hash from returned user
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password_hash, ...userWithoutPassword } = user
-      
-      return { user: userWithoutPassword as User, error: null }
-    } catch (error) {
-      console.error('Login error:', error)
-      return { user: null, error: 'Authentication failed' }
+      const { password: _, ...userWithoutPassword } = foundUser
+      return { user: userWithoutPassword, error: null }
+    } catch {
+      return { user: null, error: 'Autentikasi gagal' }
     }
   }
 
-  // Get all users (admin only)
+  // Get all users
   async getAllUsers(): Promise<{ users: User[]; error: string | null }> {
     try {
-      const { data: users, error } = await supabase
-        .from('users')
-        .select('id, username, email, name, role, status, avatar_url, created_at, updated_at, last_login')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        return { users: [], error: 'Failed to fetch users' }
-      }
-
-      return { users: users as User[], error: null }
-    } catch (error) {
-      console.error('Get users error:', error)
-      return { users: [], error: 'Failed to fetch users' }
+      this.loadUsers()
+      const users = this.users.map(({ password: _, ...user }) => user)
+      return { users, error: null }
+    } catch {
+      return { users: [], error: 'Gagal mengambil data user' }
     }
   }
 
-  // Create new user (admin only)
+  // Create new user
   async createUser(userData: CreateUserData): Promise<{ user: User | null; error: string | null }> {
     try {
-      // Store password as plain text
-      const { data: newUser, error } = await supabase
-        .from('users')
-        .insert([
-          {
-            username: userData.username,
-            email: userData.email,
-            name: userData.name,
-            password_hash: userData.password, // Store as plain text
-            role: userData.role,
-            status: 'active'
-          }
-        ])
-        .select('id, username, email, name, role, status, avatar_url, created_at, updated_at')
-        .single()
+      this.loadUsers()
 
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          return { user: null, error: 'Username or email already exists' }
-        }
-        return { user: null, error: 'Failed to create user' }
+      if (this.users.some(u => u.username === userData.username)) {
+        return { user: null, error: 'Username sudah digunakan' }
       }
 
-      return { user: newUser as User, error: null }
-    } catch (error) {
-      console.error('Create user error:', error)
-      return { user: null, error: 'Failed to create user' }
+      if (this.users.some(u => u.email === userData.email)) {
+        return { user: null, error: 'Email sudah digunakan' }
+      }
+
+      const now = new Date().toISOString()
+      const newUser: InternalUser = {
+        id: this.generateId(),
+        username: userData.username,
+        email: userData.email,
+        name: userData.name,
+        password: userData.password,
+        role: userData.role,
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      }
+
+      this.users.push(newUser)
+      this.saveUsers()
+
+      const { password: _, ...userWithoutPassword } = newUser
+      return { user: userWithoutPassword, error: null }
+    } catch {
+      return { user: null, error: 'Gagal membuat user baru' }
     }
   }
 
-  // Update user (admin only or own profile)
+  // Update user
   async updateUser(userId: string, userData: UpdateUserData): Promise<{ user: User | null; error: string | null }> {
     try {
-      const updateData: Record<string, unknown> = { ...userData }
+      this.loadUsers()
 
-      // Store password as plain text if provided
-      if (userData.password) {
-        updateData.password_hash = userData.password // Store as plain text
-        delete updateData.password
+      const userIndex = this.users.findIndex(u => u.id === userId)
+      if (userIndex === -1) {
+        return { user: null, error: 'User tidak ditemukan' }
       }
 
-      const { data: updatedUser, error } = await supabase
-        .from('users')
-        .update(updateData)
-        .eq('id', userId)
-        .select('id, username, email, name, role, status, avatar_url, created_at, updated_at, last_login')
-        .single()
+      if (userData.username && this.users.some(u => u.username === userData.username && u.id !== userId)) {
+        return { user: null, error: 'Username sudah digunakan' }
+      }
 
-      if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          return { user: null, error: 'Username or email already exists' }
+      if (userData.email && this.users.some(u => u.email === userData.email && u.id !== userId)) {
+        return { user: null, error: 'Email sudah digunakan' }
+      }
+
+      const updatedUser = { ...this.users[userIndex] }
+      
+      if (userData.username) updatedUser.username = userData.username
+      if (userData.email) updatedUser.email = userData.email
+      if (userData.name) updatedUser.name = userData.name
+      if (userData.password) updatedUser.password = userData.password
+      if (userData.role) updatedUser.role = userData.role
+      if (userData.status) updatedUser.status = userData.status
+      updatedUser.updated_at = new Date().toISOString()
+
+      this.users[userIndex] = updatedUser
+      this.saveUsers()
+
+      // Update auth-user if it's the current user
+      if (typeof window !== 'undefined') {
+        const authUser = localStorage.getItem('auth-user')
+        if (authUser) {
+          const parsedAuthUser = JSON.parse(authUser)
+          if (parsedAuthUser.id === userId) {
+            const { password: _, ...userWithoutPassword } = updatedUser
+            localStorage.setItem('auth-user', JSON.stringify(userWithoutPassword))
+          }
         }
-        return { user: null, error: 'Failed to update user' }
       }
 
-      return { user: updatedUser as User, error: null }
-    } catch (error) {
-      console.error('Update user error:', error)
-      return { user: null, error: 'Failed to update user' }
+      const { password: _, ...userWithoutPassword } = updatedUser
+      return { user: userWithoutPassword, error: null }
+    } catch {
+      return { user: null, error: 'Gagal mengupdate user' }
     }
   }
 
-  // Delete user (admin only)
+  // Delete user
   async deleteUser(userId: string): Promise<{ success: boolean; error: string | null }> {
     try {
-      const { error } = await supabase
-        .from('users')
-        .delete()
-        .eq('id', userId)
+      this.loadUsers()
 
-      if (error) {
-        return { success: false, error: 'Failed to delete user' }
+      const userIndex = this.users.findIndex(u => u.id === userId)
+      if (userIndex === -1) {
+        return { success: false, error: 'User tidak ditemukan' }
       }
 
+      const user = this.users[userIndex]
+      if (user.role === 'admin') {
+        const adminCount = this.users.filter(u => u.role === 'admin').length
+        if (adminCount <= 1) {
+          return { success: false, error: 'Tidak dapat menghapus admin terakhir' }
+        }
+      }
+
+      this.users.splice(userIndex, 1)
+      this.saveUsers()
+
       return { success: true, error: null }
-    } catch (error) {
-      console.error('Delete user error:', error)
-      return { success: false, error: 'Failed to delete user' }
+    } catch {
+      return { success: false, error: 'Gagal menghapus user' }
     }
   }
 
   // Get user by ID
   async getUserById(userId: string): Promise<{ user: User | null; error: string | null }> {
     try {
-      const { data: user, error } = await supabase
-        .from('users')
-        .select('id, username, email, name, role, status, avatar_url, created_at, updated_at, last_login')
-        .eq('id', userId)
-        .single()
+      this.loadUsers()
 
-      if (error) {
-        return { user: null, error: 'User not found' }
+      const foundUser = this.users.find(u => u.id === userId)
+      if (!foundUser) {
+        return { user: null, error: 'User tidak ditemukan' }
       }
 
-      return { user: user as User, error: null }
-    } catch (error) {
-      console.error('Get user by ID error:', error)
-      return { user: null, error: 'Failed to fetch user' }
+      const { password: _, ...userWithoutPassword } = foundUser
+      return { user: userWithoutPassword, error: null }
+    } catch {
+      return { user: null, error: 'Gagal mengambil data user' }
+    }
+  }
+
+  // Change password
+  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<{ success: boolean; error: string | null }> {
+    try {
+      this.loadUsers()
+
+      const userIndex = this.users.findIndex(u => u.id === userId)
+      if (userIndex === -1) {
+        return { success: false, error: 'User tidak ditemukan' }
+      }
+
+      if (this.users[userIndex].password !== currentPassword) {
+        return { success: false, error: 'Password saat ini salah' }
+      }
+
+      this.users[userIndex].password = newPassword
+      this.users[userIndex].updated_at = new Date().toISOString()
+      this.saveUsers()
+
+      return { success: true, error: null }
+    } catch {
+      return { success: false, error: 'Gagal mengubah password' }
     }
   }
 
@@ -212,35 +318,42 @@ class AuthService {
   validateUserData(userData: Partial<CreateUserData>): { isValid: boolean; errors: Record<string, string> } {
     const errors: Record<string, string> = {}
 
-    if (userData.username) {
-      if (userData.username.length < 3) {
-        errors.username = 'Username must be at least 3 characters long'
-      }
-      if (!/^[a-zA-Z0-9_]+$/.test(userData.username)) {
-        errors.username = 'Username can only contain letters, numbers, and underscores'
-      }
+    if (!userData.username || userData.username.trim() === '') {
+      errors.username = 'Username wajib diisi'
+    } else if (userData.username.length < 3) {
+      errors.username = 'Username minimal 3 karakter'
+    } else if (!/^[a-zA-Z0-9_]+$/.test(userData.username)) {
+      errors.username = 'Username hanya boleh huruf, angka, dan underscore'
     }
 
-    if (userData.email) {
+    if (!userData.email || userData.email.trim() === '') {
+      errors.email = 'Email wajib diisi'
+    } else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(userData.email)) {
-        errors.email = 'Please enter a valid email address'
+        errors.email = 'Format email tidak valid'
       }
     }
 
-    if (userData.name) {
-      if (userData.name.length < 2) {
-        errors.name = 'Name must be at least 2 characters long'
-      }
+    if (!userData.name || userData.name.trim() === '') {
+      errors.name = 'Nama wajib diisi'
+    } else if (userData.name.length < 2) {
+      errors.name = 'Nama minimal 2 karakter'
     }
 
-    if (userData.password) {
-      if (userData.password.length < 6) {
-        errors.password = 'Password must be at least 6 characters long'
-      }
+    if (!userData.password || userData.password.trim() === '') {
+      errors.password = 'Password wajib diisi'
+    } else if (userData.password.length < 6) {
+      errors.password = 'Password minimal 6 karakter'
     }
 
     return { isValid: Object.keys(errors).length === 0, errors }
+  }
+
+  // Reset to default users
+  async resetToDefaults(): Promise<void> {
+    this.users = [...DEFAULT_USERS]
+    this.saveUsers()
   }
 }
 

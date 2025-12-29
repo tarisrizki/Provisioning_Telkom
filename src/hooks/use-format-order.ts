@@ -50,6 +50,12 @@ export function useFormatOrder(options: UseFormatOrderOptions = {}): UseFormatOr
   const hasPreviousPage = currentPage > 1
 
   const fetchData = useCallback(async (page: number = 1) => {
+    if (!supabase) {
+      setError('Database not configured')
+      setLoading(false)
+      return
+    }
+    
     try {
       setLoading(true)
       setError(null)

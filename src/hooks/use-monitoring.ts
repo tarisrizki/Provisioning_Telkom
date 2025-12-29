@@ -38,16 +38,18 @@ export function useMonitoring(filters?: MonitoringFilters) {
     const normalizeStatus = (status: string) => status.toLowerCase().trim()
 
     async function fetchMonitoringData() {
+      // Check if Supabase is configured
+      if (!supabase) {
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
+      
       try {
         setLoading(true)
         setError(null)
         
         console.log('Monitoring: Starting to fetch data from Supabase with filters...')
-        
-        // Check if Supabase is configured
-        if (!supabase) {
-          throw new Error('Supabase client not configured')
-        }
         
         // Build query with filters
         let query = supabase

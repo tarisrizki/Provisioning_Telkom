@@ -27,6 +27,12 @@ export function useDashboardKPI() {
   const [error, setError] = useState<string | null>(null)
 
   const calculateKPI = async () => {
+    if (!supabase) {
+      setError('Database not configured')
+      setIsLoading(false)
+      return
+    }
+    
     try {
       setIsLoading(true)
       setError(null)

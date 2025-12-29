@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation"
 import { MainLayout } from "@/components/main-layout"
 import { SearchProvider } from "@/contexts/search-context"
 import { AuthProvider } from "@/contexts/auth-context"
+import { ToastProvider } from "@/contexts/toast-context"
 
 interface LayoutWrapperProps {
   children: React.ReactNode
@@ -17,18 +18,20 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
   
   const isPublicRoute = publicRoutes.includes(pathname)
   
-  // Always wrap with AuthProvider
+  // Always wrap with AuthProvider and ToastProvider
   return (
     <AuthProvider>
-      {isPublicRoute ? (
-        // Return children directly for public routes (like login)
-        <div className="h-full w-full bg-[#1B2431]">{children}</div>
-      ) : (
-        // Wrap with SearchProvider and MainLayout for authenticated routes
-        <SearchProvider>
-          <MainLayout>{children}</MainLayout>
-        </SearchProvider>
-      )}
+      <ToastProvider>
+        {isPublicRoute ? (
+          // Return children directly for public routes (like login)
+          <div className="h-full w-full bg-[#1B2431]">{children}</div>
+        ) : (
+          // Wrap with SearchProvider and MainLayout for authenticated routes
+          <SearchProvider>
+            <MainLayout>{children}</MainLayout>
+          </SearchProvider>
+        )}
+      </ToastProvider>
     </AuthProvider>
   )
 }

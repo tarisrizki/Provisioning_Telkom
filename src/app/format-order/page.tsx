@@ -243,11 +243,11 @@ function FormatOrderContent() {
       const orderToOpen = formatOrderData.find(order => order.order_id === openDetailParam)
       if (orderToOpen) {
         openDetailModal(orderToOpen)
-      } else {
+      } else if (supabase) {
         // If not found in current data, fetch specifically
         const fetchSpecificOrder = async () => {
           try {
-            const { data, error } = await supabase
+            const { data, error } = await supabase!
               .from('format_order')
               .select('*')
               .eq('order_id', openDetailParam)
@@ -376,6 +376,11 @@ function FormatOrderContent() {
 
   // Export all data from database (no filters, no pagination)
   const handleExportAll = async () => {
+    if (!supabase) {
+      alert('Database not configured. Cannot export data.')
+      return
+    }
+    
     setIsExportingAll(true)
     try {
       console.log('Fetching ALL data from database without any limits...')

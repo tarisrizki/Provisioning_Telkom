@@ -16,6 +16,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "@reduxjs/toolkit": "^2.11.0",
     "@supabase/supabase-js": "^2.55.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/xlsx": "^0.0.35",

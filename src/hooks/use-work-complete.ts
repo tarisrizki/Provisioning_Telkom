@@ -9,6 +9,12 @@ export function useTodayWorkComplete() {
 
   useEffect(() => {
     async function fetchWorkComplete() {
+      if (!supabase) {
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
+      
       try {
         setLoading(true)
         

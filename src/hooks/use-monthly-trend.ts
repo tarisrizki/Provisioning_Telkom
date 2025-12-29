@@ -17,6 +17,12 @@ export function useMonthlyTrend() {
   }, [])
 
   const fetchMonthlyTrend = async () => {
+    if (!supabase) {
+      setError('Database not configured')
+      setLoading(false)
+      return
+    }
+    
     try {
       setLoading(true)
       setError(null)

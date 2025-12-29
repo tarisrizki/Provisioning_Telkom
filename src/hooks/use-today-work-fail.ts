@@ -9,6 +9,12 @@ export function useTodayWorkFail() {
 
   useEffect(() => {
     async function fetchTodayWorkFail() {
+      if (!supabase) {
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
+      
       try {
         setLoading(true)
         

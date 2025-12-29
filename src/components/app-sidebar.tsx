@@ -4,8 +4,10 @@ import {
   Home, 
   BarChart3, 
   Users, 
-  Database,
-  Upload as UploadIcon
+  FileText,
+  Upload as UploadIcon,
+  LogOut,
+  Settings
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -32,7 +34,7 @@ const mainNav = [
 // User navigation will be conditionally rendered based on role
 
 const utilityNav = [
-  { title: "Log out", href: "/logout", icon: Database },
+  { title: "Log out", href: "/logout", icon: LogOut },
 ]
 
 export function AppSidebar() {
@@ -42,6 +44,11 @@ export function AppSidebar() {
   // Admin-only navigation
   const adminNav = [
     { title: "User Management", href: "/user-management", icon: Users },
+  ]
+
+  // User account navigation (for all users)
+  const accountNav = [
+    { title: "Manage Account", href: "/manage-account", icon: Settings },
   ]
 
   return (
@@ -89,7 +96,10 @@ export function AppSidebar() {
 
         {/* Admin Section - Only show for admins */}
         {isAdmin && (
-          <div className="p-4 mt-auto">
+          <div className="p-4">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
+              Admin
+            </div>
             <SidebarGroup>
               <SidebarGroupContent>
                 <SidebarMenu>
@@ -121,6 +131,42 @@ export function AppSidebar() {
             </SidebarGroup>
           </div>
         )}
+
+        {/* Account Section - For all users */}
+        <div className="p-4 mt-auto">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-3">
+            Account
+          </div>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {accountNav.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive}
+                        className={`
+                          w-full flex items-center space-x-3 px-3 py-3 rounded-md transition-colors mb-1
+                          ${isActive 
+                            ? "bg-blue-500 text-white" 
+                            : "text-white hover:bg-[#3a3f4b]"
+                          }
+                        `}
+                      >
+                        <Link href={item.href}>
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
       </SidebarContent>
       
       <SidebarFooter className="p-4">

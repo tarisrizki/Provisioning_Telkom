@@ -11,14 +11,24 @@ import {
   Save, 
   AlertTriangle,
   CheckCircle,
-  Camera
+  Camera,
+  Lock,
+  Eye,
+  EyeOff
 } from "lucide-react"
 import ProtectedRoute from "@/components/protected-route"
 
 export default function ManageAccountPage() {
   const { user, refreshUser } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [isPasswordLoading, setIsPasswordLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error' | null; text: string }>({ type: null, text: '' })
+  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error' | null; text: string }>({ type: null, text: '' })
+  
+  // Password visibility states
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
   // Profile form state
   const [profileForm, setProfileForm] = useState({
@@ -28,6 +38,13 @@ export default function ManageAccountPage() {
     phoneNumber: '',
     dateOfBirth: '',
     gender: ''
+  })
+
+  // Password form state
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   })
 
   useEffect(() => {
@@ -81,6 +98,59 @@ export default function ManageAccountPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setProfileForm(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validation
+    if (!passwordForm.currentPassword.trim()) {
+      setPasswordMessage({ type: 'error', text: 'Password saat ini wajib diisi!' })
+      return
+    }
+
+    if (!passwordForm.newPassword.trim()) {
+      setPasswordMessage({ type: 'error', text: 'Password baru wajib diisi!' })
+      return
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordMessage({ type: 'error', text: 'Password baru minimal 6 karakter!' })
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMessage({ type: 'error', text: 'Konfirmasi password tidak cocok!' })
+      return
+    }
+
+    if (!user) {
+      setPasswordMessage({ type: 'error', text: 'User tidak ditemukan!' })
+      return
+    }
+
+    setIsPasswordLoading(true)
+    setPasswordMessage({ type: null, text: '' })
+
+    try {
+      const { success, error } = await authService.changePassword(
+        user.id,
+        passwordForm.currentPassword,
+        passwordForm.newPassword
+      )
+
+      if (!success || error) {
+        setPasswordMessage({ type: 'error', text: error || 'Gagal mengubah password!' })
+        return
+      }
+
+      setPasswordMessage({ type: 'success', text: 'Password berhasil diubah!' })
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+    } catch {
+      setPasswordMessage({ type: 'error', text: 'Gagal mengubah password. Silakan coba lagi.' })
+    } finally {
+      setIsPasswordLoading(false)
+    }
   }
 
   if (!user) {
@@ -219,7 +289,110 @@ export default function ManageAccountPage() {
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold text-xl py-5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
                 >
                   <Save className="h-5 w-5 mr-3" />
-                  {isLoading ? 'Saving...' : 'Save'}
+                  {isLoading ? 'Saving...' : 'Save Profile'}
+                </Button>
+              </div>
+            </form>
+          </div>
+
+          {/* Change Password Section */}
+          <div className="mt-8 bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-600/30 shadow-2xl">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+              <Lock className="h-6 w-6 text-blue-400" />
+              Ubah Password
+            </h2>
+
+            {/* Password Success/Error Messages */}
+            {passwordMessage.type && (
+              <div className="mb-6">
+                <div className={`p-4 rounded-xl flex items-center gap-3 ${
+                  passwordMessage.type === 'success' 
+                    ? 'bg-green-500/20 border border-green-400/40 text-green-300' 
+                    : 'bg-red-500/20 border border-red-400/40 text-red-300'
+                }`}>
+                  {passwordMessage.type === 'success' ? (
+                    <CheckCircle className="h-5 w-5" />
+                  ) : (
+                    <AlertTriangle className="h-5 w-5" />
+                  )}
+                  <span className="font-medium">{passwordMessage.text}</span>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-6">
+              {/* Current Password */}
+              <div>
+                <Label className="text-gray-300 text-lg font-medium mb-3 block">Password Saat Ini</Label>
+                <div className="relative">
+                  <Input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+                    className="bg-slate-700/50 border-slate-600/50 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 text-lg py-4 px-4 rounded-xl transition-all duration-300 pr-12"
+                    placeholder="Masukkan password saat ini"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New Password */}
+              <div>
+                <Label className="text-gray-300 text-lg font-medium mb-3 block">Password Baru</Label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+                    className="bg-slate-700/50 border-slate-600/50 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 text-lg py-4 px-4 rounded-xl transition-all duration-300 pr-12"
+                    placeholder="Masukkan password baru (min 6 karakter)"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm New Password */}
+              <div>
+                <Label className="text-gray-300 text-lg font-medium mb-3 block">Konfirmasi Password Baru</Label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                    className="bg-slate-700/50 border-slate-600/50 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 text-lg py-4 px-4 rounded-xl transition-all duration-300 pr-12"
+                    placeholder="Ulangi password baru"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Change Password Button */}
+              <div className="pt-4">
+                <Button 
+                  type="submit" 
+                  disabled={isPasswordLoading}
+                  className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold text-xl py-5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                >
+                  <Lock className="h-5 w-5 mr-3" />
+                  {isPasswordLoading ? 'Mengubah Password...' : 'Ubah Password'}
                 </Button>
               </div>
             </form>

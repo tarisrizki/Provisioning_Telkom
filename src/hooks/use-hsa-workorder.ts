@@ -41,18 +41,20 @@ export function useHSAWorkOrder(filters?: HSAWorkOrderFilters) {
     ]
 
     async function fetchHSAWorkOrderData() {
+      // Check if Supabase is configured
+      if (!supabase) {
+        console.error('HSAWorkOrder: Supabase client not configured')
+        setError('Database not configured')
+        setLoading(false)
+        return
+      }
+      
       try {
         setLoading(true)
         setError(null)
         
         console.log('HSAWorkOrder: Starting to fetch data from Supabase with filters...')
         console.log('HSAWorkOrder: Supabase client available:', !!supabase)
-        
-        // Check if Supabase is configured
-        if (!supabase) {
-          console.error('HSAWorkOrder: Supabase client not configured')
-          throw new Error('Supabase client not configured')
-        }
 
         // Build query with filters
         let query = supabase

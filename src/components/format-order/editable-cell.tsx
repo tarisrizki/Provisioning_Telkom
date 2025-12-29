@@ -49,6 +49,14 @@ export function EditableCell({
     })
     
     try {
+      if (!supabase) {
+        console.warn('EditableCell: Database not configured')
+        setEditValue(value || '')
+        setIsLoading(false)
+        setIsEditing(false)
+        return
+      }
+      
       const { error } = await supabase
         .from('format_order')
         .update({ 

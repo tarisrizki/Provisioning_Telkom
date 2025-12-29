@@ -1,16 +1,19 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+
+// Flag to check if Supabase is configured
+export const isSupabaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_SUPABASE_URL && 
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+)
 
 // Lazy function to create Supabase client
-export function createSupabaseClient() {
+export function createSupabaseClient(): SupabaseClient | null {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables:', {
-      url: supabaseUrl ? 'Set' : 'Missing',
-      key: supabaseAnonKey ? 'Set' : 'Missing'
-    })
-    throw new Error('Missing Supabase environment variables. Please check your .env.local file.')
+    console.warn('Supabase not configured - running in offline mode')
+    return null
   }
 
   return createClient(supabaseUrl, supabaseAnonKey, {
@@ -22,8 +25,16 @@ export function createSupabaseClient() {
   })
 }
 
-// Create a singleton instance
+// Create a singleton instance (may be null if not configured)
 export const supabase = createSupabaseClient()
+
+// Helper to get supabase client with null check - throws if not configured
+export function getSupabaseClient(): SupabaseClient {
+  if (!supabase) {
+    throw new Error('Supabase is not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.')
+  }
+  return supabase
+}
 
 // Database table names
 export const TABLES = {

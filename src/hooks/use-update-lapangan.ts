@@ -45,13 +45,15 @@ export function useUpdateLapangan() {
 
   // Fetch data from Supabase with pagination
   const fetchData = useCallback(async () => {
+    if (!supabase) {
+      setError('Database not configured')
+      setLoading(false)
+      return
+    }
+    
     try {
       setLoading(true)
       setError(null)
-      
-      if (!supabase) {
-        throw new Error('Supabase client not configured')
-      }
 
       console.log('UpdateLapangan: Fetching data from Supabase...')
 

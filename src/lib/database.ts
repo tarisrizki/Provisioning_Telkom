@@ -1,4 +1,4 @@
-import { createSupabaseClient, TABLES, type WorkOrder, type Upload, type DashboardMetrics, type WorkOrderStats } from './supabase'
+import { getSupabaseClient, TABLES, type WorkOrder, type Upload, type DashboardMetrics, type WorkOrderStats } from './supabase'
 
 interface DataIntegrityReport {
   totalRecords: number
@@ -20,7 +20,11 @@ export class DatabaseService {
   // Work Orders
   static async insertWorkOrders(workOrders: WorkOrder[]): Promise<{ success: boolean; error?: string; insertedCount?: number }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
+      if (!supabase) {
+        return { success: false, error: 'Database not configured' }
+      }
+      
       const { data, error } = await supabase
         .from(TABLES.WORK_ORDERS)
         .insert(workOrders)
@@ -49,7 +53,7 @@ export class DatabaseService {
     offset?: number
   }): Promise<{ success: boolean; data?: WorkOrder[]; error?: string; count?: number }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       let query = supabase
         .from(TABLES.WORK_ORDERS)
         .select('*', { count: 'exact' })
@@ -98,7 +102,7 @@ export class DatabaseService {
 
   static async getWorkOrdersCount(): Promise<{ success: boolean; count?: number; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { count, error } = await supabase
         .from(TABLES.WORK_ORDERS)
         .select('*', { count: 'exact', head: true })
@@ -117,7 +121,7 @@ export class DatabaseService {
 
   static async deleteAllWorkOrders(): Promise<{ success: boolean; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { error } = await supabase
         .from(TABLES.WORK_ORDERS)
         .delete()
@@ -138,7 +142,7 @@ export class DatabaseService {
   // Uploads
   static async createUpload(upload: Omit<Upload, 'id' | 'created_at'>): Promise<{ success: boolean; data?: Upload; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from(TABLES.UPLOADS)
         .insert(upload)
@@ -159,7 +163,7 @@ export class DatabaseService {
 
   static async getUploads(): Promise<{ success: boolean; data?: Upload[]; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from(TABLES.UPLOADS)
         .select('*')
@@ -179,7 +183,7 @@ export class DatabaseService {
 
   static async deleteUpload(id: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { error } = await supabase
         .from(TABLES.UPLOADS)
         .delete()
@@ -200,7 +204,7 @@ export class DatabaseService {
   // Dashboard Metrics
   static async createDashboardMetrics(metrics: Omit<DashboardMetrics, 'id' | 'created_at'>): Promise<{ success: boolean; data?: DashboardMetrics; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from(TABLES.DASHBOARD_METRICS)
         .insert(metrics)
@@ -221,7 +225,7 @@ export class DatabaseService {
 
   static async getLatestDashboardMetrics(): Promise<{ success: boolean; data?: DashboardMetrics; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       const { data, error } = await supabase
         .from(TABLES.DASHBOARD_METRICS)
         .select('*')
@@ -632,7 +636,7 @@ export class DatabaseService {
   // Helper method to update upload status
   private static async updateUploadStatus(id: string, status: 'processing' | 'completed' | 'failed'): Promise<void> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       await supabase
         .from(TABLES.UPLOADS)
         .update({ status })
@@ -645,7 +649,7 @@ export class DatabaseService {
   // Get work order statistics
   static async getWorkOrderStats(): Promise<{ success: boolean; data?: WorkOrderStats; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       
       // Get total count
       const { count: totalCount, error: countError } = await supabase
@@ -752,7 +756,7 @@ export class DatabaseService {
   // Get data integrity report
   static async getDataIntegrityReport(): Promise<{ success: boolean; data?: DataIntegrityReport; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       
       // Fetch all data using pagination for comprehensive integrity check
       let allData: Array<Record<string, unknown>> = []
@@ -818,7 +822,7 @@ export class DatabaseService {
   // Get upload history
   static async getUploadHistory(): Promise<{ success: boolean; data?: UploadHistoryRecord[]; error?: string }> {
     try {
-      const supabase = createSupabaseClient()
+      const supabase = getSupabaseClient()
       
       // Fetch all upload history using pagination
       let allData: UploadHistoryRecord[] = []

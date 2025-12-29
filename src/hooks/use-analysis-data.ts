@@ -59,6 +59,12 @@ export function useAnalysisData() {
   const [error, setError] = useState<string | null>(null)
 
   const fetchAnalysisData = useCallback(async () => {
+    if (!supabase) {
+      setError('Database not configured')
+      setLoading(false)
+      return
+    }
+    
     try {
       setLoading(true)
       setError(null)

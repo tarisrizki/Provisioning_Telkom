@@ -104,6 +104,12 @@ export function useLaporan() {
 
   // Load data from Supabase database
   const loadCSVData = useCallback(async () => {
+    if (!supabase) {
+      setError('Database not configured')
+      setIsLoading(false)
+      return
+    }
+    
     try {
       setIsLoading(true)
       setError(null)

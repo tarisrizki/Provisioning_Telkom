@@ -50,6 +50,12 @@ export function useDashboard() {
 
   // Single function to load data from Supabase (same as laporan)
   const loadDataFromSupabase = useCallback(async () => {
+    if (!supabase) {
+      console.warn('Dashboard: Database not configured')
+      setIsLoading(false)
+      return
+    }
+    
     try {
       setIsLoading(true)
       console.log("Dashboard: Loading data from Supabase database...")

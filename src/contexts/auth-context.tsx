@@ -3,6 +3,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { authService, type User } from '@/lib/auth-service'
 
+// Helper to set cookies
+function setCookie(name: string, value: string, days: number = 7) {
+  const expires = new Date(Date.now() + days * 864e5).toUTCString()
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`
+}
+
+// Helper to delete cookies
+function deleteCookie(name: string) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+}
+
 interface AuthContextType {
   user: User | null
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>
@@ -36,14 +47,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (username: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const { user: loggedInUser, error } = await authService.login({ username, password })
-      
+
       if (error || !loggedInUser) {
         return { success: false, error: error || 'Login failed' }
       }
 
       setUser(loggedInUser)
       setIsAuthenticated(true)
+      
+      // Save to localStorage
       localStorage.setItem('auth-user', JSON.stringify(loggedInUser))
+      
+      // Set cookies for middleware authentication
+      setCookie('auth-token', 'authenticated', 7)
+      setCookie('user-info', JSON.stringify(loggedInUser), 7)
+      
+      return { success: true }
       return { success: true }
     } catch (error) {
       console.error('Login error:', error)
@@ -65,6 +84,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     setIsAuthenticated(false)
     localStorage.removeItem('auth-user')
+    
+    // Clear cookies
+    deleteCookie('auth-token')
+    deleteCookie('user-info')
+    
     window.location.href = '/'
   }
 

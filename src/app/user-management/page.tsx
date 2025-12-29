@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import ProtectedRoute from "@/components/protected-route"
+import { useToast } from "@/contexts/toast-context"
 import { 
   Users, 
   Plus, 
@@ -25,6 +26,7 @@ import {
 } from "lucide-react"
 
 export default function UserManagementPage() {
+  const { showToast } = useToast()
   const [users, setUsers] = useState<User[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -110,10 +112,12 @@ export default function UserManagementPage() {
     
     if (error) {
       setFormErrors({ general: error })
+      showToast(error, 'error')
     } else if (newUser) {
       setUsers(prev => [newUser, ...prev])
       setShowAddModal(false)
       resetForm()
+      showToast(`User ${newUser.name} berhasil ditambahkan`, 'success')
     }
     
     setIsSubmitting(false)
@@ -163,11 +167,13 @@ export default function UserManagementPage() {
     
     if (error) {
       setFormErrors({ general: error })
+      showToast(error, 'error')
     } else if (updatedUser) {
       setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u))
       setShowEditModal(false)
       setEditingUser(null)
       resetForm()
+      showToast(`User ${updatedUser.name} berhasil diupdate`, 'success')
     }
     
     setIsSubmitting(false)
@@ -184,16 +190,19 @@ export default function UserManagementPage() {
     if (!deletingUser) return
     
     setIsSubmitting(true)
+    const userName = deletingUser.name
     
     const { success, error } = await authService.deleteUser(deletingUser.id)
     
     if (error) {
       setError(error)
+      showToast(error, 'error')
     } else if (success) {
       setUsers(prev => prev.filter(u => u.id !== deletingUser.id))
       setSelectedUsers(prev => prev.filter(id => id !== deletingUser.id))
       setShowDeleteModal(false)
       setDeletingUser(null)
+      showToast(`User ${userName} berhasil dihapus`, 'success')
     }
     
     setIsSubmitting(false)

@@ -20,6 +20,11 @@ export function useMonitoringFilterOptions() {
 
   useEffect(() => {
     async function fetchFilterOptions() {
+      if (!supabase) {
+        setFilterOptions(prev => ({ ...prev, loading: false, error: 'Database not configured' }))
+        return
+      }
+      
       try {
         setFilterOptions(prev => ({ ...prev, loading: true, error: null }))
 
